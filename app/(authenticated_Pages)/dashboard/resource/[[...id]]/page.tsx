@@ -7,7 +7,12 @@ import axios from "axios";
 import Mermaid from "@/components/mermaid/mermaid";
 
 export default function ResourceChatPage({ params }: { params: any }) {
-  const { id }: { id: any } = use(params);
+  const rawId = (use(params) as { id: string | string[] }).id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [resourceTopic, setResourceTopic] = useState("");
+
   const [messages, setMessages] = useState<
     { sender: "user" | "bot"; text: string }[]
   >([]);
@@ -27,22 +32,33 @@ export default function ResourceChatPage({ params }: { params: any }) {
       ]);
     }, 1000);
   };
+
+  const resourceAPI = "/api/resource";
+
   useEffect(() => {
     async function Datafetcher() {
-      const res = await axios.get(`/api/resource/${id}`, {
-        headers: {
-          backendtoken: localStorage.getItem("backendtoken"),
-        },
-      });
+      const res = await axios.get<{ resource?: { title: string } }>(
+        resourceAPI,
+        {
+          params: { id },
+        }
+      );
+      console.log(res.data);
+      if (res.data.resource) {
+        setResourceTopic(res.data.resource.title);
+      } else {
+        console.error("Resource not found");
+      }
     }
     Datafetcher();
   }, []);
+
   return (
     <div className="h-screen bg-muted/50 text-foreground pt-14">
       <div className="flex flex-col h-full w-full">
         {/* Header */}
         <div className="pt-6 pb-4 text-center">
-          <h1 className="text-2xl font-bold text-white">Topic Name</h1>
+          <h1 className="text-2xl font-bold text-white">{resourceTopic}</h1>
         </div>
 
         {/* Chat Area */}
