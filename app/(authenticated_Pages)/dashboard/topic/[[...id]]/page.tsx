@@ -42,6 +42,20 @@ export default function NewTopicPage({ params }: { params: any }) {
     item.title.toLowerCase().includes(search.toLowerCase())
   );
 
+  interface ResourceResponse {
+    message: string;
+    resource: {
+      id: string;
+      topicId: string;
+      title: string;
+      type: string;
+      url: string;
+      summary: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+  }
+
   const topicAPI = "/api/topic";
   const resourceAPI = `/api/resource`;
 
@@ -164,15 +178,21 @@ export default function NewTopicPage({ params }: { params: any }) {
           url: youtubeUrl,
         };
 
-        console.log("Resource Data:", resourceData);
+        const response = await axios.post<ResourceResponse>(
+          resourceAPI,
+          resourceData,{
+            headers:{
+              "Content-Type": "application/json",
+            }
+          });
+        toast.success(response.data.message);
 
-        const response = await axios.post(resourceAPI, resourceData);
-        toast.success((response.data as any).message);
+        const resourceID = response.data.resource.id;
 
         setMedia((prev) => [
           ...prev,
           {
-            id,
+            id: resourceID,
             title: videoTitle,
             type: "VIDEO",
             url: youtubeUrl,
@@ -180,37 +200,53 @@ export default function NewTopicPage({ params }: { params: any }) {
         ]);
 
         setYoutubeUrl("");
-        setResourceModalOpen(false);
       } catch (error) {
         console.error("Error fetching or saving YouTube video:", error);
         toast.error(
           "Something went wrong while fetching the YouTube video info."
         );
       } finally {
-        setIsLoading(false);
-      }
+        setResourceModalOpen(false);
+      } 
     } else {
       if (!pdfTitle.trim() || !pdfFile) {
         alert("Enter PDF title and select a file.");
         return;
       }
 
-      // TODO: add cloudinary upload logic here
+      try {
+        setIsLoading(true)
+        const formData = new FormData();
+        formData.append("file", pdfFile);
+        formData.append("type","PDF")
+        formData.append("title", pdfTitle);
+        formData.append("topicId", id);
 
-      setMedia((prev) => [
-        ...prev,
-        {
-          id,
-          title: pdfTitle,
-          type: "PDF",
-          url: "", // Backend should return the PDF URL
-        },
-      ]);
-
-      setPdfTitle("");
-      setPdfFile(null);
-      setResourceModalOpen(false);
-    }
+        const res=await axios.post(resourceAPI,formData)
+        setMedia((prev) => [
+          ...prev,
+          {
+            id,
+            title: pdfTitle,
+            type: "PDF",
+            url: (res.data as any).url, // Backend should return the PDF URL
+          },
+        ]);
+      } catch (error) {
+        console.error("Error fetching or saving the pdf:", error);
+        toast.error(
+          "Something went wrong while storing the pdf."
+        );
+      } finally {
+        setPdfTitle("");
+        setPdfFile(null);
+        setResourceModalOpen(false);
+      }}
+      
+      setIsLoading(false)
+      
+      
+    
   };
 
   const handleResourceClick = (item: (typeof media)[0]) => {
