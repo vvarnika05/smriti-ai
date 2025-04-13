@@ -58,6 +58,7 @@ function CustomSignup({ email, userId }: { email: string; userId: string }) {
 
       if (res.status === 201) {
         toast.success(res.data.message);
+        window.location.reload();
       }
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Signup failed");
