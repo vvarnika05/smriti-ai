@@ -5,6 +5,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send, Wand2, BrainCircuit, FileQuestion } from "lucide-react";
 import axios from "axios";
 import Mermaid from "@/components/mermaid/mermaid";
+import ReactMarkdown from "react-markdown";
+import prepareMermaidCode from "@/lib/prepareMermaidCode";
 
 export default function ResourceChatPage({ params }: { params: any }) {
   const rawId = (use(params) as { id: string | string[] }).id;
@@ -14,24 +16,75 @@ export default function ResourceChatPage({ params }: { params: any }) {
   const [resourceTopic, setResourceTopic] = useState("");
 
   const [messages, setMessages] = useState<
-    { sender: "user" | "bot"; text: string }[]
+    { sender: "user" | "bot"; text: string; type: string }[]
   >([]);
   const [input, setInput] = useState("");
-  const [showMermaid, setShowMermaid] = useState(false);
-  const handleSend = () => {
-    if (!input.trim()) return;
 
-    setMessages((prev) => [...prev, { sender: "user", text: input }]);
+  type AIResponse =
+    | { summary: string }
+    | { mindmap: string }
+    | { answer: string };
+
+  const handleSend = async (
+    customInput?: string,
+    task: "summary" | "mindmap" | "qa" = "qa"
+  ) => {
+    const userMessage = customInput ?? input.trim();
+    if (!userMessage) return;
+
+    setMessages((prev) => [
+      ...prev,
+      { sender: "user", text: userMessage, type: "text" },
+    ]);
     setInput("");
 
-    // Example bot response (replace with actual API logic)
-    setTimeout(() => {
+    setMessages((prev) => [
+      ...prev,
+      { sender: "bot", text: "Smriti AI is thinking...", type: "text" },
+    ]);
+
+    try {
+      const payload: any = {
+        resourceId: id,
+        task,
+      };
+
+      if (task === "qa") {
+        payload.question = userMessage;
+      }
+
+      const res = await axios.post<AIResponse>("/api/resource-ai", payload);
+
+      let botText = "";
+
+      if ("summary" in res.data) {
+        botText = res.data.summary;
+      } else if ("mindmap" in res.data) {
+        botText = res.data.mindmap;
+        console.log(JSON.stringify(botText));
+      } else if ("answer" in res.data) {
+        botText = res.data.answer;
+      }
+
       setMessages((prev) => [
-        ...prev,
-        { sender: "bot", text: "Here's a response from Smriti AI!" },
+        ...prev.slice(0, -1),
+        { sender: "bot", text: botText, type: task },
       ]);
-    }, 1000);
+    } catch (error) {
+      console.error("Error:", error);
+      setMessages((prev) => [
+        ...prev.slice(0, -1),
+        {
+          sender: "bot",
+          text: "❌ Something went wrong while processing your request.",
+          type: "text",
+        },
+      ]);
+    }
   };
+
+  const getSummary = () => handleSend("summarise this", "summary");
+  const getMindMap = () => handleSend("Generate a mindmap", "mindmap");
 
   const resourceAPI = "/api/resource";
 
@@ -63,36 +116,44 @@ export default function ResourceChatPage({ params }: { params: any }) {
 
         {/* Chat Area */}
         <div className="overflow-y-auto h-full">
-          {showMermaid ? (
-            <div className="h-full w-full flex items-center justify-center">
-              <Mermaid
-                id="flow1"
-                chart={`
-                flowchart TD
-                  A[Start] --> B{Decision?}
-                  B -->|Yes| C[Process 1]
-                  B -->|No| D[Process 2]
-                  C --> E[End]
-                  D --> E
-              `}
-              />
-            </div>
-          ) : (
-            <div className="flex-1 px-2 sm:px-0 space-y-4 max-w-7xl mx-auto pb-20">
-              {messages.map((msg, idx) => (
+          <div className="flex-1 px-2 sm:px-0 space-y-4 max-w-7xl mx-auto pb-20">
+            {messages.map((msg, idx) => (
+              <div
+                key={idx}
+                className={`flex w-full ${
+                  msg.sender === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
                 <div
-                  key={idx}
-                  className={`flex ${
-                    msg.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
+                  className={`
+                        ${
+                          msg.sender === "user"
+                            ? "bg-muted text-foreground max-w-xs"
+                            : "text-foreground w-full"
+                        }
+                        p-4 rounded-xl shadow prose prose-invert
+                        ${
+                          msg.sender === "user"
+                            ? "rounded-br-none"
+                            : "rounded-bl-none"
+                        }
+                        leading-loose
+                      `}
                 >
-                  <div className="p-3 rounded-xl max-w-lg shadow bg-muted text-foreground rounded-bl-none">
-                    {msg.text}
-                  </div>
+                  {msg.sender === "bot" && msg.type === "mindmap" ? (
+                    <Mermaid
+                      id={crypto.randomUUID()}
+                      chart={prepareMermaidCode({ code: msg.text })}
+                    />
+                  ) : (
+                    <div className="prose prose-invert max-w-none">
+                      <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Chat Input & Actions */}
@@ -116,7 +177,7 @@ export default function ResourceChatPage({ params }: { params: any }) {
               <Button
                 size="icon"
                 className="rounded-full bg-primary hover:scale-105 transition"
-                onClick={handleSend}
+                onClick={() => handleSend(input)}
               >
                 <Send className="w-4 h-4" />
               </Button>
@@ -127,13 +188,16 @@ export default function ResourceChatPage({ params }: { params: any }) {
               <Button
                 variant="outline"
                 className="flex-1 rounded-full border-zinc-700 text-white hover:bg-zinc-800"
+                onClick={() => {
+                  getSummary();
+                }}
               >
                 <Wand2 className="mr-2 h-4 w-4" /> AI Summarize
               </Button>
               <Button
                 variant="outline"
                 className="flex-1 rounded-full border-zinc-700 text-white hover:bg-zinc-800"
-                onClick={() => setShowMermaid((prev) => !prev)}
+                onClick={() => getMindMap()}
               >
                 <BrainCircuit className="mr-2 h-4 w-4" /> Mind Map
               </Button>
