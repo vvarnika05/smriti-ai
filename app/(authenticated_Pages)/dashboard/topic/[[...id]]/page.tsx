@@ -41,6 +41,20 @@ export default function NewTopicPage({ params }: { params: any }) {
     item.title.toLowerCase().includes(search.toLowerCase())
   );
 
+  interface ResourceResponse {
+    message: string;
+    resource: {
+      id: string;
+      topicId: string;
+      title: string;
+      type: string;
+      url: string;
+      summary: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+  }
+
   const topicAPI = "/api/topic";
   const resourceAPI = `/api/resource`;
 
@@ -163,15 +177,18 @@ export default function NewTopicPage({ params }: { params: any }) {
           url: youtubeUrl,
         };
 
-        console.log("Resource Data:", resourceData);
+        const response = await axios.post<ResourceResponse>(
+          resourceAPI,
+          resourceData
+        );
+        toast.success(response.data.message);
 
-        const response = await axios.post(resourceAPI, resourceData);
-        toast.success((response.data as any).message);
+        const resourceID = response.data.resource.id;
 
         setMedia((prev) => [
           ...prev,
           {
-            id,
+            id: resourceID,
             title: videoTitle,
             type: "VIDEO",
             url: youtubeUrl,
