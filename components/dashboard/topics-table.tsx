@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Table,
@@ -7,9 +7,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
-import * as React from "react"
+import * as React from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -21,59 +21,29 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, GraduationCap } from "lucide-react"
+} from "@tanstack/react-table";
+import { ArrowUpDown, ChevronDown, GraduationCap } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
-import { Progress } from "@/components/ui/progress"
-import { CheckCircle2, Clock, PauseCircle } from "lucide-react"
-import { backendURI } from "@/app/backendURL"
-import axios from "axios"
-import Link from "next/link"
+import { Progress } from "@/components/ui/progress";
+import { CheckCircle2, Clock, PauseCircle } from "lucide-react";
+import axios from "axios";
+import Link from "next/link";
+import { toast } from "sonner";
 
 export type Topic = {
-  id: string
-  title: string
-  status: "learning" | "completed" | "paused"
-  progress: number // percentage
-}
-
-
-
-
-// [
-//   {
-//     id: "t1",
-//     title: "React Basics",
-//     status: "learning",
-//     progress: 45,
-//   },
-//   {
-//     id: "t2",
-//     title: "TypeScript Essentials",
-//     status: "completed",
-//     progress: 100,
-//   },
-//   {
-//     id: "t3",
-//     title: "State Management",
-//     status: "paused",
-//     progress: 20,
-//   },
-//   {
-//     id: "t4",
-//     title: "Next.js Fundamentals",
-//     status: "learning",
-//     progress: 60,
-//   },
-// ]
+  id: string;
+  title: string;
+  status: "learning" | "completed" | "paused";
+  progress: number; // percentage
+};
 
 export const columns: ColumnDef<Topic>[] = [
   {
@@ -92,8 +62,11 @@ export const columns: ColumnDef<Topic>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as Topic["status"]
-      const statusMap: Record<Topic["status"], { label: string; icon: React.ReactNode; color: string }> = {
+      const status = row.getValue("status") as Topic["status"];
+      const statusMap: Record<
+        Topic["status"],
+        { label: string; icon: React.ReactNode; color: string }
+      > = {
         learning: {
           label: "Learning",
           icon: <Clock className="w-4 h-4" />,
@@ -109,40 +82,52 @@ export const columns: ColumnDef<Topic>[] = [
           icon: <PauseCircle className="w-4 h-4" />,
           color: "bg-yellow-100 text-yellow-800",
         },
-      }
+      };
 
-      const { label, icon, color } = statusMap[status]
+      const { label, icon, color } = statusMap[status];
 
       return (
-        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${color}`}>
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${color}`}
+        >
           {icon}
           {label}
         </span>
-      )
+      );
     },
   },
   {
     accessorKey: "progress",
     header: "Progress",
     cell: ({ row }) => {
-      const value = row.getValue("progress") as number
+      const value = row.getValue("progress") as number;
       return (
         <div className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-muted-foreground">{value}%</span>
+          <span className="text-sm font-medium text-muted-foreground">
+            {value}%
+          </span>
           <Progress value={value} className="h-2" />
         </div>
-      )
+      );
     },
   },
-]
-
+];
 
 export function TopicsTable(): React.JSX.Element {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState<Record<string, boolean>>({})
-  const [data,setData]: [data:Topic[]|[], SetData:any] = React.useState([])
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState<
+    Record<string, boolean>
+  >({});
+  const [data, setData]: [data: Topic[] | [], SetData: any] = React.useState(
+    []
+  );
   const table = useReactTable<Topic>({
     data,
     columns,
@@ -160,30 +145,41 @@ export function TopicsTable(): React.JSX.Element {
       columnVisibility,
       rowSelection,
     },
-  })
-  React.useEffect(()=>{
-    async function Datafetcher() {
+  });
+
+  React.useEffect(() => {
+    async function fetchTopics() {
       try {
-        const res=await axios.get(`${backendURI}/api/folders`,{
-        headers:{
-          backendtoken:localStorage.getItem('backendtoken')
-        }
-      })
-      const transformed = (res.data as any).folders.map(({ _id, ...rest }:{_id:any}) => ({
-        id: _id,
-        progress:Math.round(Math.random()*100),
-        status:Math.round(Math.random()*100)%3==0?"learning":(Math.round(Math.random()*100)%2==0?"completed":"paused"),
-        ...rest,
-      }));
-      setData(transformed)
+        setIsLoading(true); // Start spinner
+        const topicAPI = "/api/topic";
+        const res = await axios.get(topicAPI);
+
+        const transformed = (res.data as any).topics.map(
+          ({ id, ...rest }: { id: string }) => {
+            const progress = Math.round(Math.random() * 100);
+            const status = progress === 100 ? "completed" : "learning";
+
+            return {
+              id,
+              progress,
+              status,
+              ...rest,
+            };
+          }
+        );
+
+        setData(transformed);
       } catch (error) {
-        console.log("Error occurred",error) // toast error here
+        console.error("Error occurred", error);
+        toast.error("Failed to load topics");
+      } finally {
+        setIsLoading(false); // Stop spinner
       }
-      
     }
-  
-    Datafetcher()
-  },[])
+
+    fetchTopics();
+  }, []);
+
   return (
     <div className="w-full">
       <div className="flex items-center justify-between py-4">
@@ -216,54 +212,63 @@ export function TopicsTable(): React.JSX.Element {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      <Link href={`/dashboard/topic/${row.original.id}`}>{flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}</Link>
-                    </TableCell>
+      {isLoading ? (
+        <div className="h-[50vh] flex flex-col items-center justify-center text-white text-lg gap-4">
+          <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
+          <span>Loading Topics...</span>
+        </div>
+      ) : (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        <Link href={`/dashboard/topic/${row.original.id}`}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </Link>
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
-  )
+  );
 }

@@ -8,27 +8,29 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { backendURI } from "@/app/backendURL";
 import axios from "axios";
 import { use } from "react";
 import { toast } from "sonner";
+
 const getYouTubeThumbnail = (url: string) => {
   const match = url.match(/(?:v=|\.be\/)([\w-]{11})/);
   return match ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg` : "";
 };
 
 export default function NewTopicPage({ params }: { params: any }) {
-  const { id }: { id: any } = use(params);
+  const rawId = (use(params) as { id: string | string[] }).id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+
+  const [topicId, setTopicId] = useState<string | null>(null);
   const [topicModalOpen, setTopicModalOpen] = useState(id ? false : true);
   const [editMode, setEditMode] = useState(false);
   const [topicName, setTopicName] = useState("");
-  const [descriptionName, setDescriptionName] = useState("");
   const [media, setMedia] = useState<
-    { id: string; title: string; type: "youtube" | "pdf"; url: string }[]
+    { id: string; title: string; type: "VIDEO" | "PDF"; url: string }[]
   >([]);
   const [resourceModalOpen, setResourceModalOpen] = useState(false);
-  const [newResourceType, setNewResourceType] = useState<"youtube" | "pdf">(
-    "youtube"
+  const [newResourceType, setNewResourceType] = useState<"VIDEO" | "PDF">(
+    "VIDEO"
   );
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [pdfTitle, setPdfTitle] = useState("");
@@ -39,90 +41,94 @@ export default function NewTopicPage({ params }: { params: any }) {
     item.title.toLowerCase().includes(search.toLowerCase())
   );
 
-  const router = useRouter();
-  useEffect(() => {
-    async function DataFetcher() {
-      try {
-        const res = await axios.get(`${backendURI}/api/folder/${id}`, {
-          headers: {
-            backendtoken: localStorage.getItem("backendtoken"),
-          },
-        });
-        setIsLoading(true);
-        console.log("error occur from here");
-        const dataMedia = await axios.get(`${backendURI}/api/resources/${id}`, {
-          headers: {
-            backendtoken: localStorage.getItem("backendtoken"),
-          },
-        });
-        console.log(dataMedia);
-        const transformed = (dataMedia.data as any).resources.map(
-          ({ _id, ...rest }: { _id: any }) => ({
-            id: _id,
-            ...rest,
-          })
-        );
-        setIsLoading(false);
-        setTopicName((res.data as any).folder.title);
-        setDescriptionName((res.data as any).folder.description);
-        setMedia(transformed);
-      } catch (error) {
-        setIsLoading(false);
-        console.log("Error occurred:", error);
-      }
-    }
-    if (id) {
-      DataFetcher();
-    }
-  }, [id]); /*here will be the fn or something */
-  const handleSaveTopic = async () => {
-    console.log("here");
-    const title = topicName.trim();
-    const description = descriptionName.trim();
-    if (!title || !description) return;
-    try {
-      const res = await axios.post(
-        `${backendURI}/api/folders`,
-        {
-          title,
-          description,
-        },
-        {
-          headers: {
-            backendtoken: localStorage.getItem("backendtoken"),
-          },
-        }
-      );
-      if (res.status === 201) {
-        router.push(`/dashboard/topic/${(res.data as any).folder._id}`);
-        toast.success((res.data as any).message);
-        console.log("200 status");
-        //toast sucess res.data.message
-        console.log((res.data as any).message);
-      } else {
-        // res.data
-        console.log("else condition");
-        toast.error((res.data as any).message);
-        console.log((res.data as any).message);
-      }
-    } catch (error) {
-      //toast message res.data.message
-      console.log("error condition");
+  const topicAPI = "/api/topic";
+  const resourceAPI = `/api/resource`;
 
-      console.log(error);
+  const router = useRouter();
+
+  useEffect(() => {
+    async function fetchTopicAndResources() {
+      try {
+        setIsLoading(true);
+        console.log("Fetching topic and resources for ID:", id);
+
+        // Fetch the topic title
+        const topicRes = await axios.get<{ topic: { title: string } }>(
+          topicAPI,
+          {
+            params: { id },
+          }
+        );
+        setTopicName(topicRes.data.topic.title);
+
+        // Fetch the resources associated with this topic
+        const resourceRes = await axios.get<{ resources: any[] }>(resourceAPI, {
+          params: { topicId: id },
+        });
+
+        // Map them to the format expected by setMedia
+        const resources = resourceRes.data.resources.map((r) => ({
+          id: r.id,
+          title: r.title,
+          type: r.type?.toUpperCase?.() || "UNKNOWN",
+          url: r.url,
+        }));
+
+        setMedia(resources);
+      } catch (error) {
+        console.error("Error fetching topic/resources:", error);
+        toast.error("Failed to fetch topic or resources.");
+      } finally {
+        setIsLoading(false);
+      }
     }
+
+    if (id) {
+      fetchTopicAndResources();
+    }
+  }, [id]);
+
+  const handleSaveTopic = async () => {
+    const title = topicName.trim();
+    if (!title) return;
+
+    try {
+      let res;
+
+      if (editMode && topicId) {
+        // Edit mode: update topic
+        res = await axios.put(topicAPI, {
+          id: topicId,
+          title,
+        });
+      } else {
+        // Create mode: add topic
+        res = await axios.post(topicAPI, {
+          title,
+        });
+      }
+
+      if (res.status === 201 || res.status === 200) {
+        const topic = (res.data as { topic: { id: string } }).topic;
+        const responseData = res.data as { message: string };
+        toast.success(responseData.message);
+
+        router.push(`/dashboard/topic/${topic.id}`);
+      } else {
+        const responseData = res.data as { message: string };
+        toast.error(responseData.message || "Something went wrong");
+      }
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Request failed");
+      console.log("error condition", error);
+    }
+
     setTopicModalOpen(false);
     setEditMode(true);
   };
 
-  const handleResourceClick = (item: (typeof media)[0]) => {
-    router.push(`/dashboard/resource/${item.id}`);
-  };
-
   const handleAddResource = async () => {
-    //const CryptoId = crypto.randomUUID();
-
-    if (newResourceType === "youtube") {
+    if (newResourceType === "VIDEO") {
       const videoIdMatch = youtubeUrl.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
       const videoId = videoIdMatch ? videoIdMatch[1] : null;
 
@@ -138,41 +144,36 @@ export default function NewTopicPage({ params }: { params: any }) {
       }
 
       try {
+        setIsLoading(true);
+
         const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${API_KEY}`;
         const res = await fetch(apiUrl);
         const data = await res.json();
         const videoTitle = data.items?.[0]?.snippet?.title;
-        console.log(videoTitle);
+
         if (!videoTitle) {
           alert("Failed to fetch video title");
           return;
         }
 
-        // TODO: Replace this with POST to /api/topic/{topicId}/resource/
-        // Send payload: { id, title: videoTitle, type: "youtube", url: youtubeUrl }
-        setIsLoading(true);
-        const response = await axios.post(
-          `${backendURI}/api/resources`,
-          {
-            type: "youtube",
-            title: videoTitle,
-            folderId: id,
-            url: youtubeUrl,
-          },
-          {
-            headers: {
-              backendtoken: localStorage.getItem("backendtoken"),
-            },
-          }
-        );
+        const resourceData = {
+          topicId: id,
+          title: videoTitle,
+          type: "VIDEO",
+          url: youtubeUrl,
+        };
+
+        console.log("Resource Data:", resourceData);
+
+        const response = await axios.post(resourceAPI, resourceData);
         toast.success((response.data as any).message);
-        setIsLoading(false);
+
         setMedia((prev) => [
           ...prev,
           {
             id,
             title: videoTitle,
-            type: "youtube",
+            type: "VIDEO",
             url: youtubeUrl,
           },
         ]);
@@ -180,12 +181,12 @@ export default function NewTopicPage({ params }: { params: any }) {
         setYoutubeUrl("");
         setResourceModalOpen(false);
       } catch (error) {
-        console.error("Error fetching video title:", error);
-        setIsLoading(false);
+        console.error("Error fetching or saving YouTube video:", error);
         toast.error(
           "Something went wrong while fetching the YouTube video info."
         );
-        //alert("Something went wrong while fetching the YouTube video info.");
+      } finally {
+        setIsLoading(false);
       }
     } else {
       if (!pdfTitle.trim() || !pdfFile) {
@@ -193,24 +194,14 @@ export default function NewTopicPage({ params }: { params: any }) {
         return;
       }
 
-      // TODO: Replace with POST to /api/topic/{topicId}/resource/
-      // Example using FormData:
-      /*
-      const formData = new FormData();
-      formData.append("id", id);
-      formData.append("title", pdfTitle);
-      formData.append("type", "pdf");
-      formData.append("file", pdfFile);
-
-      await axios.post(`/api/topic/${topicId}/resource/`, formData);
-    */
+      // TODO: add cloudinary upload logic here
 
       setMedia((prev) => [
         ...prev,
         {
           id,
           title: pdfTitle,
-          type: "pdf",
+          type: "PDF",
           url: "", // Backend should return the PDF URL
         },
       ]);
@@ -219,6 +210,10 @@ export default function NewTopicPage({ params }: { params: any }) {
       setPdfFile(null);
       setResourceModalOpen(false);
     }
+  };
+
+  const handleResourceClick = (item: (typeof media)[0]) => {
+    router.push(`/dashboard/resource/${item.id}`);
   };
 
   return (
@@ -235,37 +230,22 @@ export default function NewTopicPage({ params }: { params: any }) {
               onChange={(e) => setTopicName(e.target.value)}
               placeholder="e.g. Linear Algebra"
             />
-            <h2 className="text-xl font-semibold mb-4 mt-4">
-              {editMode ? "Edit Description" : "Enter Description"}
-            </h2>
-            <Input
-              value={descriptionName}
-              onChange={(e) => setDescriptionName(e.target.value)}
-              placeholder="e.g. This folder is all about the linear algebra"
-            />
             <div className="mt-4 flex justify-end">
-              <Button
-                onClick={handleSaveTopic}
-                disabled={!topicName.trim() || !descriptionName.trim()}
-              >
+              <Button onClick={handleSaveTopic} disabled={!topicName.trim()}>
                 Save
               </Button>
             </div>
           </div>
         </div>
       )}
+
       <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h2
           className="text-2xl font-bold flex items-center gap-2 cursor-pointer group transition"
           onClick={() => setTopicModalOpen(true)}
         >
           <Pencil className="h-5 w-5 text-muted-foreground group-hover:text-primary transition" />
-          <div>
-            <p>{topicName}</p>
-            <p className="text-sm font-medium text-neutral-500">
-              {descriptionName}
-            </p>
-          </div>
+          <p>{topicName}</p>
         </h2>
 
         <Button onClick={() => setResourceModalOpen(true)} className="gap-2">
@@ -295,8 +275,8 @@ export default function NewTopicPage({ params }: { params: any }) {
                   <input
                     type="radio"
                     name="resource"
-                    checked={newResourceType === "youtube"}
-                    onChange={() => setNewResourceType("youtube")}
+                    checked={newResourceType === "VIDEO"}
+                    onChange={() => setNewResourceType("VIDEO")}
                   />
                   <span className="ml-2">YouTube Video</span>
                 </Label>
@@ -304,14 +284,14 @@ export default function NewTopicPage({ params }: { params: any }) {
                   <input
                     type="radio"
                     name="resource"
-                    checked={newResourceType === "pdf"}
-                    onChange={() => setNewResourceType("pdf")}
+                    checked={newResourceType === "PDF"}
+                    onChange={() => setNewResourceType("PDF")}
                   />
                   <span className="ml-2">PDF File</span>
                 </Label>
               </div>
 
-              {newResourceType === "youtube" ? (
+              {newResourceType === "VIDEO" ? (
                 <Input
                   value={youtubeUrl}
                   onChange={(e) => setYoutubeUrl(e.target.value)}
@@ -364,8 +344,9 @@ export default function NewTopicPage({ params }: { params: any }) {
 
       {/* Resource Grid */}
       {isLoading ? (
-        <div className="h-[50vh] flex items-center justify-center text-white text-lg">
-          Loading Resources
+        <div className="h-[50vh] flex flex-col items-center justify-center text-white text-lg gap-4">
+          <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
+          <span>Loading Resources...</span>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -375,7 +356,7 @@ export default function NewTopicPage({ params }: { params: any }) {
               className="cursor-pointer hover:ring-2 hover:ring-primary transition flex flex-col py-0 gap-0"
               onClick={() => handleResourceClick(item)}
             >
-              {item.type === "youtube" ? (
+              {item.type === "VIDEO" ? (
                 <Image
                   src={getYouTubeThumbnail(item.url)}
                   alt={item.title}
