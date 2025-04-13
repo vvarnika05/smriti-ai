@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { FileText, PlusCircle, Pencil, X, Search } from "lucide-react";
+import { FileText, PlusCircle, Pencil, X, Search, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import axios from "axios";
 import { use } from "react";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const getYouTubeThumbnail = (url: string) => {
   const match = url.match(/(?:v=|\.be\/)([\w-]{11})/);
@@ -216,6 +217,27 @@ export default function NewTopicPage({ params }: { params: any }) {
     router.push(`/dashboard/resource/${item.id}`);
   };
 
+  const handleDeleteResource = async (item: { id?: string; title?: string; type?: "VIDEO" | "PDF"; url: any; }) => {
+    // try {
+    //   await axios.delete("/api/resource", {
+    //     data: { url: item.url },
+    //   });
+    //   // setMedia((prev) => prev.filter((res) => res.url !== item.url));
+    //   const updatedMedia = media.filter(item => item.url !== item.url);
+    //   setMedia(updatedMedia);
+    // } catch (err) {
+    //   console.error("Failed to delete resource", err);
+    // }
+  };
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [resourceToDelete, setResourceToDelete] = useState<{
+    id: string;
+    title: string;
+    type: "VIDEO" | "PDF";
+    url: string;
+  } | null>(null);
+
   return (
     <div className="min-h-screen bg-background text-foreground max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-14">
       {/* Custom Modal for Topic Name */}
@@ -255,6 +277,7 @@ export default function NewTopicPage({ params }: { params: any }) {
       </div>
 
       {/* Custom Modal for Adding Resources */}
+
       {resourceModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-zinc-900 rounded-md p-6 w-full max-w-md shadow-lg relative">
@@ -353,9 +376,31 @@ export default function NewTopicPage({ params }: { params: any }) {
           {filteredMedia.map((item) => (
             <Card
               key={item.url}
-              className="cursor-pointer hover:ring-2 hover:ring-primary transition flex flex-col py-0 gap-0"
+              className="relative group cursor-pointer hover:ring-2 hover:ring-primary transition flex flex-col py-0 gap-0"
               onClick={() => handleResourceClick(item)}
             >
+              {/* Delete Button on Hover */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setResourceToDelete(item);
+                        handleDeleteResource(item);
+                        setDeleteModalOpen(true);
+                      }}
+                      className="absolute cursor-pointer top-2 right-2 opacity-0 group-hover:opacity-100 bg-[#171717] text-white hover:text-red-600 p-2 rounded-full transition z-10"
+                    >
+                      <Trash className="w-4 h-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Delete</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
               {item.type === "VIDEO" ? (
                 <Image
                   src={getYouTubeThumbnail(item.url)}
@@ -369,13 +414,18 @@ export default function NewTopicPage({ params }: { params: any }) {
                   <FileText className="h-12 w-12 text-muted-foreground" />
                 </div>
               )}
+
               <CardContent className="p-4 min-h-[40px] flex items-center">
                 <p className="text-sm font-medium truncate w-full">
                   {item.title}
                 </p>
               </CardContent>
             </Card>
+
+
+
           ))}
+
         </div>
       )}
     </div>
