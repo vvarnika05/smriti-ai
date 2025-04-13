@@ -2,11 +2,12 @@
 import { use, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Wand2, BrainCircuit, FileQuestion } from "lucide-react";
+import { Send, Wand2, BrainCircuit, FileQuestion, Route } from "lucide-react";
 import axios from "axios";
 import Mermaid from "@/components/mermaid/mermaid";
 import ReactMarkdown from "react-markdown";
 import prepareMermaidCode from "@/lib/prepareMermaidCode";
+import Link from "next/link";
 
 export default function ResourceChatPage({ params }: { params: any }) {
   const rawId = (use(params) as { id: string | string[] }).id;
@@ -85,6 +86,7 @@ export default function ResourceChatPage({ params }: { params: any }) {
 
   const getSummary = () => handleSend("summarise this", "summary");
   const getMindMap = () => handleSend("Generate a mindmap", "mindmap");
+  const getRoadMap = () => handleSend("Generate a Road Map", "qa");
 
   const resourceAPI = "/api/resource";
 
@@ -107,10 +109,10 @@ export default function ResourceChatPage({ params }: { params: any }) {
   }, []);
 
   return (
-    <div className="h-screen bg-muted/50 text-foreground pt-14">
+    <div className="h-screen bg-muted/50 text-foreground pt-24">
       <div className="flex flex-col h-full w-full">
         {/* Header */}
-        <div className="pt-6 pb-4 text-center">
+        <div className="pb-10 text-center">
           <h1 className="text-2xl font-bold text-white">{resourceTopic}</h1>
         </div>
 
@@ -204,9 +206,18 @@ export default function ResourceChatPage({ params }: { params: any }) {
               <Button
                 variant="outline"
                 className="flex-1 rounded-full border-zinc-700 text-white hover:bg-zinc-800"
+                onClick={() => getRoadMap()}
               >
-                <FileQuestion className="mr-2 h-4 w-4" /> Attempt a Quiz
+                <Route className="mr-2 h-4 w-4" /> Road Map
               </Button>
+              <Link href={`/dashboard/quiz/${id}`} className="flex-1">
+                <Button
+                  variant="outline"
+                  className="flex-1 w-full rounded-full border-zinc-700 text-white hover:bg-zinc-800"
+                >
+                  <FileQuestion className="mr-2 h-4 w-4" /> Attempt a Quiz
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

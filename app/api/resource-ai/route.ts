@@ -20,35 +20,10 @@ async function askGemini(prompt: string): Promise<string> {
   return response.text();
 }
 
-// Helper: parse MCQs
-function parseMCQs(raw: string) {
-  const mcqs = [];
-  const questionBlocks = raw.split(/\n\n+/).filter(Boolean);
-
-  for (const block of questionBlocks) {
-    const [qLine, ...rest] = block.split("\n").filter(Boolean);
-    const question = qLine.replace(/^\d+[\).]?\s*/, "").trim();
-
-    const options: string[] = [];
-    let correctAnswer = "";
-    let explanation = "";
-
-    for (const line of rest) {
-      if (line.toLowerCase().startsWith("correct answer:")) {
-        correctAnswer = line.split(":")[1]?.trim() || "";
-      } else if (line.toLowerCase().startsWith("explanation:")) {
-        explanation = line.split(":")[1]?.trim() || "";
-      } else {
-        options.push(line.replace(/^[-*]?\s*/, "").trim());
-      }
-    }
-
-    if (question && options.length >= 2 && correctAnswer) {
-      mcqs.push({ question, options, correctAnswer, explanation });
-    }
-  }
-
-  return mcqs;
+function extractJSON(text: string): any {
+  const match = text.match(/\[.*\]/s); // non-greedy multiline match
+  if (!match) throw new Error("No JSON found in Gemini response.");
+  return JSON.parse(match[0]);
 }
 
 // Main handler
@@ -138,32 +113,84 @@ export async function POST(req: NextRequest) {
     }
 
     if (task === "quiz") {
-      const prompt = `Create 5 multiple choice questions (MCQs) based on this YouTube transcript. Each question should have 4 options, specify the correct answer, and give a short explanation.
+      // Step 1: Check if a quiz already exists for this resourceId
+      const existingQuiz = await prisma.quiz.findUnique({
+        where: { resourceId: resource.id },
+        include: {
+          quizQAs: true, // Include related questions and answers
+        },
+      });
 
-      Transcript:
-      ${transcript}`;
+      if (existingQuiz) {
+        return NextResponse.json({
+          message: "Quiz already exists for this resource",
+          quiz: existingQuiz,
+          quizQAs: existingQuiz.quizQAs,
+        });
+      } else {
+        // Step 2: Generate new quiz questions
+        const prompt = `Create exactly 5 multiple choice questions (MCQs) in JSON format based on the following YouTube transcript.
+        Each question should include:
+        - question (string)
+        - options (array of 4 strings)
+        - answer (string: the correct option)
+        - explanation (string: a brief explanation)
 
-      const mcqText = await askGemini(prompt);
-      const mcqs = parseMCQs(mcqText);
+        Respond ONLY with a single JSON array and nothing else.
 
-      const quizRecords = await Promise.all(
-        mcqs.map((q) =>
-          prisma.quiz.create({
-            data: {
-              topicId: resource.topicId,
-              question: q.question,
-              options: q.options,
-              correctAnswer: q.correctAnswer,
-              explanation: q.explanation,
-            },
-          })
-        )
-      );
+        Example:
+        [
+          {
+            "question": "What is 2 + 2?",
+            "options": ["1", "2", "3", "4"],
+            "answer": "4",
+            "explanation": "2 + 2 equals 4."
+          },
+          ...
+        ]
 
-      return NextResponse.json({ message: "Quiz created", quiz: quizRecords });
+        Transcript:
+        ${transcript}`;
+
+        const mcqText = await askGemini(prompt);
+        const mcqs = extractJSON(mcqText);
+
+        interface QuizQuestion {
+          question: string;
+          options: string[];
+          answer: string;
+          explanation: string;
+        }
+
+        // Step 3: Create a new quiz record
+        const quizRecord = await prisma.quiz.create({
+          data: {
+            resourceId: resource.id,
+          },
+        });
+
+        // Step 4: Add the questions and answers to the QuizQA model
+        const quizQAs = await Promise.all(
+          mcqs.map((q: QuizQuestion) =>
+            prisma.quizQA.create({
+              data: {
+                quizId: quizRecord.id,
+                question: q.question,
+                options: q.options,
+                correctAnswer: q.answer,
+                explanation: q.explanation,
+              },
+            })
+          )
+        );
+
+        return NextResponse.json({
+          message: "Quiz created with questions",
+          quiz: quizRecord,
+          quizQAs,
+        });
+      }
     }
-
-    return NextResponse.json({ message: "Invalid task type" }, { status: 400 });
   } catch (error) {
     console.error("Error in resource AI task:", error);
     return NextResponse.json(
