@@ -165,7 +165,11 @@ export default function NewTopicPage({ params }: { params: any }) {
 
         console.log("Resource Data:", resourceData);
 
-        const response = await axios.post(resourceAPI, resourceData);
+        const response = await axios.post(resourceAPI, resourceData,{
+          headers:{
+            "Content-Type": "application/json",
+          }
+        });
         toast.success((response.data as any).message);
 
         setMedia((prev) => [
@@ -186,30 +190,47 @@ export default function NewTopicPage({ params }: { params: any }) {
           "Something went wrong while fetching the YouTube video info."
         );
       } finally {
-        setIsLoading(false);
-      }
+        setResourceModalOpen(false);
+      } 
     } else {
       if (!pdfTitle.trim() || !pdfFile) {
         alert("Enter PDF title and select a file.");
         return;
       }
 
-      // TODO: add cloudinary upload logic here
+      try {
+        setIsLoading(true)
+        const formData = new FormData();
+        formData.append("file", pdfFile);
+        formData.append("type","PDF")
+        formData.append("title", pdfTitle);
+        formData.append("topicId", id);
 
-      setMedia((prev) => [
-        ...prev,
-        {
-          id,
-          title: pdfTitle,
-          type: "PDF",
-          url: "", // Backend should return the PDF URL
-        },
-      ]);
-
-      setPdfTitle("");
-      setPdfFile(null);
-      setResourceModalOpen(false);
-    }
+        const res=await axios.post(resourceAPI,formData)
+        setMedia((prev) => [
+          ...prev,
+          {
+            id,
+            title: pdfTitle,
+            type: "PDF",
+            url: (res.data as any).url, // Backend should return the PDF URL
+          },
+        ]);
+      } catch (error) {
+        console.error("Error fetching or saving the pdf:", error);
+        toast.error(
+          "Something went wrong while storing the pdf."
+        );
+      } finally {
+        setPdfTitle("");
+        setPdfFile(null);
+        setResourceModalOpen(false);
+      }}
+      
+      setIsLoading(false)
+      
+      
+    
   };
 
   const handleResourceClick = (item: (typeof media)[0]) => {
@@ -352,7 +373,7 @@ export default function NewTopicPage({ params }: { params: any }) {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredMedia.map((item) => (
             <Card
-              key={item.url}
+              key={item.id}
               className="cursor-pointer hover:ring-2 hover:ring-primary transition flex flex-col py-0 gap-0"
               onClick={() => handleResourceClick(item)}
             >

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
+import cloudinary from "@/lib/cloudinary";
+import { uploadPDFBuffer } from "@/lib/bufferToStream";
 
 // GET: get single or multiple resources
 export async function GET(req: NextRequest) {
@@ -44,7 +46,9 @@ export async function POST(req: NextRequest) {
   if (!userId)
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-  const body = await req.json();
+  const contentType = req.headers.get("content-type");
+  if (contentType?.includes("application/json")) {
+    const body = await req.json();
   const { topicId, title, type, url, summary } = body;
 
   if (!topicId || !title || !type || !url) {
@@ -53,19 +57,61 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
+    try {
+      const resource = await prisma.resource.create({
+        data: { topicId, title, type, url, summary: summary || "" },
+      });
+  
+      return NextResponse.json(
+        { message: "Resource created", resource },
+        { status: 201 }
+      );
+    } catch (error) {
+      console.error("POST resource error:", error);
+      return NextResponse.json({ message: "Creation failed" }, { status: 500 });
+    }
+  }
+   
 
-  try {
+
+  else if (contentType?.includes("multipart/form-data")) {
+    const formData = await req.formData();
+    const file = formData.get("file");
+    const type =  formData.get("type");
+    const title = formData.get("title");
+    const topicId = formData.get("topicId")
+    if (!file || !(file instanceof File)) {
+      return NextResponse.json(
+        { message: "No file uploaded" },
+        { status: 400 }
+      );
+    }
+    if (type !== "PDF" || typeof title !== "string" || typeof topicId !== "string") {
+      return NextResponse.json(
+        { message: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    
+    // Now you can do anything with `buffer`
+    // e.g., save to disk, upload to S3, or store in DB
+  
+    const uploadResult = await uploadPDFBuffer(buffer, file.name.replace(/\.pdf$/, ""));
+    console.log(uploadResult)
+    const url= (uploadResult as any).secure_url
+    console.log(url)
     const resource = await prisma.resource.create({
-      data: { topicId, title, type, url, summary: summary || "" },
+      data: { topicId, title, type, url, summary: "" }, //summary: summary || "" //create krte hue summary paas ni ho ri toh "" hi store krwa rha hu
     });
-
     return NextResponse.json(
       { message: "Resource created", resource },
       { status: 201 }
     );
-  } catch (error) {
-    console.error("POST resource error:", error);
-    return NextResponse.json({ message: "Creation failed" }, { status: 500 });
+  }
+  else {
+    return NextResponse.json({ message: "Creation failed. No valid type" }, { status: 500 });
   }
 }
 
