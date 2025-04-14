@@ -54,32 +54,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const transcript = await getYoutubeTranscript(resource.url);
+    let summary = resource.summary;
 
-    if (task === "summary") {
-      if (resource.summary?.length > 0) {
-        return NextResponse.json({
-          message: "Summary already exists",
-          summary: resource.summary,
+    if (!summary || summary.length === 0) {
+      if (resource.type === "VIDEO") {
+        const transcript = await getYoutubeTranscript(resource.url);
+        const prompt = `Summarize this YouTube transcript. Provide:
+        1. A short summary
+        2. Key bullet points
+
+        Transcript:
+        ${transcript}`;
+
+        summary = await askGemini(prompt);
+
+        await prisma.resource.update({
+          where: { id: resourceId },
+          data: { summary },
         });
       }
+    }
 
-      const prompt = `Summarize this YouTube transcript. Provide:
-      1. A short summary
-      2. Key bullet points
-
-      Transcript:
-      ${transcript}`;
-
-      const summary = await askGemini(prompt);
-      const updated = await prisma.resource.update({
-        where: { id: resourceId },
-        data: { summary },
-      });
-
+    if (task === "summary") {
       return NextResponse.json({
         message: "Summary generated",
-        summary: updated.summary,
+        summary,
       });
     }
 
@@ -91,9 +90,9 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const prompt = `Answer the following question based on this YouTube transcript:
-      Transcript:
-      ${transcript}
+      const prompt = `Answer the following question based on this summary of a YouTube transcript:
+      Summary:
+      ${summary}
 
       Question: ${question}`;
 
@@ -102,11 +101,11 @@ export async function POST(req: NextRequest) {
     }
 
     if (task === "mindmap") {
-      const prompt = `Generate a mind map using mermaid.js syntax based on the following YouTube transcript.
+      const prompt = `Generate a mind map using mermaid.js syntax based on the following summary of a YouTube transcript.
       The mind map should highlight the key concepts, ideas, and their relationships, organized in a simplified 
       and easy-to-understand structure. Limit the number of nodes to ensure clarity and avoid overwhelming the user with too much detail.
-      Transcript:
-      ${transcript}`;
+      Summary:
+      ${summary}`;
 
       const mindmap = await askGemini(prompt);
       return NextResponse.json({ message: "Mindmap code generated", mindmap });
@@ -129,7 +128,7 @@ export async function POST(req: NextRequest) {
         });
       } else {
         // Step 2: Generate new quiz questions
-        const prompt = `Create exactly 5 multiple choice questions (MCQs) in JSON format based on the following YouTube transcript.
+        const prompt = `Create exactly 5 multiple choice questions (MCQs) in JSON format based on the following summary of a YouTube transcript.
         Each question should include:
         - question (string)
         - options (array of 4 strings)
@@ -149,8 +148,8 @@ export async function POST(req: NextRequest) {
           ...
         ]
 
-        Transcript:
-        ${transcript}`;
+        Summary:
+        ${summary}`;
 
         const mcqText = await askGemini(prompt);
         const mcqs = extractJSON(mcqText);
