@@ -61,11 +61,11 @@ Use it on web, and soon — on WhatsApp & mobile apps too!
 ## 🛠️ Tech Stack
 
 - 🧩 **Frontend**: Next.js, TypeScript, Tailwind CSS  
-- 🧠 **AI Layer**: OpenAI APIs, LangChain  
+- 🧠 **AI Layer**: Gemini APIS,LLMs 
 - 🔐 **Auth**: Clerk  
-- ☁️ **Backend**: Supabase / Firebase (for storage & DB)  
+- ☁️ **Backend**: Next.js,Prisma,Mongodb  
 - 🤖 **Bot Layer**: WhatsApp + Twilio Integration  
-- 🧪 **Chrome Extension**: Capture videos directly from YouTube
+- 🧪 **Chrome Extension**: Capture videos directly from YouTube //upcoming
 
 ---
 
