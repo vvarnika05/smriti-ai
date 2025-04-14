@@ -28,7 +28,7 @@ export default function ResourceChatPage({ params }: { params: any }) {
 
   const handleSend = async (
     customInput?: string,
-    task: "summary" | "mindmap" | "qa" = "qa"
+    task: "summary" | "mindmap" | "roadmap" | "qa" = "qa"
   ) => {
     const userMessage = customInput ?? input.trim();
     if (!userMessage) return;
@@ -41,7 +41,7 @@ export default function ResourceChatPage({ params }: { params: any }) {
 
     setMessages((prev) => [
       ...prev,
-      { sender: "bot", text: "Smriti AI is thinking...", type: "text" },
+      { sender: "bot", text: "🧠 Smriti AI is thinking...", type: "text" },
     ]);
 
     try {
@@ -86,7 +86,7 @@ export default function ResourceChatPage({ params }: { params: any }) {
 
   const getSummary = () => handleSend("summarise this", "summary");
   const getMindMap = () => handleSend("Generate a mindmap", "mindmap");
-  const getRoadMap = () => handleSend("Generate a Road Map", "qa");
+  const getRoadMap = () => handleSend("Generate a Road Map", "roadmap");
 
   const resourceAPI = "/api/resource";
 
@@ -101,6 +101,7 @@ export default function ResourceChatPage({ params }: { params: any }) {
       console.log(res.data);
       if (res.data.resource) {
         setResourceTopic(res.data.resource.title);
+        setIsLoading(false);
       } else {
         console.error("Resource not found");
       }
@@ -113,12 +114,19 @@ export default function ResourceChatPage({ params }: { params: any }) {
       <div className="flex flex-col h-full w-full">
         {/* Header */}
         <div className="pb-10 text-center">
-          <h1 className="text-2xl font-bold text-white">{resourceTopic}</h1>
+          {isLoading ? (
+            <div className="flex items-center justify-center text-white text-lg gap-2">
+              <span>Loading...</span>
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <h1 className="text-2xl font-bold text-white">{resourceTopic}</h1>
+          )}
         </div>
 
         {/* Chat Area */}
         <div className="overflow-y-auto h-full">
-          <div className="flex-1 px-2 sm:px-0 space-y-4 max-w-7xl mx-auto pb-20">
+          <div className="flex-1 px-2 sm:px-6 lg:px-8 space-y-4 max-w-7xl mx-auto pb-20">
             {messages.map((msg, idx) => (
               <div
                 key={idx}

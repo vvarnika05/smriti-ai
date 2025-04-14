@@ -1,3 +1,10 @@
+import {
+  SUMMARY_PROMPT,
+  QA_PROMPT,
+  MINDMAP_PROMPT,
+  ROADMAP_PROMPT,
+  QUIZ_PROMPT,
+} from "@/lib/prompts";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
@@ -59,12 +66,7 @@ export async function POST(req: NextRequest) {
     if (!summary || summary.length === 0) {
       if (resource.type === "VIDEO") {
         const transcript = await getYoutubeTranscript(resource.url);
-        const prompt = `Summarize this YouTube transcript. Provide:
-        1. A short summary
-        2. Key bullet points
-
-        Transcript:
-        ${transcript}`;
+        const prompt = SUMMARY_PROMPT(transcript);
 
         summary = await askGemini(prompt);
 
@@ -82,6 +84,13 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    if (task === "roadmap") {
+      const prompt = ROADMAP_PROMPT(summary);
+
+      const answer = await askGemini(prompt);
+      return NextResponse.json({ message: "Roadmap generated", answer });
+    }
+
     if (task === "qa") {
       if (!question) {
         return NextResponse.json(
@@ -90,22 +99,14 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const prompt = `Answer the following question based on this summary of a YouTube transcript:
-      Summary:
-      ${summary}
-
-      Question: ${question}`;
+      const prompt = QA_PROMPT(summary, question);
 
       const answer = await askGemini(prompt);
       return NextResponse.json({ message: "Answer generated", answer });
     }
 
     if (task === "mindmap") {
-      const prompt = `Generate a mind map using mermaid.js syntax based on the following summary of a YouTube transcript.
-      The mind map should highlight the key concepts, ideas, and their relationships, organized in a simplified 
-      and easy-to-understand structure. Limit the number of nodes to ensure clarity and avoid overwhelming the user with too much detail.
-      Summary:
-      ${summary}`;
+      const prompt = MINDMAP_PROMPT(summary);
 
       const mindmap = await askGemini(prompt);
       return NextResponse.json({ message: "Mindmap code generated", mindmap });
@@ -128,28 +129,7 @@ export async function POST(req: NextRequest) {
         });
       } else {
         // Step 2: Generate new quiz questions
-        const prompt = `Create exactly 5 multiple choice questions (MCQs) in JSON format based on the following summary of a YouTube transcript.
-        Each question should include:
-        - question (string)
-        - options (array of 4 strings)
-        - answer (string: the correct option)
-        - explanation (string: a brief explanation)
-
-        Respond ONLY with a single JSON array and nothing else.
-
-        Example:
-        [
-          {
-            "question": "What is 2 + 2?",
-            "options": ["1", "2", "3", "4"],
-            "answer": "4",
-            "explanation": "2 + 2 equals 4."
-          },
-          ...
-        ]
-
-        Summary:
-        ${summary}`;
+        const prompt = QUIZ_PROMPT(summary);
 
         const mcqText = await askGemini(prompt);
         const mcqs = extractJSON(mcqText);
