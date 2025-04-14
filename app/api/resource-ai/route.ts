@@ -1,4 +1,5 @@
 import {
+  FALLBACK_PROMPT,
   SUMMARY_PROMPT,
   QA_PROMPT,
   MINDMAP_PROMPT,
@@ -65,10 +66,19 @@ export async function POST(req: NextRequest) {
 
     if (!summary || summary.length === 0) {
       if (resource.type === "VIDEO") {
-        const transcript = await getYoutubeTranscript(resource.url);
-        const prompt = SUMMARY_PROMPT(transcript);
+        try {
+          const transcript = await getYoutubeTranscript(resource.url);
+          const prompt = SUMMARY_PROMPT(transcript);
+          summary = await askGemini(prompt);
+        } catch (err) {
+          console.error(
+            "Transcript fetch failed. Falling back to title-based summary.",
+            err
+          );
 
-        summary = await askGemini(prompt);
+          const fallbackPrompt = FALLBACK_PROMPT(resource.title);
+          summary = await askGemini(fallbackPrompt);
+        }
 
         await prisma.resource.update({
           where: { id: resourceId },
