@@ -1,15 +1,24 @@
 "use client";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
+// React and third-party libraries
 import * as React from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast } from "sonner";
+
+// Icons
+import {
+  ArrowUpDown,
+  CheckCircle2,
+  ChevronDown,
+  Clock,
+  GraduationCap,
+  PauseCircle,
+  Trash2,
+} from "lucide-react";
+
+// TanStack Table
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -22,27 +31,41 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, GraduationCap } from "lucide-react";
 
+// UI components
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, Clock, PauseCircle } from "lucide-react";
-import axios from "axios";
-import Link from "next/link";
-import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export type Topic = {
   id: string;
   title: string;
   status: "learning" | "completed" | "paused";
-  progress: number; // percentage
+  progress: number;
 };
 
 export const columns: ColumnDef<Topic>[] = [
@@ -56,6 +79,14 @@ export const columns: ColumnDef<Topic>[] = [
         Topic
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
+    ),
+    cell: ({ row }) => (
+      <Link
+        href={`/dashboard/topic/${row.original.id}`}
+        className="hover:underline"
+      >
+        {row.getValue("title")}
+      </Link>
     ),
   },
   {
@@ -110,6 +141,71 @@ export const columns: ColumnDef<Topic>[] = [
         </div>
       );
     },
+  },
+  {
+    accessorKey: "actions",
+    header: () => <div className="text-center w-full">Actions</div>,
+    cell: ({ row }) => {
+      const topicId = row.original.id;
+      const [open, setOpen] = React.useState(false);
+      const router = useRouter(); // for refreshing data if needed
+
+      const handleDelete = async () => {
+        try {
+          const res = await fetch("/api/topic", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id: topicId }),
+          });
+
+          if (!res.ok) {
+            throw new Error("Delete failed");
+          }
+
+          toast.success("Topic deleted");
+          router.refresh(); // Optional: refresh data after deletion
+        } catch (err) {
+          toast.error("Failed to delete topic");
+          console.error(err);
+        } finally {
+          setOpen(false);
+        }
+      };
+
+      return (
+        <div className="flex justify-center">
+          <AlertDialog open={open} onOpenChange={setOpen}>
+            <AlertDialogTrigger asChild>
+              <button
+                className="p-2 text-muted-foreground hover:text-red-500 transition-colors"
+                onClick={() => setOpen(true)}
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Topic</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this topic? This action cannot
+                  be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete}>
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      );
+    },
+    enableSorting: false,
+    enableHiding: false,
   },
 ];
 
@@ -213,7 +309,7 @@ export function TopicsTable(): React.JSX.Element {
         </DropdownMenu>
       </div>
       {isLoading ? (
-        <div className="h-[50vh] flex flex-col items-center justify-center text-white text-lg gap-4">
+        <div className="flex flex-col items-center justify-center text-white text-lg gap-4">
           <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
           <span>Loading Topics...</span>
         </div>
@@ -245,12 +341,10 @@ export function TopicsTable(): React.JSX.Element {
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
-                        <Link href={`/dashboard/topic/${row.original.id}`}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </Link>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
                       </TableCell>
                     ))}
                   </TableRow>
