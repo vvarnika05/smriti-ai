@@ -63,7 +63,7 @@ Use it on web, and soon — on WhatsApp & mobile apps too!
 - 🧩 **Frontend**: Next.js, TypeScript, Tailwind CSS  
 - 🧠 **AI Layer**: Gemini APIS,LLMs 
 - 🔐 **Auth**: Clerk  
-- ☁️ **Backend**: Next.js,Prisma,Mongodb  
+- ☁️ **Backend**: Next.js,Prisma,Mongodb  (shifted to postgres )
 - 🤖 **Bot Layer**: WhatsApp + Twilio Integration  
 - 🧪 **Chrome Extension**: Capture videos directly from YouTube //upcoming
 
