@@ -47,6 +47,7 @@ export type Topic = {
   title: string;
   status: "learning" | "completed" | "paused";
   progress: number;
+  isDeleting?: boolean;
 };
 
 export function TopicsTable(): React.JSX.Element {
@@ -64,13 +65,17 @@ export function TopicsTable(): React.JSX.Element {
   >({});
 
   const handleRemoveTopic = (topicId: string) => {
-    const row = document.querySelector(`tr[data-id="${topicId}"]`);
-    if (row) {
-      row.classList.add("opacity-0", "transition-opacity", "duration-500");
-      setTimeout(() => {
-        setData((prev) => prev.filter((t) => t.id !== topicId));
-      }, 500);
-    }
+    // First mark the row as deleting
+    setData((prev) =>
+      prev.map((topic) =>
+        topic.id === topicId ? { ...topic, isDeleting: true } : topic
+      )
+    );
+
+    // Then remove it after animation
+    setTimeout(() => {
+      setData((prev) => prev.filter((topic) => topic.id !== topicId));
+    }, 500);
   };
 
   const columns: ColumnDef<Topic>[] = [
@@ -261,7 +266,15 @@ export function TopicsTable(): React.JSX.Element {
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-id={row.original.id}>
+                  <TableRow
+                    key={row.id}
+                    data-id={row.original.id}
+                    className={
+                      row.original.isDeleting
+                        ? "opacity-0 transition-opacity duration-500"
+                        : ""
+                    }
+                  >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(

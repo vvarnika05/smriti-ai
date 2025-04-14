@@ -1,6 +1,7 @@
 export const FALLBACK_PROMPT = (title: string) => `
 The YouTube video titled "${title}" could not be transcribed.
-Based only on the title, write a short summary and list key points that this video is likely to cover. Use your best judgment to cover the main topic and give the user a useful overview.
+Based only on the title, write a short summary and list key points that this video is likely to cover. 
+Use your best judgment to cover the main topic and give the user a useful overview.
 `;
 
 export const SUMMARY_PROMPT = (transcript: string) => `
