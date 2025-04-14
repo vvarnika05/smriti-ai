@@ -1,13 +1,10 @@
 "use client";
 
-// React and third-party libraries
 import * as React from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-
-// Icons
 import {
   ArrowUpDown,
   CheckCircle2,
@@ -15,36 +12,20 @@ import {
   Clock,
   GraduationCap,
   PauseCircle,
-  Trash2,
 } from "lucide-react";
-
-// TanStack Table
 import {
   ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-  flexRender,
+  useReactTable,
   getCoreRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  useReactTable,
+  getFilteredRowModel,
+  flexRender,
+  SortingState,
+  ColumnFiltersState,
+  VisibilityState,
 } from "@tanstack/react-table";
-
-// UI components
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -60,6 +41,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import ActionsCell from "./actionCell";
 
 export type Topic = {
   id: string;
@@ -68,148 +50,8 @@ export type Topic = {
   progress: number;
 };
 
-export const columns: ColumnDef<Topic>[] = [
-  {
-    accessorKey: "title",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Topic
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <Link
-        href={`/dashboard/topic/${row.original.id}`}
-        className="hover:underline"
-      >
-        {row.getValue("title")}
-      </Link>
-    ),
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as Topic["status"];
-      const statusMap: Record<
-        Topic["status"],
-        { label: string; icon: React.ReactNode; color: string }
-      > = {
-        learning: {
-          label: "Learning",
-          icon: <Clock className="w-4 h-4" />,
-          color: "bg-blue-100 text-blue-800",
-        },
-        completed: {
-          label: "Completed",
-          icon: <CheckCircle2 className="w-4 h-4" />,
-          color: "bg-green-100 text-green-800",
-        },
-        paused: {
-          label: "Paused",
-          icon: <PauseCircle className="w-4 h-4" />,
-          color: "bg-yellow-100 text-yellow-800",
-        },
-      };
-
-      const { label, icon, color } = statusMap[status];
-
-      return (
-        <span
-          className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${color}`}
-        >
-          {icon}
-          {label}
-        </span>
-      );
-    },
-  },
-  {
-    accessorKey: "progress",
-    header: "Progress",
-    cell: ({ row }) => {
-      const value = row.getValue("progress") as number;
-      return (
-        <div className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-muted-foreground">
-            {value}%
-          </span>
-          <Progress value={value} className="h-2" />
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "actions",
-    header: () => <div className="text-center w-full">Actions</div>,
-    cell: ({ row }) => {
-      const topicId = row.original.id;
-      const [open, setOpen] = React.useState(false);
-      const router = useRouter(); // for refreshing data if needed
-
-      const handleDelete = async () => {
-        try {
-          const res = await fetch("/api/topic", {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ id: topicId }),
-          });
-
-          if (!res.ok) {
-            throw new Error("Delete failed");
-          }
-
-          toast.success("Topic deleted");
-          router.refresh(); // Optional: refresh data after deletion
-        } catch (err) {
-          toast.error("Failed to delete topic");
-          console.error(err);
-        } finally {
-          setOpen(false);
-        }
-      };
-
-      return (
-        <div className="flex justify-center">
-          <AlertDialog open={open} onOpenChange={setOpen}>
-            <AlertDialogTrigger asChild>
-              <button
-                className="p-2 text-muted-foreground hover:text-red-500 transition-colors"
-                onClick={() => setOpen(true)}
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Topic</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to delete this topic? This action cannot
-                  be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      );
-    },
-    enableSorting: false,
-    enableHiding: false,
-  },
-];
-
 export function TopicsTable(): React.JSX.Element {
+  const [data, setData] = React.useState<Topic[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -221,18 +63,102 @@ export function TopicsTable(): React.JSX.Element {
   const [rowSelection, setRowSelection] = React.useState<
     Record<string, boolean>
   >({});
-  const [data, setData]: [data: Topic[] | [], SetData: any] = React.useState(
-    []
-  );
-  const table = useReactTable<Topic>({
+
+  const handleRemoveTopic = (topicId: string) => {
+    const row = document.querySelector(`tr[data-id="${topicId}"]`);
+    if (row) {
+      row.classList.add("opacity-0", "transition-opacity", "duration-500");
+      setTimeout(() => {
+        setData((prev) => prev.filter((t) => t.id !== topicId));
+      }, 500);
+    }
+  };
+
+  const columns: ColumnDef<Topic>[] = [
+    {
+      accessorKey: "title",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Topic <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <Link
+          href={`/dashboard/topic/${row.original.id}`}
+          className="hover:underline"
+        >
+          {row.getValue("title")}
+        </Link>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.getValue("status") as Topic["status"];
+        const statusMap = {
+          learning: {
+            label: "Learning",
+            icon: <Clock className="w-4 h-4" />,
+            color: "bg-blue-100 text-blue-800",
+          },
+          completed: {
+            label: "Completed",
+            icon: <CheckCircle2 className="w-4 h-4" />,
+            color: "bg-green-100 text-green-800",
+          },
+          paused: {
+            label: "Paused",
+            icon: <PauseCircle className="w-4 h-4" />,
+            color: "bg-yellow-100 text-yellow-800",
+          },
+        };
+        const { label, icon, color } = statusMap[status];
+        return (
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${color}`}
+          >
+            {icon} {label}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "progress",
+      header: "Progress",
+      cell: ({ row }) => {
+        const value = row.getValue("progress") as number;
+        return (
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-medium text-muted-foreground">
+              {value}%
+            </span>
+            <Progress value={value} className="h-2" />
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "actions",
+      header: () => <div className="text-center w-full">Actions</div>,
+      cell: ({ row }) => (
+        <ActionsCell topicId={row.original.id} onDelete={handleRemoveTopic} />
+      ),
+    },
+  ];
+
+  const table = useReactTable({
     data,
     columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     state: {
@@ -292,7 +218,7 @@ export function TopicsTable(): React.JSX.Element {
           <DropdownMenuContent align="end">
             {table
               .getAllColumns()
-              .filter((column) => column.getCanHide())
+              .filter((c) => c.getCanHide())
               .map((column) => (
                 <DropdownMenuCheckboxItem
                   key={column.id}
@@ -308,6 +234,7 @@ export function TopicsTable(): React.JSX.Element {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
       {isLoading ? (
         <div className="flex flex-col items-center justify-center text-white text-lg gap-4">
           <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
@@ -335,10 +262,7 @@ export function TopicsTable(): React.JSX.Element {
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
+                  <TableRow key={row.id} data-id={row.original.id}>
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(
