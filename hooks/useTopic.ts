@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
 
 const topicAPI = "/api/topic";
 
 export function useTopic(id: string | null) {
+  const router = useRouter();
   const [topicId, setTopicId] = useState<string | null>(id || null);
   const [topicModalOpen, setTopicModalOpen] = useState(id ? false : true);
   const [editMode, setEditMode] = useState(!!id);
@@ -65,7 +67,11 @@ export function useTopic(id: string | null) {
 
         // Update topicId if we just created a new topic
         if (!editMode) {
-          setTopicId(topic.id);
+          const newTopicId = topic.id;
+          setTopicId(newTopicId);
+
+          // Update the URL to include the new topic ID without reloading the page
+          router.replace(`/dashboard/topic/${newTopicId}`, { scroll: false });
         }
       } else {
         const responseData = res.data as { message: string };
