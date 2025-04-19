@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import confetti from "canvas-confetti";
@@ -7,15 +7,33 @@ import confetti from "canvas-confetti";
 export type QuizFinalResultProps = {
   score: number;
   total: number;
+  userAnswers: (string | null)[];
+  quizData: {
+    question: string;
+    options: string[];
+    answer: string;
+    explanation: string;
+  }[];
+  resetQuiz: () => void;
+  startReview: () => void;
 };
 
-const QuizFinalResult = ({ score, total }: QuizFinalResultProps) => {
-  const percentage = Math.round((score / total) * 100);
+const getColorForScore = (percentage: number): string => {
+  if (percentage > 70) return "#84cc16"; // green
+  if (percentage > 30) return "#eab308"; // yellow
+  return "#dc2626"; // red
+};
 
-  // Determine dynamic color
-  let color = "#dc2626"; // red
-  if (percentage > 30 && percentage <= 70) color = "#eab308"; // yellow
-  if (percentage > 70) color = "#84cc16"; // lime green
+const QuizFinalResult = ({
+  score,
+  total,
+  userAnswers,
+  quizData,
+  resetQuiz,
+  startReview,
+}: QuizFinalResultProps) => {
+  const percentage = Math.round((score / total) * 100);
+  const color = getColorForScore(percentage);
 
   useEffect(() => {
     if (percentage > 70) {
@@ -27,11 +45,17 @@ const QuizFinalResult = ({ score, total }: QuizFinalResultProps) => {
     }
   }, [percentage]);
 
+  const wrongAnswersCount = useMemo(() => {
+    return userAnswers.filter(
+      (answer, index) => answer !== quizData[index].answer
+    ).length;
+  }, [userAnswers, quizData]);
+
   return (
     <div className="flex flex-col items-center justify-center text-center space-y-6">
       <h2 className="text-3xl font-bold text-primary">Your Quiz Summary</h2>
 
-      <div className="w-45 h-45 rounded-full p-4 ">
+      <div className="w-40 h-40">
         <CircularProgressbar
           value={percentage}
           text={`${percentage}%`}
@@ -51,12 +75,23 @@ const QuizFinalResult = ({ score, total }: QuizFinalResultProps) => {
         correctly.
       </p>
 
-      <button
-        onClick={() => window.location.reload()}
-        className="mt-4 bg-primary text-black px-6 py-2 rounded hover:bg-lime-300"
-      >
-        Retry Quiz
-      </button>
+      <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+        <button
+          onClick={resetQuiz}
+          className="bg-primary text-black px-6 py-2 rounded hover:bg-lime-300 transition-colors"
+        >
+          Retry Quiz
+        </button>
+
+        {wrongAnswersCount > 0 && (
+          <button
+            onClick={startReview}
+            className="bg-zinc-700 text-white px-6 py-2 rounded hover:bg-zinc-600 transition-colors"
+          >
+            Revisit Incorrect Questions ({wrongAnswersCount})
+          </button>
+        )}
+      </div>
     </div>
   );
 };
