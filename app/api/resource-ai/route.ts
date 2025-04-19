@@ -9,16 +9,10 @@ import {
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
-import { YoutubeTranscript } from "youtube-transcript";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getYoutubeTranscript } from "@/utils/youtube";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-
-// Helper: fetch transcript
-async function getYoutubeTranscript(url: string): Promise<string> {
-  const transcript = await YoutubeTranscript.fetchTranscript(url);
-  return transcript.map((item) => item.text).join(" ");
-}
 
 // Helper: ask Gemini
 async function askGemini(prompt: string): Promise<string> {

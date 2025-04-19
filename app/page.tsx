@@ -54,10 +54,10 @@ export default function Hero() {
             <BlurIn
               word={
                 <>
-                  <span>Watch. Read. </span>
+                  <span>Phadlo Chahe Kahi se,</span>
                   <br />
-                  <SparklesText className="inline" text="Remember." />
-                  <span> Repeat.</span>
+                  <SparklesText className="inline" text="Yaad" />
+                  <span> Hoga Yahi se.</span>
                 </>
               }
               className="font-display text-center text-4xl font-bold w-full lg:w-auto max-w-4xl mx-auto -z-10"
@@ -65,11 +65,12 @@ export default function Hero() {
             />
           </motion.div>
           <motion.h2
-            className="text-xl text-muted-foreground tracking-normal text-center max-w-2xl mx-auto z-10"
+            className="mt-2 text-xl text-muted-foreground tracking-normal text-center max-w-2xl mx-auto z-10"
             variants={itemVariants}
           >
-            Upload your courses videos & notes, get custom MCQs on WhatsApp, and
-            retain <NumberTicker value={100} />% more effectively.
+            Upload your YouTube videos & PDF notes to get instant summaries,
+            mind maps, take MCQ tests, and retain <NumberTicker value={100} />%
+            more effectively.
           </motion.h2>
 
           <motion.div variants={itemVariants} className="z-20">

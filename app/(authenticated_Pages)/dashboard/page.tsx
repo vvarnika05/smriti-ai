@@ -2,8 +2,7 @@
 
 import { TopicsTable } from "@/components/dashboard/topics-table";
 import { PerformanceChart } from "@/components/dashboard/performance-chart";
-import { LearningStatusChart } from "@/components/dashboard/learning-chart";
-import { Award, CalendarCheck } from "lucide-react";
+import { Award, CalendarCheck, ChartColumnBig, PlusCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -12,9 +11,9 @@ const stats = [
   {
     title: "Mastery Level",
     value: "Intermediate",
-    progress: "65% complete",
     icon: <Award className="text-primary h-5 w-5" />,
     trend: "12% growth",
+    progress: 65,
   },
   {
     title: "Study Consistency",
@@ -37,54 +36,71 @@ export default function Page() {
             </h1>
           </div>
           <Link href="/dashboard/topic/">
-            <Button variant="default">New Topic</Button>
+            <Button variant="default">
+              <PlusCircle className="h-4 w-4" />
+              New Topic
+            </Button>
           </Link>
         </div>
 
-        {/* Performance Chart */}
+        {/* Performance stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 gap-4">
-            {stats.map((stat) => (
-              <Card
-                key={stat.title}
-                className="rounded-xl shadow-sm hover:shadow-md transition-all"
-              >
-                <CardContent>
-                  <div className="flex items-center gap-4">
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      {stat.icon}
+          {stats.map((stat) => (
+            <Card
+              key={stat.title}
+              className="rounded-xl shadow-sm hover:shadow-md transition-all"
+            >
+              <CardContent>
+                <div className="flex items-center gap-4">
+                  <div className="bg-muted/50 rounded-lg p-3">{stat.icon}</div>
+                  <div className="space-y-1 w-full">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">
+                        {stat.title}
+                      </p>
+                      <span className="text-xs font-medium text-green-500 bg-green-500/10 px-2 py-1 rounded-full">
+                        {stat.trend}
+                      </span>
                     </div>
-                    <div className="space-y-1 w-full">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm text-muted-foreground">
-                          {stat.title}
-                        </p>
-                        <span className="text-xs font-medium text-green-500 bg-green-500/10 px-2 py-1 rounded-full">
-                          {stat.trend}
-                        </span>
-                      </div>
-                      <p className="text-xl font-bold">{stat.value}</p>
-                    </div>
+                    <p className="text-xl font-bold">{stat.value}</p>
                   </div>
+                </div>
 
-                  <div className="mt-4">
-                    <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary rounded-full transition-all duration-500"
-                        style={{ width: `${stat.progress}%` }}
-                      />
-                    </div>
-                    <p className="text-right text-xs text-muted-foreground mt-1">
-                      {stat.progress}% achieved
-                    </p>
+                <div className="mt-4">
+                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all duration-500"
+                      style={{ width: `${stat.progress}%` }}
+                    />
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <PerformanceChart />
-          <LearningStatusChart />
+                  <p className="text-right text-xs text-muted-foreground mt-1">
+                    {stat.progress}% achieved
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          {/* performance Chart */}
+          <Card className="pt-3 pb-0 gap-3">
+            <div className="flex items-center gap-4 px-4">
+              <div className="bg-muted/50 rounded-lg p-3">
+                <ChartColumnBig className="text-primary h-5 w-5" />
+              </div>
+              <div className="space-y-1 w-full">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm">Performance</p>
+                  <span className="text-xs font-medium text-green-500 bg-green-500/10 px-2 py-1 rounded-full">
+                    7% from last month
+                  </span>
+                </div>
+              </div>
+            </div>
+            <CardContent className="px-2">
+              <PerformanceChart />
+            </CardContent>
+          </Card>
         </div>
 
         {/* Active Topics Table */}
