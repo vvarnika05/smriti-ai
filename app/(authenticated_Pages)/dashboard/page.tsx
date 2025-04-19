@@ -2,7 +2,7 @@
 
 import { TopicsTable } from "@/components/dashboard/topics-table";
 import { PerformanceChart } from "@/components/dashboard/performance-chart";
-import { Award, CalendarCheck, ChartColumnBig, PlusCircle } from "lucide-react";
+import { Award, CalendarCheck, ChartColumnBig, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -37,8 +37,8 @@ export default function Page() {
           </div>
           <Link href="/dashboard/topic/">
             <Button variant="default">
-              <PlusCircle className="h-4 w-4" />
-              New Topic
+              <Plus className="h-4 w-4" />
+              <span className="md:block hidden">New Topic</span>
             </Button>
           </Link>
         </div>

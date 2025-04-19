@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowRightIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useUser } from "@clerk/nextjs";
 
 import { Button } from "@/components/ui/button";
 import BlurIn from "@/components/magicui/blur-in";
@@ -29,6 +30,9 @@ const itemVariants = {
 };
 
 export default function Hero() {
+  const { isSignedIn } = useUser();
+
+  const linkHref = isSignedIn ? "/dashboard" : "/sign-up";
   return (
     <main>
       <div className="z-0 relative min-h-screen w-full overflow-hidden">
@@ -60,12 +64,12 @@ export default function Hero() {
                   <span> Hoga Yahi se.</span>
                 </>
               }
-              className="font-display text-center text-4xl font-bold w-full lg:w-auto max-w-4xl mx-auto -z-10"
+              className="font-display text-center text-3xl md:text-7xl font-bold w-full lg:w-auto max-w-4xl mx-auto -z-10"
               duration={1}
             />
           </motion.div>
           <motion.h2
-            className="mt-2 text-xl text-muted-foreground tracking-normal text-center max-w-2xl mx-auto z-10"
+            className="mt-2 text-base md:text-xl text-muted-foreground tracking-normal text-center max-w-2xl mx-auto z-10"
             variants={itemVariants}
           >
             Upload your YouTube videos & PDF notes to get instant summaries,
@@ -74,13 +78,14 @@ export default function Hero() {
           </motion.h2>
 
           <motion.div variants={itemVariants} className="z-20">
-            <Link href="/sign-up" passHref>
+            <Link href={linkHref} passHref>
               <Button className="bg-primary text-black rounded-full">
                 Get Started
                 <ArrowRightIcon className="w-8 h-8 transform transition-transform duration-300 group-hover:translate-x-1" />
               </Button>
             </Link>
           </motion.div>
+
           <motion.div variants={itemVariants}>
             <AnimatedImage
               src="/dashboard.png"

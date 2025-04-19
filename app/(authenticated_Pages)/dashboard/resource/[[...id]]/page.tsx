@@ -2,7 +2,7 @@
 import { use, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Wand2, BrainCircuit, FileQuestion, Route } from "lucide-react";
+import { Send, Wand2, BrainCircuit, CircleHelp, Route } from "lucide-react";
 import axios from "axios";
 import Mermaid from "@/components/mermaid/mermaid";
 import ReactMarkdown from "react-markdown";
@@ -194,36 +194,38 @@ export default function ResourceChatPage({ params }: { params: any }) {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-row flex-wrap gap-2 sm:flex-nowrap">
               <Button
                 variant="outline"
                 className="flex-1 rounded-full border-zinc-700 text-white hover:bg-zinc-800"
-                onClick={() => {
-                  getSummary();
-                }}
+                onClick={getSummary}
               >
-                <Wand2 className="mr-2 h-4 w-4" /> AI Summarize
+                <Wand2 className="h-4 w-4" />
+                <span className="hidden sm:inline ml-2">AI Summarize</span>
               </Button>
               <Button
                 variant="outline"
                 className="flex-1 rounded-full border-zinc-700 text-white hover:bg-zinc-800"
-                onClick={() => getMindMap()}
+                onClick={getMindMap}
               >
-                <BrainCircuit className="mr-2 h-4 w-4" /> Mind Map
+                <BrainCircuit className="h-4 w-4" />
+                <span className="hidden sm:inline ml-2">Mind Map</span>
               </Button>
               <Button
                 variant="outline"
                 className="flex-1 rounded-full border-zinc-700 text-white hover:bg-zinc-800"
-                onClick={() => getRoadMap()}
+                onClick={getRoadMap}
               >
-                <Route className="mr-2 h-4 w-4" /> Road Map
+                <Route className="h-4 w-4" />
+                <span className="hidden sm:inline ml-2">Road Map</span>
               </Button>
               <Link href={`/dashboard/quiz/${id}`} className="flex-1">
                 <Button
                   variant="outline"
                   className="flex-1 w-full rounded-full border-zinc-700 text-white hover:bg-zinc-800"
                 >
-                  <FileQuestion className="mr-2 h-4 w-4" /> Attempt a Quiz
+                  <CircleHelp className="h-4 w-4" />
+                  <span className="hidden sm:inline ml-2">Attempt a Quiz</span>
                 </Button>
               </Link>
             </div>

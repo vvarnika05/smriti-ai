@@ -83,7 +83,7 @@ export default function TopicPage({ params }: { params: any }) {
       />
 
       {/* Topic Header */}
-      <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="mb-6 flex items-center justify-between gap-4">
         <TopicHeader
           topicName={topicName}
           onClick={() => setTopicModalOpen(true)}
