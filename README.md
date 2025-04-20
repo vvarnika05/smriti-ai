@@ -1,6 +1,3 @@
-
-\#AMUHACKS 4.0 \#CSSAMU \#AMU
-
 # 📚 Smriti AI – Your Smart Learning Companion
 
 Smriti AI is an intelligent, all-in-one learning assistant that helps you **organize**, **understand**, and **retain** everything you study 🧠. Whether you're a student, a self-learner, or a professional, Smriti AI transforms passive content into active learning tools.
