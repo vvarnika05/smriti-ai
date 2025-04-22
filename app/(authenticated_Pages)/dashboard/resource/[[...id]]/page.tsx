@@ -2,7 +2,14 @@
 import { use, useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Wand2, BrainCircuit, FileQuestion, Route } from "lucide-react";
+import {
+  Send,
+  Wand2,
+  BrainCircuit,
+  FileQuestion,
+  Route,
+  ExternalLink,
+} from "lucide-react";
 import axios from "axios";
 import Mermaid from "@/components/mermaid/mermaid";
 import ReactMarkdown from "react-markdown";
@@ -15,6 +22,8 @@ export default function ResourceChatPage({ params }: { params: any }) {
 
   const [isLoading, setIsLoading] = useState(true);
   const [resourceTopic, setResourceTopic] = useState("");
+  const [resourceUrl, setResourceUrl] = useState("");
+  const [resourceSummary, setResourceSummary] = useState("");
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -49,6 +58,19 @@ export default function ResourceChatPage({ params }: { params: any }) {
       ...prev,
       { sender: "bot", text: "🧠 Smriti AI is thinking...", type: "text" },
     ]);
+
+    // Check if task is 'summary' and we already have it
+    if (task === "summary" && resourceSummary) {
+      setMessages((prev) => [
+        ...prev.slice(0, -1),
+        {
+          sender: "bot",
+          text: resourceSummary,
+          type: task,
+        },
+      ]);
+      return;
+    }
 
     try {
       const payload: any = {
@@ -101,17 +123,20 @@ export default function ResourceChatPage({ params }: { params: any }) {
 
   const resourceAPI = "/api/resource";
 
+  interface ResourceResponse {
+    resource?: { title: string; url: string; summary: string };
+  }
+
   useEffect(() => {
     async function Datafetcher() {
-      const res = await axios.get<{ resource?: { title: string } }>(
-        resourceAPI,
-        {
-          params: { id },
-        }
-      );
+      const res = await axios.get<ResourceResponse>(resourceAPI, {
+        params: { id },
+      });
       console.log(res.data);
       if (res.data.resource) {
         setResourceTopic(res.data.resource.title);
+        setResourceUrl(res.data.resource.url);
+        setResourceSummary(res.data.resource.summary);
         setIsLoading(false);
       } else {
         console.error("Resource not found");
@@ -133,7 +158,18 @@ export default function ResourceChatPage({ params }: { params: any }) {
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               </div>
             ) : (
-              <h1 className="text-2xl font-bold text-white">{resourceTopic}</h1>
+              <Link
+                href={resourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div className="flex items-center justify-center gap-2 text-white text-lg">
+                  <h1 className="text-2xl font-bold text-white">
+                    {resourceTopic}
+                  </h1>
+                  <ExternalLink />
+                </div>
+              </Link>
             )}
           </div>
           <div className="flex-1 px-2 sm:px-6 lg:px-8 space-y-4 max-w-5xl mx-auto pb-20">
