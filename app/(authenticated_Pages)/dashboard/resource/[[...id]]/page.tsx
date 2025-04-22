@@ -203,7 +203,11 @@ export default function ResourceChatPage({ params }: { params: any }) {
                       key={msg.id || `mermaid-${idx}`}
                     />
                   ) : (
-                    <div className="prose prose-invert max-w-none">
+                    <div
+                      className={`max-w-none ${
+                        msg.sender === "bot" ? "markdown-body" : ""
+                      } `}
+                    >
                       <ReactMarkdown>{msg.text}</ReactMarkdown>
                     </div>
                   )}
