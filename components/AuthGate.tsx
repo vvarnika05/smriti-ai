@@ -133,7 +133,7 @@ function CustomSignup({ email, userId }: { email: string; userId: string }) {
           className="w-full py-2 rounded-lg bg-primary text-black font-semibold hover:opacity-90 transition"
           disabled={isLoading}
         >
-          {isLoading ? "Loading... Please Wait" : "Submit"}
+          {isLoading ? "Saving..." : "Submit"}
         </button>
       </form>
     </div>

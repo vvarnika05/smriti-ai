@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       {
-        message: "User created and metadata updated successfully",
+        message: "You're all set! Your account was created successfully.",
         user: {
           id: user.id,
           username: user.username,
