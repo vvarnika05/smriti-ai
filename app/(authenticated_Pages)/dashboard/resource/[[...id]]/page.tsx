@@ -1,8 +1,8 @@
 "use client";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Wand2, BrainCircuit, CircleHelp, Route } from "lucide-react";
+import { Send, Wand2, BrainCircuit, FileQuestion, Route } from "lucide-react";
 import axios from "axios";
 import Mermaid from "@/components/mermaid/mermaid";
 import ReactMarkdown from "react-markdown";
@@ -16,8 +16,14 @@ export default function ResourceChatPage({ params }: { params: any }) {
   const [isLoading, setIsLoading] = useState(true);
   const [resourceTopic, setResourceTopic] = useState("");
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    textareaRef.current?.focus();
+  }, []);
+
   const [messages, setMessages] = useState<
-    { sender: "user" | "bot"; text: string; type: string }[]
+    { sender: "user" | "bot"; text: string; type: string; id?: string }[]
   >([]);
   const [input, setInput] = useState("");
 
@@ -69,7 +75,12 @@ export default function ResourceChatPage({ params }: { params: any }) {
 
       setMessages((prev) => [
         ...prev.slice(0, -1),
-        { sender: "bot", text: botText, type: task },
+        {
+          sender: "bot",
+          text: botText,
+          type: task,
+          id: task === "mindmap" ? crypto.randomUUID() : undefined,
+        },
       ]);
     } catch (error) {
       console.error("Error:", error);
@@ -112,21 +123,20 @@ export default function ResourceChatPage({ params }: { params: any }) {
   return (
     <div className="h-screen bg-muted/50 text-foreground pt-24">
       <div className="flex flex-col h-full w-full">
-        {/* Header */}
-        <div className="pb-10 text-center">
-          {isLoading ? (
-            <div className="flex items-center justify-center text-white text-lg gap-2">
-              <span>Loading...</span>
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : (
-            <h1 className="text-2xl font-bold text-white">{resourceTopic}</h1>
-          )}
-        </div>
-
         {/* Chat Area */}
         <div className="overflow-y-auto h-full">
-          <div className="flex-1 px-2 sm:px-6 lg:px-8 space-y-4 max-w-7xl mx-auto pb-20">
+          {/* Header */}
+          <div className="pb-6 text-center">
+            {isLoading ? (
+              <div className="flex items-center justify-center text-white text-lg gap-2">
+                <span>Loading...</span>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              <h1 className="text-2xl font-bold text-white">{resourceTopic}</h1>
+            )}
+          </div>
+          <div className="flex-1 px-2 sm:px-6 lg:px-8 space-y-4 max-w-5xl mx-auto pb-20">
             {messages.map((msg, idx) => (
               <div
                 key={idx}
@@ -152,8 +162,9 @@ export default function ResourceChatPage({ params }: { params: any }) {
                 >
                   {msg.sender === "bot" && msg.type === "mindmap" ? (
                     <Mermaid
-                      id={crypto.randomUUID()}
+                      id={msg.id || `mermaid-${idx}`}
                       chart={prepareMermaidCode({ code: msg.text })}
+                      key={msg.id || `mermaid-${idx}`}
                     />
                   ) : (
                     <div className="prose prose-invert max-w-none">
@@ -168,14 +179,15 @@ export default function ResourceChatPage({ params }: { params: any }) {
 
         {/* Chat Input & Actions */}
         <div className="flex justify-center px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl w-full border-t border-muted bg-card p-4 shadow-inner rounded-t-3xl">
+          <div className="max-w-5xl w-full border-t border-muted bg-zinc-800 p-4 shadow-inner rounded-t-3xl">
             {/* Input Row */}
             <div className="flex gap-2 mb-4 items-end">
               <Textarea
-                className="flex-1 resize-none max-h-40 overflow-auto rounded-2xl bg-zinc-800 text-white placeholder:text-zinc-400 focus:ring-1 focus:ring-primary border-none"
+                ref={textareaRef}
+                className="flex-1 resize-none min-h-5 max-h-40 overflow-auto rounded-2xl text-white placeholder:text-zinc-400 focus-visible:ring-1 focus:ring-primary border-none"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask anything about this resource..."
+                placeholder="Ask anything..."
                 rows={1}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
@@ -194,10 +206,10 @@ export default function ResourceChatPage({ params }: { params: any }) {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-row flex-wrap gap-2 sm:flex-nowrap">
+            <div className="grid grid-cols-4 gap-2 sm:flex-nowrap">
               <Button
                 variant="outline"
-                className="flex-1 rounded-full border-zinc-700 text-white hover:bg-zinc-800"
+                className="rounded-full border-zinc-700 text-white hover:bg-zinc-800"
                 onClick={getSummary}
               >
                 <Wand2 className="h-4 w-4" />
@@ -205,7 +217,7 @@ export default function ResourceChatPage({ params }: { params: any }) {
               </Button>
               <Button
                 variant="outline"
-                className="flex-1 rounded-full border-zinc-700 text-white hover:bg-zinc-800"
+                className="rounded-full border-zinc-700 text-white hover:bg-zinc-800"
                 onClick={getMindMap}
               >
                 <BrainCircuit className="h-4 w-4" />
@@ -213,18 +225,18 @@ export default function ResourceChatPage({ params }: { params: any }) {
               </Button>
               <Button
                 variant="outline"
-                className="flex-1 rounded-full border-zinc-700 text-white hover:bg-zinc-800"
+                className="rounded-full border-zinc-700 text-white hover:bg-zinc-800"
                 onClick={getRoadMap}
               >
                 <Route className="h-4 w-4" />
                 <span className="hidden sm:inline ml-2">Road Map</span>
               </Button>
-              <Link href={`/dashboard/quiz/${id}`} className="flex-1">
+              <Link href={`/dashboard/quiz/${id}`}>
                 <Button
                   variant="outline"
-                  className="flex-1 w-full rounded-full border-zinc-700 text-white hover:bg-zinc-800"
+                  className="w-full rounded-full border-zinc-700 text-white hover:bg-zinc-800"
                 >
-                  <CircleHelp className="h-4 w-4" />
+                  <FileQuestion className="h-4 w-4" />
                   <span className="hidden sm:inline ml-2">Attempt a Quiz</span>
                 </Button>
               </Link>
