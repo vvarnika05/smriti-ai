@@ -1,7 +1,7 @@
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Brain, Star } from "lucide-react"; // imported Star icon
+import { Brain, Star } from "lucide-react";
 
 export default function Navbar() {
   return (
