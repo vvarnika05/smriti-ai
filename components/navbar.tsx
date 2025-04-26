@@ -1,8 +1,7 @@
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Brain } from "lucide-react";
+import { Brain, Star } from "lucide-react"; // imported Star icon
 
 export default function Navbar() {
   return (
@@ -19,8 +18,23 @@ export default function Navbar() {
 
           {/* Right side buttons */}
           <div className="flex items-center gap-4">
+            {/* GitHub Star Button */}
+            <a
+              href="https://github.com/vatsal-bhakodia/smriti-ai"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button
+                variant="outline"
+                className="rounded-full flex items-center gap-2"
+              >
+                <Star className="h-4 w-4 text-primary" />
+                Star
+              </Button>
+            </a>
+
             <SignedOut>
-              <Link href="/sign-in">
+              <Link href="/sign-in" className="hidden md:block">
                 <Button variant="outline" className="rounded-full">
                   Sign In
                 </Button>
