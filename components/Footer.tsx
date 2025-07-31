@@ -5,27 +5,6 @@ import { Brain, ArrowUpRight, Heart } from "lucide-react";
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
-  // Smooth scroll function for anchor links
-  interface SmoothScrollEvent
-    extends React.MouseEvent<HTMLAnchorElement, MouseEvent> {}
-
-  const handleSmoothScroll = (e: SmoothScrollEvent, href: string): void => {
-    // Only handle anchor links (starting with #)
-    if (href.startsWith("#")) {
-      e.preventDefault();
-      const targetId = href.substring(1);
-      const targetElement = document.getElementById(targetId);
-
-      if (targetElement) {
-        targetElement.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-          inline: "nearest",
-        });
-      }
-    }
-  };
-
   const footerLinks = {
     product: [
       { name: "Features", href: "#features" },
@@ -34,7 +13,7 @@ const Footer = () => {
       { name: "Mind Maps", href: "#" },
     ],
     company: [
-      { name: "About Us", href: "#about" },
+      { name: "About Us", href: "#" },
       { name: "Blog", href: "#" },
       { name: "Contact", href: "#" },
       {
@@ -54,7 +33,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-black border-t border-gray-800">
+    <footer className="bg-black border-t border-neutral-900">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
@@ -92,7 +71,6 @@ const Footer = () => {
                   <li key={index}>
                     <Link
                       href={link.href}
-                      onClick={(e) => handleSmoothScroll(e, link.href)}
                       className="group flex items-center text-gray-400 hover:text-primary text-sm transition-all duration-300 hover:translate-x-1"
                     >
                       <span>{link.name}</span>
@@ -107,7 +85,7 @@ const Footer = () => {
       </div>
 
       {/* Bottom Section */}
-      <div className="border-t border-gray-800">
+      <div className="border-t border-neutral-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="md:flex md:items-center md:justify-between">
             <div className="flex items-center space-x-4 text-sm text-gray-400">
