@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Brain, ArrowUpRight, Heart, Github, Twitter, Linkedin, Mail } from 'lucide-react';
+import { Brain, ArrowUpRight, Heart, Github, Twitter, Linkedin } from 'lucide-react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -29,20 +29,20 @@ const handleSmoothScroll = (e: SmoothScrollEvent, href: string): void => {
     product: [
       { name: 'Features', href: '#features' },
       { name: 'Pricing', href: '#pricing' },
-      { name: 'Study Tools', href: '/tools' },
-      { name: 'Mind Maps', href: '/mindmaps' },
+      { name: 'Study Tools', href: '#' },
+      { name: 'Mind Maps', href: '#' },
     ],
     company: [
       { name: 'About Us', href: '#about' },
-      { name: 'Blog', href: '/blog' },
-      { name: 'Careers', href: '/careers' },
-      { name: 'Contact', href: '/contact' },
+      { name: 'Blog', href: '#' },
+      { name: 'Contact', href: '#' },
+      { name: 'Our Contributors', href: 'https://github.com/vatsal-bhakodia/smriti-ai/graphs/contributors' },
     ],
     support: [
-      { name: 'Help Center', href: '/help' },
-      { name: 'Privacy Policy', href: '/privacy' },
-      { name: 'Terms of Service', href: '/terms' },
-      { name: 'Status', href: '/status' },
+      { name: 'Help Center', href: '#' },
+      { name: 'Privacy Policy', href: '#' },
+      { name: 'Terms of Service', href: '#' },
+      { name: 'Project Status', href: 'https://github.com/vatsal-bhakodia/smriti-ai/actions' },
     ],
   };
 
@@ -50,7 +50,6 @@ const handleSmoothScroll = (e: SmoothScrollEvent, href: string): void => {
     { icon: Twitter, href: 'https://twitter.com', label: 'Twitter' },
     { icon: Github, href: 'https://github.com/vatsal-bhakodia/smriti-ai', label: 'GitHub' },
     { icon: Linkedin, href: 'https://linkedin.com', label: 'LinkedIn' },
-    // { icon: Mail, href: 'mailto:hello@smritiai.com', label: 'Email' },
   ];
 
   return (
