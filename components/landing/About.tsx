@@ -3,7 +3,7 @@ import { Brain, Zap } from "lucide-react";
 
 const About = () => {
   return (
-    <section className="text-white flex flex-col justify-center items-center px-6 py-24 relative">
+    <section id="about" className="text-white flex flex-col justify-center items-center px-6 py-24 relative">
       <div className="max-w-4xl text-center space-y-10 relative z-[1]">
         <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">
           Forget Fast? <br />
