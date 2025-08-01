@@ -5,6 +5,7 @@ import Navbar from "@/components/navbar";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
+import BackToTopButton from "@/components/ui/BackToTopButton";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -43,6 +44,7 @@ export default function RootLayout({
           <Navbar />
           <main>{children}</main>
           <Toaster />
+          <BackToTopButton />
         </body>
       </html>
     </ClerkProvider>
