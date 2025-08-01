@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 // POST: Save quiz result
 export async function POST(req: NextRequest) {
@@ -25,10 +25,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!quiz) {
-      return NextResponse.json(
-        { message: "Quiz not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "Quiz not found" }, { status: 404 });
     }
 
     // Create the quiz result
@@ -40,9 +37,9 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(
-      { 
+      {
         message: "Quiz result saved successfully",
-        quizResult 
+        quizResult,
       },
       { status: 201 }
     );
