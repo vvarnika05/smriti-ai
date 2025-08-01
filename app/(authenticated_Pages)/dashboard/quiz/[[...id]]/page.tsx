@@ -32,6 +32,7 @@ export default function QuizPage({ params }: { params: any }) {
   const [quizState, setQuizState] = useState<"quiz" | "results" | "review">(
     "quiz"
   );
+  const [quizId, setQuizId] = useState<string | null>(null);
 
   const resourceAPI = "/api/resource";
 
@@ -91,6 +92,8 @@ export default function QuizPage({ params }: { params: any }) {
         }));
 
         setQuizData(quizItems);
+        // Store the quiz ID for saving results later
+        setQuizId(resQuiz.data.quiz.id);
         // Initialize userAnswers array with null values
         setUserAnswers(Array(quizItems.length).fill(null));
       } catch (error) {
@@ -105,7 +108,7 @@ export default function QuizPage({ params }: { params: any }) {
 
   const total = quizData.length;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selected && currentQ === total - 1) {
       // On last question, show warning if no answer selected
       setShowWarning(true);
@@ -119,8 +122,10 @@ export default function QuizPage({ params }: { params: any }) {
     updatedAnswers[currentQ] = selected;
     setUserAnswers(updatedAnswers);
 
+    let finalScore = score;
     if (selected === quizData[currentQ].answer) {
-      setScore((prev) => prev + 1);
+      finalScore = score + 1;
+      setScore(finalScore);
     }
 
     // Move to next or end
@@ -128,7 +133,20 @@ export default function QuizPage({ params }: { params: any }) {
       setCurrentQ((prev) => prev + 1);
       setSelected(null);
     } else {
-      // Change to results view instead of incrementing currentQ
+      // Quiz completed - save result to database
+      if (quizId) {
+        try {
+          await axios.post("/api/quiz-result", {
+            quizId,
+            score: finalScore,
+          });
+          console.log("Quiz result saved successfully");
+        } catch (error) {
+          console.error("Error saving quiz result:", error);
+          // Don't prevent showing results even if saving fails
+        }
+      }
+      // Change to results view
       setQuizState("results");
     }
   };
