@@ -17,25 +17,26 @@ const About = () => {
         </p>
 
         <div className="grid md:grid-cols-2 gap-8 mt-10">
-          <div className="bg-white/5 border border-white/10 backdrop-blur p-6 rounded-xl">
-            <h3 className="text-xl font-semibold mb-2 text-white flex items-center justify-center gap-2">
-              <Brain className="text-primary" /> Smarter Study Cycles
-            </h3>
-            <p className="text-gray-400">
-              Our system reminds you to revise before forgetting sets in—powered
-              by spaced repetition.
-            </p>
-          </div>
-          <div className="bg-white/5 border border-white/10 backdrop-blur p-6 rounded-xl">
-            <h3 className="text-xl font-semibold mb-2 text-white flex items-center justify-center gap-2">
-              <Zap className="text-primary" /> From Content to Clarity
-            </h3>
-            <p className="text-gray-400">
-              Upload notes or videos, and Smriti AI turns them into mindmaps and
-              quiz cards.
-            </p>
-          </div>
-        </div>
+  <div className="bg-white/5 border border-white/10 backdrop-blur p-6 rounded-xl transform transition-transform duration-300 hover:-translate-y-2 hover:shadow-xl">
+    <h3 className="text-xl font-semibold mb-2 text-white flex items-center justify-center gap-2">
+      <Brain className="text-primary" /> Smarter Study Cycles
+    </h3>
+    <p className="text-gray-400">
+      Our system reminds you to revise before forgetting sets in—powered
+      by spaced repetition.
+    </p>
+  </div>
+  <div className="bg-white/5 border border-white/10 backdrop-blur p-6 rounded-xl transform transition-transform duration-300 hover:-translate-y-2 hover:shadow-xl">
+    <h3 className="text-xl font-semibold mb-2 text-white flex items-center justify-center gap-2">
+      <Zap className="text-primary" /> From Content to Clarity
+    </h3>
+    <p className="text-gray-400">
+      Upload notes or videos, and Smriti AI turns them into mindmaps and
+      quiz cards.
+    </p>
+  </div>
+</div>
+
       </div>
       <div className="absolute bottom-5 left-1/2 w-[180px] h-[180px] bg-primary opacity-100 blur-[200px] transform -translate-x-1/2 -translate-y-1/2"></div>
     </section>
