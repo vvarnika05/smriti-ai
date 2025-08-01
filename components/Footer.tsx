@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Brain, ArrowUpRight, Heart } from "lucide-react";
+import handleSmoothScroll from "@/utils/smooth-scroll";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -71,6 +72,7 @@ const Footer = () => {
                   <li key={index}>
                     <Link
                       href={link.href}
+                      onClick={handleSmoothScroll}
                       className="group flex items-center text-gray-400 hover:text-primary text-sm transition-all duration-300 hover:translate-x-1"
                     >
                       <span>{link.name}</span>
