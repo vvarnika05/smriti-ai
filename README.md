@@ -69,7 +69,7 @@ Use it on web, and soon — on WhatsApp & mobile apps too!
 ## 🚀 Getting Started (Developer Mode)
 
 ```bash
-git clone https://github.com/your-username/smriti-ai.git
+git clone https://github.com/vatsal-bhakodia/smriti-ai
 cd smriti-ai
 npm install
 npm run dev
