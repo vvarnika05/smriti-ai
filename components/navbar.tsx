@@ -10,7 +10,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/dashboard" className="flex items-center">
+            <Link href="/dashboard" className="flex items-center" suppressHydrationWarning>
               <Brain className="me-[5px] h-5 w-5 text-primary" />
               <span className="text-xl font-bold">Smriti AI</span>
             </Link>
@@ -23,6 +23,7 @@ export default function Navbar() {
               href="https://github.com/vatsal-bhakodia/smriti-ai"
               target="_blank"
               rel="noopener noreferrer"
+              suppressHydrationWarning
             >
               <Button
                 variant="outline"
@@ -34,12 +35,12 @@ export default function Navbar() {
             </a>
 
             <SignedOut>
-              <Link href="/sign-in" className="hidden md:block">
+              <Link href="/sign-in" className="hidden md:block" suppressHydrationWarning>
                 <Button variant="outline" className="rounded-full">
                   Sign In
                 </Button>
               </Link>
-              <Link href="/sign-up">
+              <Link href="/sign-up" suppressHydrationWarning>
                 <Button className="bg-primary rounded-full">Sign Up</Button>
               </Link>
             </SignedOut>
