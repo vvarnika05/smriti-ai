@@ -23,14 +23,13 @@ Thank you for your interest in improving this project! Your help is valued. Plea
         - To clone the repository using an SSH key, including a certificate issued by your organization's SSH certificate authority, click SSH, then click .
         - To clone a repository using GitHub CLI, click GitHub CLI, then click .
         - e.g :<br>
-          
-    <img align="center" width="60%" src="https://docs.github.com/assets/cb-60499/mw-1440/images/help/repository/https-url-clone-cli.webp" alt="fork this repository" /><br>
+        <img align="center" width="60%" src="https://docs.github.com/assets/cb-60499/mw-1440/images/help/repository/https-url-clone-cli.webp" alt="fork this repository" /><br>
       
         
         - Use this command to clone our repo :
           ```bash
-          git clone https://github.com/your-username/vehigo.git
-          cd vehigo
+          git clone https://github.com/vatsal-bhakodia/smriti-ai.git
+          cd smriti-ai
           ```
 
 
