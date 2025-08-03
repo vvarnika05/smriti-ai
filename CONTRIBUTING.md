@@ -97,7 +97,7 @@ Please follow our [Code of Conduct](CODE_OF_CONDUCT.md) to keep this project inc
 
 ## 📬 Contact
 
-For questions, join the discussion in [issues](https://github.com/InnoWebLabs/smriti-ai/issues) or contact the maintainers.
+For questions, join the discussion in [issues](https://github.com/smriti-ai/issues) or contact the maintainers.
 
 ---
 
