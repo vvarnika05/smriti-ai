@@ -24,8 +24,8 @@ const Footer = () => {
     ],
     support: [
       { name: "Help Center", href: "#" },
-      { name: "Privacy Policy", href: "#" },
-      { name: "Terms of Service", href: "#" },
+      { name: "Privacy Policy", href: "/privacy-policy" }, // ✅ updated
+      { name: "Terms of Service", href: "/terms-of-use" },  // ✅ updated
       {
         name: "Project Status",
         href: "https://github.com/vatsal-bhakodia/smriti-ai/actions",
@@ -40,7 +40,6 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Brand Section */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Logo */}
             <div className="flex items-center group">
               <Link href="/" className="flex items-center">
                 <div className="relative">
@@ -52,8 +51,6 @@ const Footer = () => {
                 </span>
               </Link>
             </div>
-
-            {/* Description */}
             <p className="text-gray-400 text-sm max-w-md leading-relaxed">
               Transform passive learning into active remembering. Smriti AI
               helps you retain knowledge faster with AI-powered study tools and
@@ -72,7 +69,10 @@ const Footer = () => {
                   <li key={index}>
                     <Link
                       href={link.href}
-                      onClick={handleSmoothScroll}
+                      // Disable smooth scroll for full page navigations
+                      onClick={
+                        link.href.startsWith("#") ? handleSmoothScroll : undefined
+                      }
                       className="group flex items-center text-gray-400 hover:text-primary text-sm transition-all duration-300 hover:translate-x-1"
                     >
                       <span>{link.name}</span>
@@ -93,8 +93,6 @@ const Footer = () => {
             <div className="flex items-center space-x-4 text-sm text-gray-400">
               <span>© {currentYear} Smriti AI. All rights reserved.</span>
             </div>
-
-            {/* New line for Made in India and Open Source */}
             <div className="mt-4 md:mt-0 text-sm text-gray-400 flex items-center space-x-2">
               <div className="hidden md:flex items-center space-x-1">
                 <span>Made in India with</span>
