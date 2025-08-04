@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { toast } from "sonner";
 import { Mail, MessageSquare, User, FileText, Clock, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -79,17 +85,17 @@ export default function ContactPage() {
   };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
     // Clear error when user starts typing
     if (errors[field as keyof FormErrors]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       toast.error("Please fix the errors in the form");
       return;
@@ -116,9 +122,9 @@ export default function ContactPage() {
       if (!response.ok) {
         throw new Error(data.message || "Failed to send message");
       }
-      
+
       toast.success("Thank you for your message! We'll get back to you soon.");
-      
+
       // Reset form
       setFormData({
         name: "",
@@ -129,14 +135,18 @@ export default function ContactPage() {
       setErrors({});
     } catch (error) {
       console.error("Error submitting contact form:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to send message. Please try again.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to send message. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="relative min-h-screen bg-background overflow-hidden"
       variants={containerVariants}
       initial="hidden"
@@ -158,7 +168,7 @@ export default function ContactPage() {
               className="font-display text-4xl md:text-6xl font-bold text-foreground mb-4"
               duration={1}
             />
-            <motion.p 
+            <motion.p
               className="text-lg text-muted-foreground max-w-2xl mx-auto"
               variants={itemVariants}
             >
@@ -169,20 +179,14 @@ export default function ContactPage() {
           {/* Contact Form */}
           <motion.div variants={itemVariants}>
             <Card className="shadow-2xl border-border/50 backdrop-blur-sm bg-background/95">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <MessageSquare className="w-5 h-5 text-primary" />
-                  Contact Us
-                </CardTitle>
-                <CardDescription>
-                  Fill out the form below and we'll get back to you as soon as possible.
-                </CardDescription>
-              </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Name Field */}
                   <motion.div className="space-y-2" variants={itemVariants}>
-                    <Label htmlFor="name" className="flex items-center gap-2 text-foreground">
+                    <Label
+                      htmlFor="name"
+                      className="flex items-center gap-2 text-foreground"
+                    >
                       <User className="w-4 h-4 text-primary" />
                       Name *
                     </Label>
@@ -190,11 +194,15 @@ export default function ContactPage() {
                       id="name"
                       type="text"
                       value={formData.name}
-                      onChange={(e) => handleInputChange("name", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("name", e.target.value)
+                      }
                       placeholder="Enter your full name"
                       className={cn(
                         "transition-all duration-200",
-                        errors.name ? "border-red-500 focus-visible:ring-red-500/20" : "focus-visible:ring-primary/20"
+                        errors.name
+                          ? "border-red-500 focus-visible:ring-red-500/20"
+                          : "focus-visible:ring-primary/20"
                       )}
                       disabled={isSubmitting}
                     />
@@ -205,7 +213,10 @@ export default function ContactPage() {
 
                   {/* Email Field */}
                   <motion.div className="space-y-2" variants={itemVariants}>
-                    <Label htmlFor="email" className="flex items-center gap-2 text-foreground">
+                    <Label
+                      htmlFor="email"
+                      className="flex items-center gap-2 text-foreground"
+                    >
                       <Mail className="w-4 h-4 text-primary" />
                       Email *
                     </Label>
@@ -213,11 +224,15 @@ export default function ContactPage() {
                       id="email"
                       type="email"
                       value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("email", e.target.value)
+                      }
                       placeholder="Enter your email address"
                       className={cn(
                         "transition-all duration-200",
-                        errors.email ? "border-red-500 focus-visible:ring-red-500/20" : "focus-visible:ring-primary/20"
+                        errors.email
+                          ? "border-red-500 focus-visible:ring-red-500/20"
+                          : "focus-visible:ring-primary/20"
                       )}
                       disabled={isSubmitting}
                     />
@@ -228,7 +243,10 @@ export default function ContactPage() {
 
                   {/* Subject Field */}
                   <motion.div className="space-y-2" variants={itemVariants}>
-                    <Label htmlFor="subject" className="flex items-center gap-2 text-foreground">
+                    <Label
+                      htmlFor="subject"
+                      className="flex items-center gap-2 text-foreground"
+                    >
                       <FileText className="w-4 h-4 text-primary" />
                       Subject
                     </Label>
@@ -236,7 +254,9 @@ export default function ContactPage() {
                       id="subject"
                       type="text"
                       value={formData.subject}
-                      onChange={(e) => handleInputChange("subject", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("subject", e.target.value)
+                      }
                       placeholder="What is this about? (optional)"
                       className="focus-visible:ring-primary/20 transition-all duration-200"
                       disabled={isSubmitting}
@@ -245,19 +265,26 @@ export default function ContactPage() {
 
                   {/* Message Field */}
                   <motion.div className="space-y-2" variants={itemVariants}>
-                    <Label htmlFor="message" className="flex items-center gap-2 text-foreground">
+                    <Label
+                      htmlFor="message"
+                      className="flex items-center gap-2 text-foreground"
+                    >
                       <MessageSquare className="w-4 h-4 text-primary" />
                       Message *
                     </Label>
                     <Textarea
                       id="message"
                       value={formData.message}
-                      onChange={(e) => handleInputChange("message", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("message", e.target.value)
+                      }
                       placeholder="Tell us more about your inquiry..."
                       rows={5}
                       className={cn(
-                        "transition-all duration-200 resize-none",
-                        errors.message ? "border-red-500 focus-visible:ring-red-500/20" : "focus-visible:ring-primary/20"
+                        "h-40 transition-all duration-200 resize-none",
+                        errors.message
+                          ? "border-red-500 focus-visible:ring-red-500/20"
+                          : "focus-visible:ring-primary/20"
                       )}
                       disabled={isSubmitting}
                     />
@@ -303,7 +330,9 @@ export default function ContactPage() {
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <Mail className="w-8 h-8 mx-auto mb-3 text-primary" />
-                      <h3 className="font-semibold text-foreground mb-2">Email</h3>
+                      <h3 className="font-semibold text-foreground mb-2">
+                        Email
+                      </h3>
                       <p className="text-muted-foreground">
                         support@smriti-ai.com
                       </p>
@@ -316,7 +345,9 @@ export default function ContactPage() {
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <Clock className="w-8 h-8 mx-auto mb-3 text-primary" />
-                      <h3 className="font-semibold text-foreground mb-2">Response Time</h3>
+                      <h3 className="font-semibold text-foreground mb-2">
+                        Response Time
+                      </h3>
                       <p className="text-muted-foreground">
                         Usually within 24 hours
                       </p>
