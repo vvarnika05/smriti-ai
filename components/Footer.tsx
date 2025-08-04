@@ -1,10 +1,27 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import { Brain, ArrowUpRight, Heart } from "lucide-react";
-import handleSmoothScroll from "@/utils/smooth-scroll";
 
 const Footer = () => {
+  const router = useRouter();
+  const pathname = usePathname();
   const currentYear = new Date().getFullYear();
+
+  const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("#")) {
+      e.preventDefault();
+
+      if (pathname === "/") {
+        const el = document.querySelector(href);
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      } else {
+        router.push("/" + href); // example: "/#pricing"
+      }
+    }
+  };
 
   const footerLinks = {
     product: [
@@ -35,12 +52,9 @@ const Footer = () => {
 
   return (
     <footer className="bg-black border-t border-neutral-900">
-      {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-          {/* Brand Section */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Logo */}
             <div className="flex items-center group">
               <Link href="/" className="flex items-center">
                 <div className="relative">
@@ -52,8 +66,6 @@ const Footer = () => {
                 </span>
               </Link>
             </div>
-
-            {/* Description */}
             <p className="text-gray-400 text-sm max-w-md leading-relaxed">
               Transform passive learning into active remembering. Smriti AI
               helps you retain knowledge faster with AI-powered study tools and
@@ -61,7 +73,6 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Links Sections */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category} className="space-y-4">
               <h3 className="text-white font-semibold text-sm uppercase tracking-wider">
@@ -72,7 +83,11 @@ const Footer = () => {
                   <li key={index}>
                     <Link
                       href={link.href}
-                      onClick={handleSmoothScroll}
+                      onClick={
+                        link.href.startsWith("#")
+                          ? (e) => handleNav(e, link.href)
+                          : undefined
+                      }
                       className="group flex items-center text-gray-400 hover:text-primary text-sm transition-all duration-300 hover:translate-x-1"
                     >
                       <span>{link.name}</span>
@@ -86,15 +101,12 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Bottom Section */}
       <div className="border-t border-neutral-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="md:flex md:items-center md:justify-between">
             <div className="flex items-center space-x-4 text-sm text-gray-400">
               <span>© {currentYear} Smriti AI. All rights reserved.</span>
             </div>
-
-            {/* New line for Made in India and Open Source */}
             <div className="mt-4 md:mt-0 text-sm text-gray-400 flex items-center space-x-2">
               <div className="hidden md:flex items-center space-x-1">
                 <span>Made in India with</span>
