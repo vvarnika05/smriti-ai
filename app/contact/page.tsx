@@ -6,18 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Mail, MessageSquare, User, FileText, Clock, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DotPattern } from "@/components/magicui/dot-pattern";
 import BlurIn from "@/components/magicui/blur-in";
+import Footer from "@/components/Footer";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -146,219 +141,222 @@ export default function ContactPage() {
   };
 
   return (
-    <motion.div
-      className="relative min-h-screen bg-background overflow-hidden"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* Background Pattern */}
-      <DotPattern
-        className={cn(
-          "absolute inset-0 z-0 [mask-image:radial-gradient(50vw_circle_at_center,white,transparent)] dark:[mask-image:radial-gradient(50vw_circle_at_center,black,transparent)]"
-        )}
-      />
+    <>
+      <motion.div
+        className="relative min-h-screen bg-background overflow-hidden"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Background Pattern */}
+        <DotPattern
+          className={cn(
+            "absolute inset-0 z-0 [mask-image:radial-gradient(50vw_circle_at_center,white,transparent)] dark:[mask-image:radial-gradient(50vw_circle_at_center,black,transparent)]"
+          )}
+        />
 
-      <div className="relative z-10 py-16 px-4 pt-32">
-        <div className="max-w-2xl mx-auto">
-          {/* Header Section */}
-          <motion.div className="text-center mb-12" variants={itemVariants}>
-            <BlurIn
-              word="Get in Touch"
-              className="font-display text-4xl md:text-6xl font-bold text-foreground mb-4"
-              duration={1}
-            />
-            <motion.p
-              className="text-lg text-muted-foreground max-w-2xl mx-auto"
-              variants={itemVariants}
-            >
-              Have questions about Smriti AI? We'd love to hear from you!
-            </motion.p>
-          </motion.div>
+        <div className="relative z-10 py-16 px-4 pt-32">
+          <div className="max-w-2xl mx-auto">
+            {/* Header Section */}
+            <motion.div className="text-center mb-12" variants={itemVariants}>
+              <BlurIn
+                word="Get in Touch"
+                className="font-display text-4xl md:text-6xl font-bold text-foreground mb-4"
+                duration={1}
+              />
+              <motion.p
+                className="text-lg text-muted-foreground max-w-2xl mx-auto"
+                variants={itemVariants}
+              >
+                Have questions about Smriti AI? We'd love to hear from you!
+              </motion.p>
+            </motion.div>
 
-          {/* Contact Form */}
-          <motion.div variants={itemVariants}>
-            <Card className="shadow-2xl border-border/50 backdrop-blur-sm bg-background/95">
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Name Field */}
-                  <motion.div className="space-y-2" variants={itemVariants}>
-                    <Label
-                      htmlFor="name"
-                      className="flex items-center gap-2 text-foreground"
-                    >
-                      <User className="w-4 h-4 text-primary" />
-                      Name *
-                    </Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) =>
-                        handleInputChange("name", e.target.value)
-                      }
-                      placeholder="Enter your full name"
-                      className={cn(
-                        "transition-all duration-200",
-                        errors.name
-                          ? "border-red-500 focus-visible:ring-red-500/20"
-                          : "focus-visible:ring-primary/20"
+            {/* Contact Form */}
+            <motion.div variants={itemVariants}>
+              <Card className="shadow-2xl border-border/50 backdrop-blur-sm bg-background/95">
+                <CardContent>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Name Field */}
+                    <motion.div className="space-y-2" variants={itemVariants}>
+                      <Label
+                        htmlFor="name"
+                        className="flex items-center gap-2 text-foreground"
+                      >
+                        <User className="w-4 h-4 text-primary" />
+                        Name *
+                      </Label>
+                      <Input
+                        id="name"
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) =>
+                          handleInputChange("name", e.target.value)
+                        }
+                        placeholder="Enter your full name"
+                        className={cn(
+                          "transition-all duration-200",
+                          errors.name
+                            ? "border-red-500 focus-visible:ring-red-500/20"
+                            : "focus-visible:ring-primary/20"
+                        )}
+                        disabled={isSubmitting}
+                      />
+                      {errors.name && (
+                        <p className="text-sm text-red-500">{errors.name}</p>
                       )}
-                      disabled={isSubmitting}
-                    />
-                    {errors.name && (
-                      <p className="text-sm text-red-500">{errors.name}</p>
-                    )}
-                  </motion.div>
+                    </motion.div>
 
-                  {/* Email Field */}
-                  <motion.div className="space-y-2" variants={itemVariants}>
-                    <Label
-                      htmlFor="email"
-                      className="flex items-center gap-2 text-foreground"
-                    >
-                      <Mail className="w-4 h-4 text-primary" />
-                      Email *
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        handleInputChange("email", e.target.value)
-                      }
-                      placeholder="Enter your email address"
-                      className={cn(
-                        "transition-all duration-200",
-                        errors.email
-                          ? "border-red-500 focus-visible:ring-red-500/20"
-                          : "focus-visible:ring-primary/20"
+                    {/* Email Field */}
+                    <motion.div className="space-y-2" variants={itemVariants}>
+                      <Label
+                        htmlFor="email"
+                        className="flex items-center gap-2 text-foreground"
+                      >
+                        <Mail className="w-4 h-4 text-primary" />
+                        Email *
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) =>
+                          handleInputChange("email", e.target.value)
+                        }
+                        placeholder="Enter your email address"
+                        className={cn(
+                          "transition-all duration-200",
+                          errors.email
+                            ? "border-red-500 focus-visible:ring-red-500/20"
+                            : "focus-visible:ring-primary/20"
+                        )}
+                        disabled={isSubmitting}
+                      />
+                      {errors.email && (
+                        <p className="text-sm text-red-500">{errors.email}</p>
                       )}
-                      disabled={isSubmitting}
-                    />
-                    {errors.email && (
-                      <p className="text-sm text-red-500">{errors.email}</p>
-                    )}
-                  </motion.div>
+                    </motion.div>
 
-                  {/* Subject Field */}
-                  <motion.div className="space-y-2" variants={itemVariants}>
-                    <Label
-                      htmlFor="subject"
-                      className="flex items-center gap-2 text-foreground"
-                    >
-                      <FileText className="w-4 h-4 text-primary" />
-                      Subject
-                    </Label>
-                    <Input
-                      id="subject"
-                      type="text"
-                      value={formData.subject}
-                      onChange={(e) =>
-                        handleInputChange("subject", e.target.value)
-                      }
-                      placeholder="What is this about? (optional)"
-                      className="focus-visible:ring-primary/20 transition-all duration-200"
-                      disabled={isSubmitting}
-                    />
-                  </motion.div>
+                    {/* Subject Field */}
+                    <motion.div className="space-y-2" variants={itemVariants}>
+                      <Label
+                        htmlFor="subject"
+                        className="flex items-center gap-2 text-foreground"
+                      >
+                        <FileText className="w-4 h-4 text-primary" />
+                        Subject
+                      </Label>
+                      <Input
+                        id="subject"
+                        type="text"
+                        value={formData.subject}
+                        onChange={(e) =>
+                          handleInputChange("subject", e.target.value)
+                        }
+                        placeholder="What is this about? (optional)"
+                        className="focus-visible:ring-primary/20 transition-all duration-200"
+                        disabled={isSubmitting}
+                      />
+                    </motion.div>
 
-                  {/* Message Field */}
-                  <motion.div className="space-y-2" variants={itemVariants}>
-                    <Label
-                      htmlFor="message"
-                      className="flex items-center gap-2 text-foreground"
-                    >
-                      <MessageSquare className="w-4 h-4 text-primary" />
-                      Message *
-                    </Label>
-                    <Textarea
-                      id="message"
-                      value={formData.message}
-                      onChange={(e) =>
-                        handleInputChange("message", e.target.value)
-                      }
-                      placeholder="Tell us more about your inquiry..."
-                      rows={5}
-                      className={cn(
-                        "h-40 transition-all duration-200 resize-none",
-                        errors.message
-                          ? "border-red-500 focus-visible:ring-red-500/20"
-                          : "focus-visible:ring-primary/20"
+                    {/* Message Field */}
+                    <motion.div className="space-y-2" variants={itemVariants}>
+                      <Label
+                        htmlFor="message"
+                        className="flex items-center gap-2 text-foreground"
+                      >
+                        <MessageSquare className="w-4 h-4 text-primary" />
+                        Message *
+                      </Label>
+                      <Textarea
+                        id="message"
+                        value={formData.message}
+                        onChange={(e) =>
+                          handleInputChange("message", e.target.value)
+                        }
+                        placeholder="Tell us more about your inquiry..."
+                        rows={5}
+                        className={cn(
+                          "h-40 transition-all duration-200 resize-none",
+                          errors.message
+                            ? "border-red-500 focus-visible:ring-red-500/20"
+                            : "focus-visible:ring-primary/20"
+                        )}
+                        disabled={isSubmitting}
+                      />
+                      {errors.message && (
+                        <p className="text-sm text-red-500">{errors.message}</p>
                       )}
-                      disabled={isSubmitting}
-                    />
-                    {errors.message && (
-                      <p className="text-sm text-red-500">{errors.message}</p>
-                    )}
-                  </motion.div>
+                    </motion.div>
 
-                  {/* Submit Button */}
-                  <motion.div variants={itemVariants}>
-                    <Button
-                      type="submit"
-                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-full transition-all duration-200"
-                      disabled={isSubmitting}
-                      size="lg"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4 mr-2" />
-                          Send Message
-                        </>
-                      )}
-                    </Button>
-                  </motion.div>
-                </form>
-              </CardContent>
-            </Card>
-          </motion.div>
+                    {/* Submit Button */}
+                    <motion.div variants={itemVariants}>
+                      <Button
+                        type="submit"
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-full transition-all duration-200"
+                        disabled={isSubmitting}
+                        size="lg"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                            Sending...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4 mr-2" />
+                            Send Message
+                          </>
+                        )}
+                      </Button>
+                    </motion.div>
+                  </form>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-          {/* Additional Contact Information */}
-          <motion.div className="mt-12" variants={itemVariants}>
-            <h2 className="text-2xl font-semibold text-foreground mb-6 text-center">
-              Other Ways to Reach Us
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <motion.div variants={itemVariants}>
-                <Card className="border-border/50 backdrop-blur-sm bg-background/95 hover:shadow-lg transition-all duration-200">
-                  <CardContent className="pt-6">
-                    <div className="text-center">
-                      <Mail className="w-8 h-8 mx-auto mb-3 text-primary" />
-                      <h3 className="font-semibold text-foreground mb-2">
-                        Email
-                      </h3>
-                      <p className="text-muted-foreground">
-                        support@smriti-ai.com
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-              <motion.div variants={itemVariants}>
-                <Card className="border-border/50 backdrop-blur-sm bg-background/95 hover:shadow-lg transition-all duration-200">
-                  <CardContent className="pt-6">
-                    <div className="text-center">
-                      <Clock className="w-8 h-8 mx-auto mb-3 text-primary" />
-                      <h3 className="font-semibold text-foreground mb-2">
-                        Response Time
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Usually within 24 hours
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </div>
-          </motion.div>
+            {/* Additional Contact Information */}
+            <motion.div className="mt-12" variants={itemVariants}>
+              <h2 className="text-2xl font-semibold text-foreground mb-6 text-center">
+                Other Ways to Reach Us
+              </h2>
+              <div className="grid md:grid-cols-2 gap-6">
+                <motion.div variants={itemVariants}>
+                  <Card className="border-border/50 backdrop-blur-sm bg-background/95 hover:shadow-lg transition-all duration-200">
+                    <CardContent className="pt-6">
+                      <div className="text-center">
+                        <Mail className="w-8 h-8 mx-auto mb-3 text-primary" />
+                        <h3 className="font-semibold text-foreground mb-2">
+                          Email
+                        </h3>
+                        <p className="text-muted-foreground">
+                          support@smriti-ai.com
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                  <Card className="border-border/50 backdrop-blur-sm bg-background/95 hover:shadow-lg transition-all duration-200">
+                    <CardContent className="pt-6">
+                      <div className="text-center">
+                        <Clock className="w-8 h-8 mx-auto mb-3 text-primary" />
+                        <h3 className="font-semibold text-foreground mb-2">
+                          Response Time
+                        </h3>
+                        <p className="text-muted-foreground">
+                          Usually within 24 hours
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+      <Footer />
+    </>
   );
 }
