@@ -330,7 +330,7 @@ export default function ContactPage() {
                           Email
                         </h3>
                         <p className="text-muted-foreground">
-                          support@smriti-ai.com
+                          support@smriti.live
                         </p>
                       </div>
                     </CardContent>
