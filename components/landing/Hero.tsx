@@ -70,13 +70,23 @@ const Hero = () => {
       </motion.h2>
 
       <motion.div variants={itemVariants} className="z-20">
-        <Link href={linkHref} passHref>
-          <Button className="bg-primary text-black rounded-full">
-            Get Started
-            <ArrowRightIcon className="w-8 h-8 transform transition-transform duration-300 group-hover:translate-x-1" />
-          </Button>
-        </Link>
-      </motion.div>
+  <Link href={linkHref} passHref>
+    <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold rounded-full cursor-pointer px-8 py-3 h-auto transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-green-500/30 group relative overflow-hidden border-0">
+      <span className="relative z-10 flex items-center gap-2">
+        Get Started
+        <svg 
+          className="w-4 h-4 transform transition-transform duration-300 group-hover:translate-x-1" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </span>
+      <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+    </Button>
+  </Link>
+</motion.div>
 
       <motion.div variants={itemVariants}>
         <AnimatedImage
