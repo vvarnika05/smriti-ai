@@ -16,6 +16,11 @@ interface LoginStats {
   currentStreak: number;
 }
 
+interface ApiResponse {
+  userLogins: LoginData[];
+  stats: LoginStats;
+}
+
 interface LoginHeatmapProps {
   days?: number;
 }
@@ -33,7 +38,9 @@ export default function LoginHeatmap({ days = 90 }: LoginHeatmapProps) {
   useEffect(() => {
     const fetchLoginData = async () => {
       try {
-        const response = await axios.get(`/api/user-login?days=${days}`);
+        const response = await axios.get<ApiResponse>(
+          `/api/user-login?days=${days}`
+        );
         setLoginData(response.data.userLogins);
         setStats(response.data.stats);
       } catch (error) {
@@ -50,21 +57,21 @@ export default function LoginHeatmap({ days = 90 }: LoginHeatmapProps) {
   const generateDateGrid = () => {
     const dates = [];
     const today = new Date();
-    
+
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(today.getDate() - i);
       dates.push(date);
     }
-    
+
     return dates;
   };
 
   // Check if a date has a login
   const hasLoginOnDate = (date: Date): boolean => {
-    const dateStr = date.toISOString().split('T')[0];
-    return loginData.some(login => {
-      const loginDate = new Date(login.loginDate).toISOString().split('T')[0];
+    const dateStr = date.toISOString().split("T")[0];
+    return loginData.some((login) => {
+      const loginDate = new Date(login.loginDate).toISOString().split("T")[0];
       return loginDate === dateStr;
     });
   };
@@ -79,7 +86,7 @@ export default function LoginHeatmap({ days = 90 }: LoginHeatmapProps) {
     const classes = [
       "bg-muted", // No activity
       "bg-primary/20", // Low activity
-      "bg-primary/40", // Medium activity  
+      "bg-primary/40", // Medium activity
       "bg-primary/60", // High activity
       "bg-primary", // Very high activity
     ];
@@ -98,7 +105,9 @@ export default function LoginHeatmap({ days = 90 }: LoginHeatmapProps) {
             </div>
             <div className="space-y-1 w-full">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Study Consistency</p>
+                <p className="text-sm text-muted-foreground">
+                  Study Consistency
+                </p>
                 <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
                   Loading...
                 </span>
@@ -110,7 +119,9 @@ export default function LoginHeatmap({ days = 90 }: LoginHeatmapProps) {
             <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
               <div className="h-full bg-primary rounded-full transition-all duration-500 w-0" />
             </div>
-            <p className="text-right text-xs text-muted-foreground mt-1">-- achieved</p>
+            <p className="text-right text-xs text-muted-foreground mt-1">
+              -- achieved
+            </p>
           </div>
         </CardContent>
       </Card>
