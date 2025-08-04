@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 // POST: Log daily user login
 export async function POST(req: NextRequest) {
@@ -88,15 +88,15 @@ export async function GET(req: NextRequest) {
     let currentStreak = 0;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     for (let i = 0; i < days; i++) {
       const checkDate = new Date(today);
       checkDate.setDate(today.getDate() - i);
-      
+
       const hasLogin = userLogins.some(
-        login => login.loginDate.getTime() === checkDate.getTime()
+        (login) => login.loginDate.getTime() === checkDate.getTime()
       );
-      
+
       if (hasLogin) {
         currentStreak++;
       } else {
