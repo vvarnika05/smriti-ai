@@ -2,7 +2,8 @@
 
 import { TopicsTable } from "@/components/dashboard/topics-table";
 import { PerformanceChart } from "@/components/dashboard/performance-chart";
-import { Award, CalendarCheck, ChartColumnBig, Plus } from "lucide-react";
+import LoginHeatmap from "@/components/dashboard/login-heatmap";
+import { Award, ChartColumnBig, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -14,13 +15,6 @@ const stats = [
     icon: <Award className="text-primary h-5 w-5" />,
     trend: "12% growth",
     progress: 65,
-  },
-  {
-    title: "Study Consistency",
-    value: "85%",
-    icon: <CalendarCheck className="text-primary h-5 w-5" />,
-    trend: "5% from last month",
-    progress: 85,
   },
 ];
 
@@ -81,6 +75,9 @@ export default function Page() {
               </CardContent>
             </Card>
           ))}
+
+          {/* Login Consistency Heatmap */}
+          <LoginHeatmap days={90} />
 
           {/* performance Chart */}
           <Card className="pt-3 pb-0 gap-3">
