@@ -16,7 +16,7 @@ const Footer = () => {
     company: [
       { name: "About Us", href: "#" },
       { name: "Blogs", href: "/blogs" },
-      { name: "Contact", href: "#" },
+      { name: "Contact", href: "/contact" },
       {
         name: "Our Contributors",
         href: "https://github.com/vatsal-bhakodia/smriti-ai/graphs/contributors",
