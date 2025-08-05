@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
-// POST: Log daily user login
+// POST: Log daily user login and update streak
 export async function POST(req: NextRequest) {
   const { userId } = getAuth(req);
   if (!userId) {
@@ -13,34 +13,55 @@ export async function POST(req: NextRequest) {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set to start of day
 
-    // Check if user already logged in today
-    const existingLogin = await prisma.userLogin.findUnique({
-      where: {
-        userId_loginDate: {
-          userId,
-          loginDate: today,
-        },
-      },
+    // Get current user data
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { lastLogin: true, currentStreak: true },
     });
 
-    if (existingLogin) {
+    if (!user) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    const lastLoginDate = new Date(user.lastLogin);
+    lastLoginDate.setHours(0, 0, 0, 0);
+
+    // Check if user already logged in today
+    if (lastLoginDate.getTime() === today.getTime()) {
       return NextResponse.json({
         message: "Login already recorded for today",
         alreadyLogged: true,
+        currentStreak: user.currentStreak,
       });
     }
 
-    // Create new login record for today
-    const userLogin = await prisma.userLogin.create({
+    // Calculate new streak
+    let newStreak = user.currentStreak;
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    if (lastLoginDate.getTime() === yesterday.getTime()) {
+      // Consecutive day - increment streak
+      newStreak += 1;
+    } else if (lastLoginDate.getTime() < yesterday.getTime()) {
+      // Gap in login - reset streak to 1
+      newStreak = 1;
+    }
+    // If lastLoginDate > yesterday, it's a future date (shouldn't happen), keep current streak
+
+    // Update user with new login time and streak
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
       data: {
-        userId,
-        loginDate: today,
+        lastLogin: today,
+        currentStreak: newStreak,
       },
+      select: { lastLogin: true, currentStreak: true },
     });
 
     return NextResponse.json({
       message: "Daily login recorded successfully",
-      userLogin,
+      currentStreak: updatedUser.currentStreak,
       alreadyLogged: false,
     });
   } catch (error) {
@@ -60,47 +81,17 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const { searchParams } = new URL(req.url);
-    const days = parseInt(searchParams.get("days") || "90"); // Default to 90 days
-
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
-    startDate.setHours(0, 0, 0, 0);
-
-    const userLogins = await prisma.userLogin.findMany({
-      where: {
-        userId,
-        loginDate: {
-          gte: startDate,
-        },
-      },
-      orderBy: {
-        loginDate: "asc",
-      },
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { currentStreak: true },
     });
 
-    // Calculate current streak
-    let currentStreak = 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    for (let i = 0; i < days; i++) {
-      const checkDate = new Date(today);
-      checkDate.setDate(today.getDate() - i);
-
-      const hasLogin = userLogins.some(
-        (login) => login.loginDate.getTime() === checkDate.getTime()
-      );
-
-      if (hasLogin) {
-        currentStreak++;
-      } else {
-        break;
-      }
+    if (!user) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     return NextResponse.json({
-      currentStreak,
+      currentStreak: user.currentStreak,
     });
   } catch (error) {
     console.error("Error fetching streak:", error);

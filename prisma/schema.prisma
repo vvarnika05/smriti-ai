@@ -10,13 +10,14 @@ datasource db {
 }
 
 model User {
-  id          String       @id @default(uuid())
-  username    String       @unique
-  email       String       @unique
-  mobile      String
-  dob         String
-  topics      Topic[]
-  userLogins  UserLogin[]
+  id           String   @id @default(uuid())
+  username     String   @unique
+  email        String   @unique
+  mobile       String
+  dob          String
+  lastLogin    DateTime @default(now())
+  currentStreak Int     @default(0)
+  topics       Topic[]
 }
 
 model Topic {
@@ -86,12 +87,3 @@ model ContactQuery {
   createdAt DateTime @default(now())
 }
 
-model UserLogin {
-  id        String   @id @default(uuid())
-  userId    String
-  loginDate DateTime @default(now()) @db.Date
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, loginDate])
-}
