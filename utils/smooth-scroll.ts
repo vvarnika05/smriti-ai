@@ -1,4 +1,6 @@
 import React from "react"
+import { MouseEvent } from "react";
+import { useRouter } from "next/router";
 
 // Helper function smoothScrollTo
 function smoothScrollTo(targetPosition: number, duration: number = 500): void {
@@ -25,21 +27,23 @@ function smoothScrollTo(targetPosition: number, duration: number = 500): void {
 }
 
 // Event handler
-const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>): void => {
-    e.preventDefault();
-    const href = e.currentTarget.getAttribute("href");
+const handleSmoothScroll = (router: ReturnType<typeof useRouter>) => {
+  return (e: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("#")) {
+      e.preventDefault();
 
-    if (!href) return;
-
-    if (href === "#") {
-        smoothScrollTo(0, 500);
-    } else if (href.startsWith("#")) {
-        const target = document.querySelector(href);
-        if (target) {
-            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset;
-            smoothScrollTo(targetPosition, 500);
+      if (router.pathname === "/") {
+        // Already on homepage, scroll to section
+        const el = document.querySelector(href);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
         }
+      } else {
+        // Navigate to homepage with hash
+        router.push("/" + href);
+      }
     }
+  };
 };
 
 export default handleSmoothScroll;
