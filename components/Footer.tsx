@@ -1,10 +1,27 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import { Brain, ArrowUpRight, Heart } from "lucide-react";
-import handleSmoothScroll from "@/utils/smooth-scroll";
 
 const Footer = () => {
+  const router = useRouter();
+  const pathname = usePathname();
   const currentYear = new Date().getFullYear();
+
+  const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("#")) {
+      e.preventDefault();
+
+      if (pathname === "/") {
+        const el = document.querySelector(href);
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      } else {
+        router.push("/" + href); // example: "/#pricing"
+      }
+    }
+  };
 
   const footerLinks = {
     product: [
@@ -15,7 +32,7 @@ const Footer = () => {
     ],
     company: [
       { name: "About Us", href: "#" },
-      { name: "Blogs", href: "/blogs" },
+      { name: "Blog", href: "#" },
       { name: "Contact", href: "/contact" },
       {
         name: "Our Contributors",
@@ -24,8 +41,8 @@ const Footer = () => {
     ],
     support: [
       { name: "Help Center", href: "#" },
-      { name: "Privacy Policy", href: "/privacy-policy" },
-      { name: "Terms of Service", href: "/terms-of-use" },
+      { name: "Privacy Policy", href: "#" },
+      { name: "Terms of Service", href: "#" },
       {
         name: "Project Status",
         href: "https://github.com/vatsal-bhakodia/smriti-ai/actions",
@@ -35,10 +52,8 @@ const Footer = () => {
 
   return (
     <footer className="bg-black border-t border-neutral-900">
-      {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-          {/* Brand Section */}
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center group">
               <Link href="/" className="flex items-center">
@@ -58,7 +73,6 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Links Sections */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category} className="space-y-4">
               <h3 className="text-white font-semibold text-sm uppercase tracking-wider">
@@ -69,9 +83,10 @@ const Footer = () => {
                   <li key={index}>
                     <Link
                       href={link.href}
-                      // Disable smooth scroll for full page navigations
                       onClick={
-                        link.href.startsWith("#") ? handleSmoothScroll : undefined
+                        link.href.startsWith("#")
+                          ? (e) => handleNav(e, link.href)
+                          : undefined
                       }
                       className="group flex items-center text-gray-400 hover:text-primary text-sm transition-all duration-300 hover:translate-x-1"
                     >
@@ -86,7 +101,6 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Bottom Section */}
       <div className="border-t border-neutral-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="md:flex md:items-center md:justify-between">
