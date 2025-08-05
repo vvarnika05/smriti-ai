@@ -42,8 +42,8 @@ const AnimatedImage: React.FC<AnimatedImageProps> = ({
   };
 
   const handleMouseLeave = () => {
-    x.set(0, true);
-    y.set(0, true);
+    x.set(0);
+    y.set(0);
   };
 
   return (

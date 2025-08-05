@@ -9,6 +9,7 @@ import Features from "@/components/landing/Features";
 import { Pricing } from "@/components/landing/Pricing";
 import Footer from "@/components/Footer";
 
+
 export default function Home() {
   const pathname = usePathname();
 
