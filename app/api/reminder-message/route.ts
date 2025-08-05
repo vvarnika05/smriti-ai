@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { twilioClient } from "@/lib/twilio";
 import prisma from "@/lib/prisma";
 
@@ -14,21 +14,61 @@ const text = [
   "Revision naam ki bhi kuch chiz hoti hai janab 🐸",
   "Lijiye jal pijiye 🍸 aur revision kijiye",
 ];
-export async function GET() {
-  const users = await prisma.user.findMany({
-    select: { mobile: true },
-  });
 
-  for (const user of users) {
-    const randomMeme = memes[Math.floor(Math.random() * memes.length)];
-    const textMeme = text[Math.floor(Math.random() * text.length)];
-    await twilioClient.messages.create({
-      to: `whatsapp:${user.mobile}`,
-      from: process.env.TWILIO_PHONE_NUMBER!,
-      body: textMeme,
-      mediaUrl: [randomMeme],
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const dryRun = searchParams.get("dryRun") === "true";
+
+  try {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const inactiveUsers = await prisma.user.findMany({
+      where: {
+        lastLogin: {
+          lt: sevenDaysAgo,
+        },
+      },
+
+      select: {
+        mobile: true,
+      },
     });
-  }
 
-  return NextResponse.json({ message: "Sent" });
+    if (inactiveUsers.length === 0) {
+      return NextResponse.json({ message: "No inactive users to message." });
+    }
+
+    if(dryRun){
+      return NextResponse.json({
+        message: "Dry run successful. Would have sent messages to inactive users.",
+        count: inactiveUsers.length,
+        users: inactiveUsers,
+      });
+    }
+
+    for (const user of inactiveUsers) {
+      const randomMeme = memes[Math.floor(Math.random() * memes.length)];
+      const textMeme = text[Math.floor(Math.random() * text.length)];
+
+      try {
+        await twilioClient.messages.create({
+          to: `whatsapp:${user.mobile}`,
+          from: process.env.TWILIO_PHONE_NUMBER!,
+          body: textMeme,
+          mediaUrl: [randomMeme],
+        });
+      } catch (error) {
+        console.log(`Failed to send message to ${user.mobile}:`, error);
+        //Will continue to the next user even if one fails
+      }
+    }
+
+    return NextResponse.json({
+      message: `Successfully sent messages to ${inactiveUsers.length} inactive users.`,
+    });
+  } catch (error) {
+    console.error("Failed to fetch inactive users or send messages: ", error);
+    return NextResponse.json({ message: "An error occured." }, { status: 500 });
+  }
 }
