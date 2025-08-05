@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET: Retrieve user login history for consistency tracking
+// GET: Retrieve current streak score
 export async function GET(req: NextRequest) {
   const { userId } = getAuth(req);
   if (!userId) {
@@ -79,11 +79,6 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Calculate consistency stats
-    const totalDays = days;
-    const loginDays = userLogins.length;
-    const consistencyPercentage = Math.round((loginDays / totalDays) * 100);
-
     // Calculate current streak
     let currentStreak = 0;
     const today = new Date();
@@ -105,16 +100,10 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({
-      userLogins,
-      stats: {
-        totalDays,
-        loginDays,
-        consistencyPercentage,
-        currentStreak,
-      },
+      currentStreak,
     });
   } catch (error) {
-    console.error("Error fetching login history:", error);
+    console.error("Error fetching streak:", error);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

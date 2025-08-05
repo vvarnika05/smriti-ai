@@ -7,6 +7,8 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { Card, CardContent } from "@/components/ui/card";
+import { ChartColumnBig } from "lucide-react";
 
 const chartData = [
   { month: "January", marks: 186 },
@@ -24,7 +26,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function PerformanceChart() {
+function PerformanceChart() {
   return (
     <ChartContainer
       config={chartConfig}
@@ -59,5 +61,28 @@ export function PerformanceChart() {
         />
       </AreaChart>
     </ChartContainer>
+  );
+}
+
+export default function PerformanceCard() {
+  return (
+    <Card className="pt-3 pb-0 gap-3">
+      <div className="flex items-center gap-4 px-4">
+        <div className="bg-muted/50 rounded-lg p-3">
+          <ChartColumnBig className="text-primary h-5 w-5" />
+        </div>
+        <div className="space-y-1 w-full">
+          <div className="flex items-center justify-between">
+            <p className="text-sm">Performance</p>
+            <span className="text-xs font-medium text-[#adff2f] bg-[#adff2f]/10 px-3 py-1 rounded-full flex items-center gap-1 border border-[#adff2f]/20">
+              7% from last month
+            </span>
+          </div>
+        </div>
+      </div>
+      <CardContent className="px-2">
+        <PerformanceChart />
+      </CardContent>
+    </Card>
   );
 }
