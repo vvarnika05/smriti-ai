@@ -1,7 +1,7 @@
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Brain, Star } from "lucide-react";
+import { Brain, Star, LayoutDashboard } from "lucide-react";
 
 export default function Navbar() {
   return (
@@ -74,6 +74,18 @@ export default function Navbar() {
                 </Button>
               </Link>
             </SignedOut>
+
+            <SignedIn>
+              <Link href="/dashboard" className="cursor-pointer">
+                  <Button
+                    variant="outline"
+                    className="rounded-full flex items-center gap-2 cursor-pointer border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black hover:border-[#adff2f] transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#adff2f]/25"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Button>
+              </Link>
+            </SignedIn>
 
             <SignedIn>
               <div className="cursor-pointer">
