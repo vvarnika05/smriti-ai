@@ -40,9 +40,8 @@ const Footer = () => {
       },
     ],
     support: [
-      { name: "Help Center", href: "#" },
-      { name: "Privacy Policy", href: "#" },
-      { name: "Terms of Service", href: "#" },
+      { name: "Privacy Policy", href: "/privacy-policy" },
+      { name: "Terms of Service", href: "/terms-of-use" },
       {
         name: "Project Status",
         href: "https://github.com/vatsal-bhakodia/smriti-ai/actions",
