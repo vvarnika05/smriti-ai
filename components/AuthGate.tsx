@@ -69,8 +69,12 @@ function CustomSignup({ email, userId }: { email: string; userId: string }) {
   // Handle phone input changes
   const handlePhoneChange = (value: string, countryData?: any) => {
     setPhone(value);
-    // Update country if it was changed via the dropdown  
-    if (countryData && countryData.countryCode && countryData.countryCode !== phoneCountry) {
+    // Update country if it was changed via the dropdown
+    if (
+      countryData &&
+      countryData.countryCode &&
+      countryData.countryCode !== phoneCountry
+    ) {
       setPhoneCountry(countryData.countryCode);
     }
   };
@@ -92,7 +96,15 @@ function CustomSignup({ email, userId }: { email: string; userId: string }) {
         window.location.reload();
       }
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Signup failed");
+      const errorMessage = err?.response?.data?.message || "Signup failed";
+
+      if (errorMessage.includes("Username is already taken")) {
+        toast.error("Username is already taken. Please try a different one.");
+      } else if (errorMessage.includes("Invalid mobile number")) {
+        toast.error("Enter a valid mobile number.");
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -142,43 +154,48 @@ function CustomSignup({ email, userId }: { email: string; userId: string }) {
               disableSearchIcon={true}
               placeholder="Enter phone number"
               specialLabel=""
-              masks={{ in: '..... .....', us: '(...) ...-....', gb: '.... ......', ca: '(...) ...-....' }}
+              masks={{
+                in: "..... .....",
+                us: "(...) ...-....",
+                gb: ".... ......",
+                ca: "(...) ...-....",
+              }}
               inputStyle={{
-                width: '100%',
-                backgroundColor: '#27272a',
-                color: 'white',
-                border: '1px solid #3f3f46',
-                borderRadius: '8px',
-                padding: '8px 12px 8px 75px',
-                height: '42px',
-                fontSize: '16px',
-                outline: 'none',
-                boxSizing: 'border-box'
+                width: "100%",
+                backgroundColor: "#27272a",
+                color: "white",
+                border: "1px solid #3f3f46",
+                borderRadius: "8px",
+                padding: "8px 12px 8px 75px",
+                height: "42px",
+                fontSize: "16px",
+                outline: "none",
+                boxSizing: "border-box",
               }}
               buttonStyle={{
-                backgroundColor: 'transparent',
-                border: 'none',
-                borderRadius: '8px 0 0 8px',
-                padding: '8px',
-                height: '42px',
-                position: 'absolute',
-                left: '0',
-                top: '0',
-                zIndex: '10',
-                width: '60px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
+                backgroundColor: "transparent",
+                border: "none",
+                borderRadius: "8px 0 0 8px",
+                padding: "8px",
+                height: "42px",
+                position: "absolute",
+                left: "0",
+                top: "0",
+                zIndex: "10",
+                width: "60px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
               dropdownStyle={{
-                backgroundColor: '#27272a',
-                border: '1px solid #3f3f46',
-                borderRadius: '8px',
-                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)',
-                zIndex: '9999',
-                maxHeight: '200px',
-                overflowY: 'auto',
-                marginTop: '4px'
+                backgroundColor: "#27272a",
+                border: "1px solid #3f3f46",
+                borderRadius: "8px",
+                boxShadow: "0 10px 25px rgba(0, 0, 0, 0.5)",
+                zIndex: "9999",
+                maxHeight: "200px",
+                overflowY: "auto",
+                marginTop: "4px",
               }}
             />
           </div>
