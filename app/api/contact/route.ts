@@ -1,17 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rateLimiter";
+
 
 interface ContactRequestBody {
   name: string;
   email: string;
   subject?: string;
   message: string;
+  userAnswer: number;
+  answer: number;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: ContactRequestBody = await request.json();
-    
+    // CAPTCHA check
+    if (body.userAnswer !== body.answer) {
+      return NextResponse.json(
+        { error: "Incorrect CAPTCHA answer." },
+        { status: 400 }
+      );
+    }
+
+    // Rate limiting by IP
+    const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+    if (!ip || !checkRateLimit(ip)) {
+      return NextResponse.json(
+        { error: "Too many submissions. Try again later." },
+        { status: 429 }
+      );
+    }
     // Validate required fields
     if (!body.name || !body.email || !body.message) {
       return NextResponse.json(

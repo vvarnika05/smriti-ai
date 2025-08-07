@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { DotPattern } from "@/components/magicui/dot-pattern";
 import BlurIn from "@/components/magicui/blur-in";
 import Footer from "@/components/Footer";
+import { generateMathCaptcha } from "@/utils/generateMathCaptcha";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -44,6 +45,16 @@ export default function ContactPage() {
     subject: "",
     message: "",
   });
+
+  const [captcha, setCaptcha] = useState<{ question: string; answer: number } | null>(null);
+  const [userCaptcha, setUserCaptcha] = useState<string>("");
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCaptcha(generateMathCaptcha());
+  }, []);
+
+  const refreshCaptcha = () => setCaptcha(generateMathCaptcha());
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -91,7 +102,7 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    if (!validateForm() || !captcha) {
       toast.error("Please fix the errors in the form");
       return;
     }
@@ -101,7 +112,7 @@ export default function ContactPage() {
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
-        headers: {
+        headers: { 
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -109,25 +120,51 @@ export default function ContactPage() {
           email: formData.email.trim(),
           subject: formData.subject.trim() || undefined,
           message: formData.message.trim(),
+          userAnswer: Number(userCaptcha),
+          answer: captcha.answer,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to send message");
+        if (
+          response.status === 400 &&
+          data.error === "Incorrect CAPTCHA answer."
+        ) {
+          setCaptchaError("Wrong answer. Try again.");
+          refreshCaptcha();
+          setUserCaptcha("");
+          setIsSubmitting(false);
+          return;
+        }
+        if (data.message) {
+          toast.error(data.message);
+          setIsSubmitting(false);
+          return;
+        }
+        if (response.status === 429) {
+          toast.error(
+            "You’ve reached the submission limit. Please try again later."
+          );
+          setIsSubmitting(false);
+          return;
+        }
+        throw new Error(data.error || "Failed to send message");
       }
 
       toast.success("Thank you for your message! We'll get back to you soon.");
 
       // Reset form
       setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-      });
+         name: "", 
+         email: "", 
+         subject: "", 
+         message: "",
+        });
       setErrors({});
+      setUserCaptcha("");
+      setCaptcha(null);
     } catch (error) {
       console.error("Error submitting contact form:", error);
       toast.error(
@@ -286,6 +323,41 @@ export default function ContactPage() {
                       />
                       {errors.message && (
                         <p className="text-sm text-red-500">{errors.message}</p>
+                      )}
+                    </motion.div>
+
+                    {/* CAPTCHA Field */}
+                    <motion.div className="space-y-2" variants={itemVariants}>
+                      <Label
+                        htmlFor="captcha"
+                        className="flex items-center gap-2 text-foreground"
+                      >
+                        <Clock className="w-4 h-4 text-primary" />
+                        {captcha?.question} =
+                      </Label>
+                      <Input
+                        id="captcha"
+                        type="number"
+                        value={userCaptcha}
+                        onChange={(e) => {
+                          setUserCaptcha(e.target.value);
+                          setCaptchaError(null);
+                        }}
+                        placeholder="Your answer"
+                        className={cn(
+                          "transition-all duration-200",
+                          captchaError
+                            ? "border-red-500 focus-visible:ring-red-500/20"
+                            : "focus-visible:ring-primary/20"
+                        )}
+                        disabled={isSubmitting}
+                        aria-invalid={!!captchaError}
+                        required
+                      />
+                      {captchaError && (
+                        <p role="alert" className="text-sm text-red-500">
+                          {captchaError}
+                        </p>
                       )}
                     </motion.div>
 
