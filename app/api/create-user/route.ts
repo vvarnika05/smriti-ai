@@ -14,11 +14,36 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
+  
   const { username, email, mobile, dob } = body;
 
   if (!username || !email || !mobile || !dob) {
     return NextResponse.json(
       { message: "Missing required fields" },
+      { status: 400 }
+    );
+  }
+
+  const existingUser = await prisma.user.findUnique({
+    where: { username },
+  });
+
+
+  if (existingUser) {
+    return NextResponse.json(
+      { msg: "Username is already taken. Please choose another one." },
+      { status: 400 }
+    );
+  }
+
+  // ✅ Mobile number validation using regex
+  const isValidMobile = /^\+\d{8,15}$/.test(mobile);
+  if (!isValidMobile) {
+    
+    return NextResponse.json(
+      {
+        msg: "Invalid mobile number. Please enter a valid  mobile number.",
+      },
       { status: 400 }
     );
   }
