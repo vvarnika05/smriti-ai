@@ -5,7 +5,14 @@ import { Star, GitBranch, Code, ExternalLink, Trophy, Medal, Award, Github, Targ
 
 // We'll load the data at runtime instead of import
 
-const Button = ({ children, variant = 'default', size = 'default', className = '', onClick, ...props }) => {
+const Button = ({ children, variant = 'default', size = 'default', className = '', onClick, ...props }: {
+  children: any;
+  variant?: 'default' | 'outline' | 'ghost' | 'secondary';
+  size?: 'default' | 'sm' | 'lg';
+  className?: string;
+  onClick?: () => void;
+  [key: string]: any;
+}) => {
   const baseClasses = 'inline-flex items-center justify-center rounded-full font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none transform hover:scale-105';
   const variants = {
     default: 'bg-gradient-to-r from-primary to-[#9dff07] hover:from-[#9dff07] hover:to-primary text-black hover:shadow-xl hover:shadow-primary/30',
@@ -30,10 +37,20 @@ const Button = ({ children, variant = 'default', size = 'default', className = '
   );
 };
 
-const Card = ({ children, className = '' }) => (
-  <div className={`rounded-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] shadow-lg bg-white/10 border border-primary/50 hover:bg-white/15 ${className}`}>
-    {children}
-  </div>
+const Card = ({ children, className = '', ...props }: {
+  children: any;
+  className?: string;
+  [key: string]: any;
+}) => (
+<div
+  className={`rounded-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] shadow-lg bg-white/10 border border-primary/50 hover:bg-white/15 focus:outline-none focus:border-primary/50 ${className}`}
+  {...props}
+>
+  {children}
+</div>
+
+
+
 );
 
 
@@ -199,19 +216,27 @@ export default function Contributors() {
         // Load contributors data
         const contributorsResponse = await fetch('/contributors.json');
         if (!contributorsResponse.ok) {
+          console.error('Contributors fetch failed:', contributorsResponse.status, contributorsResponse.statusText);
           throw new Error('Failed to load contributors data');
         }
         const contributorsData = await contributorsResponse.json();
-        
-        // Load last updated data
-        const lastUpdatedResponse = await fetch('/lastUpdated.json');
-        if (!lastUpdatedResponse.ok) {
-          throw new Error('Failed to load last updated data');
-        }
-        const lastUpdatedData = await lastUpdatedResponse.json();
-        
         setContributors(contributorsData);
-        setLastUpdated(lastUpdatedData.lastUpdated);
+        
+        // Load last updated data (optional - don't fail if this doesn't load)
+        try {
+          const lastUpdatedResponse = await fetch('/lastUpdated.json');
+          if (lastUpdatedResponse.ok) {
+            const lastUpdatedData = await lastUpdatedResponse.json();
+            setLastUpdated(lastUpdatedData.lastUpdated);
+          } else {
+            console.warn('LastUpdated fetch failed:', lastUpdatedResponse.status, lastUpdatedResponse.statusText);
+            setLastUpdated(new Date().toISOString()); // Fallback to current date
+          }
+        } catch (lastUpdatedError) {
+          console.warn('Error loading last updated data:', lastUpdatedError);
+          setLastUpdated(new Date().toISOString()); // Fallback to current date
+        }
+        
       } catch (error) {
         console.error('Error loading data:', error);
         setError('Failed to load contributors data. Please try again later.');
