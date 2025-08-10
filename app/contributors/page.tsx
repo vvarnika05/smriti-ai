@@ -3,9 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Star, GitBranch, Code, ExternalLink, Trophy, Medal, Award, Github, Target, Zap, Sparkles, Users, TrendingUp, Check, Clock } from 'lucide-react';
 
-// Import the static data
-import contributorsData from '../../public/contributors.json';
-import lastUpdatedData from '../../public/lastUpdated.json';
+// We'll load the data at runtime instead of import
 
 const Button = ({ children, variant = 'default', size = 'default', className = '', onClick, ...props }) => {
   const baseClasses = 'inline-flex items-center justify-center rounded-full font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none transform hover:scale-105';
@@ -190,13 +188,39 @@ const formatDate = (isoString: string) => {
 
 export default function Contributors() {
   const [contributors, setContributors] = useState<Contributor[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeLevel, setActiveLevel] = useState(1);
 
   useEffect(() => {
-    // Use the static data instead of fetching from API
-    setContributors(contributorsData as Contributor[]);
-    setLoading(false);
+    const loadData = async () => {
+      try {
+        // Load contributors data
+        const contributorsResponse = await fetch('/contributors.json');
+        if (!contributorsResponse.ok) {
+          throw new Error('Failed to load contributors data');
+        }
+        const contributorsData = await contributorsResponse.json();
+        
+        // Load last updated data
+        const lastUpdatedResponse = await fetch('/lastUpdated.json');
+        if (!lastUpdatedResponse.ok) {
+          throw new Error('Failed to load last updated data');
+        }
+        const lastUpdatedData = await lastUpdatedResponse.json();
+        
+        setContributors(contributorsData);
+        setLastUpdated(lastUpdatedData.lastUpdated);
+      } catch (error) {
+        console.error('Error loading data:', error);
+        setError('Failed to load contributors data. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   const topContributors = contributors.slice(0, 3);
@@ -224,6 +248,23 @@ export default function Contributors() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <div className="max-w-7xl mx-auto px-6 md:px-20 py-24">
+          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+            <div className="text-6xl">😕</div>
+            <p className="text-red-400 text-center text-lg">{error}</p>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              <Zap className="h-4 w-4 mr-2" />
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       {/* Background effects */}
@@ -232,14 +273,16 @@ export default function Contributors() {
       
       <div className="max-w-7xl mx-auto px-6 md:px-20 py-24 relative z-10">
         {/* Last Updated Banner */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
-            <Clock className="h-4 w-4 text-primary" />
-            <span className="text-gray-300 text-sm">
-              Last updated: {formatDate(lastUpdatedData.lastUpdated)}
-            </span>
+        {lastUpdated && (
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+              <Clock className="h-4 w-4 text-primary" />
+              <span className="text-gray-300 text-sm">
+                Last updated: {formatDate(lastUpdated)}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Header Section */}
         <div className="text-center mb-16">
