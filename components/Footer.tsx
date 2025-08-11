@@ -31,7 +31,7 @@ const Footer = () => {
       { name: "Mind Maps", href: "#" },
     ],
     company: [
-      { name: "About Us", href: "#" },
+      { name: "About Us", href: "/about" },
       { name: "Blog", href: "#" },
       { name: "Contact", href: "/contact" },
       {
