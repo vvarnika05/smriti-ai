@@ -31,7 +31,7 @@ export default function Navbar() {
                 Home
               </Button>
             </Link>
-            <Link href="/#about" className="cursor-pointer">
+            <Link href="/about" className="cursor-pointer">
               <Button
                 variant="ghost"
                 className="rounded-full cursor-pointer hover:bg-[#adff2f]/10 hover:text-[#adff2f] transition-all duration-300 hover:scale-105"
