@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -29,17 +29,17 @@ import { NumberTicker } from "@/components/magicui/number-ticker";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
 };
 
-const fadeInUpVariants = {
+const fadeInUpVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: { 
     opacity: 1, 
@@ -150,7 +150,7 @@ export default function AboutPage() {
                     key={index}
                     className="text-center"
                     variants={fadeInUpVariants}
-                    transition={{ delay: index * 0.1 }}
+                    custom={index}
                   >
                     <div className="text-3xl md:text-4xl font-extrabold text-primary mb-2">
                       <NumberTicker value={stat.number} />{stat.suffix}
@@ -218,7 +218,7 @@ export default function AboutPage() {
                   <motion.div 
                     key={index}
                     variants={fadeInUpVariants}
-                    transition={{ delay: index * 0.1 }}
+                    custom={index}
                   >
                     <div className="rounded-xl px-6 py-8 shadow-lg backdrop-blur-md bg-white/5 border border-white/10 hover:scale-[1.02] transition-all duration-300 h-full group">
                       <feature.icon className="w-12 h-12 mb-4 text-primary group-hover:scale-110 transition-transform duration-300" />
@@ -245,7 +245,7 @@ export default function AboutPage() {
                   <motion.div 
                     key={index}
                     variants={fadeInUpVariants}
-                    transition={{ delay: index * 0.2 }}
+                    custom={index}
                   >
                     <div className="rounded-xl px-8 py-10 shadow-lg backdrop-blur-md bg-white/5 border border-white/10 hover:scale-[1.02] transition-all duration-300 h-full text-center">
                       <div className="bg-primary/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
