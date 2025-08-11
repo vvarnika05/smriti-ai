@@ -17,7 +17,6 @@ import {
   Check,
   Clock,
 } from "lucide-react";
-import Image from "next/image";
 
 const Button = ({
   children,
@@ -507,11 +506,9 @@ export default function Contributors() {
                     <CardHeader className="text-center pb-4 relative z-10">
                       <div className="relative mx-auto mb-4">
                         <div className="h-24 w-24 mx-auto rounded-full ring-4 ring-primary/30 group-hover:ring-primary/60 transition-all duration-300 overflow-hidden bg-gradient-to-r from-primary/20 to-purple-500/20 group-hover:scale-110">
-                          <Image
+                          <img
                             src={contributor.avatar_url}
                             alt={contributor.login}
-                            height={100}
-                            width={100}
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               e.currentTarget.style.display = "none";
@@ -612,11 +609,9 @@ export default function Contributors() {
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <div className="h-10 w-10 rounded-full overflow-hidden bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center ring-2 ring-white/10">
-                                <Image
+                                <img
                                   src={contributor.avatar_url}
                                   alt={`Avatar of ${contributor.login}`}
-                                  width={40}
-                                  height={40}
                                   className="w-full h-full object-cover"
                                   onError={(e) => {
                                     e.currentTarget.style.display = "none";
