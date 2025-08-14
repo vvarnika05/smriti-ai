@@ -401,3 +401,7 @@ body {
   border: 1px solid #484847 !important;
   transition: all 0.2s;
 }
+
+.dark-time-picker {
+  color-scheme: dark;
+}

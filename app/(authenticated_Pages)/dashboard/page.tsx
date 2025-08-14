@@ -40,7 +40,7 @@ export default function Page() {
           <PerformanceCard />
         </div>
         
-        {/* === NEW COMPONENT ADDED HERE === */}
+        {/*Study Reminder Modal */}
         <StudyReminder />
 
         {/* Active Topics Table */}
