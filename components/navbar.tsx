@@ -79,7 +79,7 @@ export default function Navbar() {
             <SignedOut>
               <Link href="/sign-in" className="cursor-pointer">
                 <Button className="bg-gradient-to-r from-[#adff2f] to-[#9dff07] text-black rounded-full cursor-pointer hover:from-[#9dff07] hover:to-[#adff2f] hover:shadow-lg hover:shadow-[#adff2f]/30 transition-all duration-300 hover:scale-105 border-0">
-                  Sign In
+                  Sign In or Sign Up
                 </Button>
               </Link>
             </SignedOut>
