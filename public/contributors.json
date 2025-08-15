@@ -19,7 +19,7 @@
     "type": "User",
     "user_view_type": "public",
     "site_admin": false,
-    "contributions": 89
+    "contributions": 93
   },
   {
     "login": "medss19",
@@ -107,7 +107,7 @@
     "type": "User",
     "user_view_type": "public",
     "site_admin": false,
-    "contributions": 4
+    "contributions": 5
   },
   {
     "login": "o000SAI000o",
@@ -130,6 +130,28 @@
     "user_view_type": "public",
     "site_admin": false,
     "contributions": 4
+  },
+  {
+    "login": "git-lakshy",
+    "id": 172724242,
+    "node_id": "U_kgDOCkuQEg",
+    "avatar_url": "https://avatars.githubusercontent.com/u/172724242?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/git-lakshy",
+    "html_url": "https://github.com/git-lakshy",
+    "followers_url": "https://api.github.com/users/git-lakshy/followers",
+    "following_url": "https://api.github.com/users/git-lakshy/following{/other_user}",
+    "gists_url": "https://api.github.com/users/git-lakshy/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/git-lakshy/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/git-lakshy/subscriptions",
+    "organizations_url": "https://api.github.com/users/git-lakshy/orgs",
+    "repos_url": "https://api.github.com/users/git-lakshy/repos",
+    "events_url": "https://api.github.com/users/git-lakshy/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/git-lakshy/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false,
+    "contributions": 3
   },
   {
     "login": "Kunal89204",
@@ -306,6 +328,28 @@
     "user_view_type": "public",
     "site_admin": false,
     "contributions": 2
+  },
+  {
+    "login": "Aaditya-0701",
+    "id": 210357807,
+    "node_id": "U_kgDODInOLw",
+    "avatar_url": "https://avatars.githubusercontent.com/u/210357807?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/Aaditya-0701",
+    "html_url": "https://github.com/Aaditya-0701",
+    "followers_url": "https://api.github.com/users/Aaditya-0701/followers",
+    "following_url": "https://api.github.com/users/Aaditya-0701/following{/other_user}",
+    "gists_url": "https://api.github.com/users/Aaditya-0701/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/Aaditya-0701/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/Aaditya-0701/subscriptions",
+    "organizations_url": "https://api.github.com/users/Aaditya-0701/orgs",
+    "repos_url": "https://api.github.com/users/Aaditya-0701/repos",
+    "events_url": "https://api.github.com/users/Aaditya-0701/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/Aaditya-0701/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false,
+    "contributions": 1
   },
   {
     "login": "Abhash-Chakraborty",
