@@ -9,10 +9,10 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center w-1/5">
+          <div className="flex items-center w-auto sm:w-1/5 flex-shrink-0">
             <Link
               href="/#"
-              className="flex items-center cursor-pointer hover:opacity-90 transition-all duration-300 group"
+              className="flex items-center cursor-pointer hover:opacity-90 transition-all duration-300 group whitespace-nowrap"
             >
               <Brain className="me-[5px] h-5 w-5 text-[#adff2f]" />
               <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent group-hover:from-[#adff2f] group-hover:to-[#9dff07] transition-all duration-300">
