@@ -4,6 +4,7 @@ import { TopicsTable } from "@/components/dashboard/topics-table";
 import LevelCard from "@/components/dashboard/levelCard";
 import LoginStreakCard from "@/components/dashboard/loginStreakCard";
 import PerformanceCard from "@/components/dashboard/performanceCard";
+import { StudyReminder } from "@/components/dashboard/studyreminder"; // Import the new component
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -38,6 +39,9 @@ export default function Page() {
           {/* performance Chart */}
           <PerformanceCard />
         </div>
+        
+        {/*Study Reminder Modal */}
+        <StudyReminder />
 
         {/* Active Topics Table */}
         <TopicsTable />
