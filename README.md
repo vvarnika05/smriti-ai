@@ -312,12 +312,8 @@ This project is licensed under the MIT License - see the [`License`](https://git
 
 <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="150%">
 
-<p align="center>
-
 **👨‍💻 Developed By** 
-  **❤️Vatsal Bhakodia and Contributors❤️** 
-[Watch Demo](https://www.smriti.live/) • [Request Feature](https://github.com/vatsal-bhakodia/smriti-ai/issues) • [Documentation](https://github.com/vatsal-bhakodia)
-</p>
+  **❤️Vatsal Bhakodia and Contributors❤️** [Watch Demo](https://www.smriti.live/) • [Request Feature](https://github.com/vatsal-bhakodia/smriti-ai/issues) • [Documentation](https://github.com/vatsal-bhakodia)
 
  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=65&section=footer"/>
 
