@@ -4,7 +4,7 @@
 import { Button } from "@/components/ui/button";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
-import { Brain, LayoutDashboard, Settings, Star } from "lucide-react";
+import { Brain, LayoutDashboard, Menu, Star } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -115,7 +115,7 @@ export default function Navbar() {
               </div>
             </SignedIn>
 
-            {/* Settings Menu Button */}
+            {/* Menu Button */}
             <button
               onClick={toggleMenu}
               className="md:hidden flex items-center p-2 rounded-full hover:bg-[#adff2f]/10"
@@ -124,7 +124,7 @@ export default function Navbar() {
                 animate={{ rotate: isMenuOpen ? -90 : 0 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               >
-                <Settings className="h-6 w-6 text-[#adff2f]" />
+                <Menu className="h-6 w-6 text-[#adff2f]" />
               </motion.div>
             </button>
           </div>
@@ -200,21 +200,6 @@ export default function Navbar() {
                   </Link>
                 </SignedIn>
 
-                {/* GitHub Star Button in Mobile Menu */}
-                {/* <a
-                  href="https://github.com/vatsal-bhakodia/smriti-ai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block"
-                >
-                  <Button
-                    variant="outline"
-                    className="w-full rounded-full flex items-center justify-center gap-2 border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black"
-                  >
-                    <Star className="h-4 w-4" />
-                    Star
-                  </Button>
-                </a> */}
               </motion.div>
             </motion.div>
           )}
