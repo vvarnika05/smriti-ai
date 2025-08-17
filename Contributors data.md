@@ -17,7 +17,7 @@ This document records **all contributions** to the project and assigns points ba
 
 Contributors:
 | #️⃣ S.No  | 👤 GitHub Profile Link                    | 🎯 Points | 🔗 PR No. | 📌 Task Description                                      |
-| --------- | ----------------------------------------- | --------- | --------------------------------------------------------------------- |
+| --------- | ----------------------------------------- | --------- | ---------- |--------------------------------------------------------- |
 | 1         | https://github.com/shubhranshu-sahu       | 3         | #36        | Added LICENSE                                            |
 | 2         | https://github.com/revanthsaich           | 7         | #40        | implemented Contact page                                 |
 | 3         | https://github.com/nilaychugh             | 10        | #41        | implemented heatmap and country code dropdown            |
