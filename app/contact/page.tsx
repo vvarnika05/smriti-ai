@@ -11,7 +11,6 @@ import { toast } from "sonner";
 import { Mail, MessageSquare, User, FileText, Clock, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DotPattern } from "@/components/magicui/dot-pattern";
-import BlurIn from "@/components/magicui/blur-in";
 import Footer from "@/components/Footer";
 import { generateMathCaptcha } from "@/utils/generateMathCaptcha";
 
@@ -46,7 +45,10 @@ export default function ContactPage() {
     message: "",
   });
 
-  const [captcha, setCaptcha] = useState<{ question: string; answer: number } | null>(null);
+  const [captcha, setCaptcha] = useState<{
+    question: string;
+    answer: number;
+  } | null>(null);
   const [userCaptcha, setUserCaptcha] = useState<string>("");
   const [captchaError, setCaptchaError] = useState<string | null>(null);
 
@@ -112,7 +114,7 @@ export default function ContactPage() {
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -157,11 +159,11 @@ export default function ContactPage() {
 
       // Reset form
       setFormData({
-         name: "", 
-         email: "", 
-         subject: "", 
-         message: "",
-        });
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
       setErrors({});
       setUserCaptcha("");
       setCaptcha(null);
@@ -196,11 +198,9 @@ export default function ContactPage() {
           <div className="max-w-2xl mx-auto">
             {/* Header Section */}
             <motion.div className="text-center mb-12" variants={itemVariants}>
-              <BlurIn
-                word="Get in Touch"
-                className="font-display text-4xl md:text-6xl font-bold text-foreground mb-4"
-                duration={1}
-              />
+              <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground mb-4">
+                Get in Touch
+              </h1>
               <motion.p
                 className="text-lg text-muted-foreground max-w-2xl mx-auto"
                 variants={itemVariants}
