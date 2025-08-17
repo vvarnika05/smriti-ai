@@ -1,16 +1,6 @@
 # 📚 Smriti AI – Your Smart Learning Companion
 
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="150%">
-
-[![Open Source](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/vatsal-bhakodia/smriti-ai)
-
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="150%">
-
 > Smriti AI is an intelligent, all-in-one learning assistant that helps you **organize**, **understand**, and **retain** everything you study 🧠. Whether you're a student, a self-learner, or a professional, Smriti AI transforms passive content into active learning tools.
-
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
-
-<h1 align="center">Supported By <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Folded%20Hands%20Light%20Skin%20Tone.png" alt="Folded Hands Light Skin Tone" width="25" height="25" /></h1>
 
 <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
 
@@ -167,7 +157,7 @@ The app should now be running at [http://localhost:3000](http://localhost:3000) 
   <b>This project is now OFFICIALLY accepted for:</b>
 </p>
 
-![GSSoC Logo](/smriti-ai/public/gssoc%20logo.png)
+![GSSoC Logo](/public/gssoc%20logo.png)
 
 🌟 **Exciting News...**
 
@@ -299,9 +289,8 @@ This project is licensed under the MIT License - see the [`License`](https://git
 
 | Role          | Name               | GitHub Profile                                      | LinkedIn Profile                                                        |
 | ------------- | ------------------ | --------------------------------------------------- | ----------------------------------------------------------------------- |
-| Mentor 1      | Jaydeepsinh Parmar | [jaydeep099](https://github.com/jaydeep099)   | [jaydeepsinh-parmar](https://www.linkedin.com/in/jaydeepsinh-parmar-084609247/) |
-| Mentor 2      | Sanjana Gurav  | | [sanjana-gurav](https://www.linkedin.com/in/sanjana-gurav-59357028a/)   |
-| Mentor 3      | Bhavik Dodda  |  | [bhavik-dodda](https://www.linkedin.com/in/bhavik-dodda/)  |
+| Mentor 1      | Sanjana Gurav  |[213sanjana](https://github.com/213sanjana) | [sanjana-gurav](https://www.linkedin.com/in/sanjana-gurav-59357028a/)   |
+| Mentor 2      | Bhavik Dodda  |[BhavikDodda](https://github.com/BhavikDodda)  | [bhavik-dodda](https://www.linkedin.com/in/bhavik-dodda/)  |
 
 <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
 
@@ -318,4 +307,8 @@ This project is licensed under the MIT License - see the [`License`](https://git
 
  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=65&section=footer"/>
 
-> [🔝 Back to Top](#top)
+<div align="center">
+    <a href="#top">
+        <img src="https://img.shields.io/badge/Back%20to%20Top-000000?style=for-the-badge&logo=github&logoColor=white" alt="Back to Top">
+    </a>
+</div>
