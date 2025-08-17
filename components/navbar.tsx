@@ -1,10 +1,9 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
-import { Brain, LayoutDashboard, Menu, Star } from "lucide-react";
+import { Brain, LayoutDashboard, Menu, Star, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -27,7 +26,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center flex-shrink-0">
+          <div className="flex items-center flex-shrink-0 w-1/5">
             <Link
               href="/#"
               className="flex items-center cursor-pointer hover:opacity-90 transition-all duration-300 group whitespace-nowrap"
@@ -40,7 +39,7 @@ export default function Navbar() {
           </div>
 
           {/* Center Navigation Links - Hidden on Mobile */}
-          <div className="hidden md:flex items-center justify-center gap-6">
+          <div className="hidden md:flex items-center justify-center gap-4 w-3/5">
             <Link href="/#" className="cursor-pointer">
               <Button
                 variant="ghost"
@@ -73,42 +72,49 @@ export default function Navbar() {
                 Contact Us
               </Button>
             </Link>
-
-            {/* Add Dashboard button for desktop */}
-            <SignedIn>
-              <Link href="/dashboard" className="cursor-pointer">
-                <Button
-                  variant="outline"
-                  className="rounded-full flex items-center gap-2 cursor-pointer border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black hover:border-[#adff2f] transition-all duration-300 hover:scale-105"
-                >
-                  <LayoutDashboard className="h-4 w-4" />
-                  Dashboard
-                </Button>
-              </Link>
-            </SignedIn>
           </div>
 
           {/* Right side buttons */}
-          <div className="flex items-center space-x-2">
-            {/* GitHub Star Button */}
-            <div className="flex items-center">
-              <a
-                href="https://github.com/vatsal-bhakodia/smriti-ai"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full flex items-center gap-2 border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black hover:border-[#adff2f] transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#adff2f]/25"
-                >
-                  <Star className="h-4 w-4" />
-                  <span>Star</span>
-                </Button>
-              </a>
-            </div>
+          <div className="flex items-center justify-end space-x-2 w-1/5">
+            {/* Desktop Dashboard Button */}
+            <SignedIn>
+              <div className="hidden md:flex items-center">
+                <Link href="/dashboard" className="cursor-pointer">
+                  <Button
+                    variant="outline"
+                    className="rounded-full flex items-center gap-2 cursor-pointer border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black hover:border-[#adff2f] transition-all duration-300 hover:scale-105"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Button>
+                </Link>
+              </div>
+            </SignedIn>
 
-            {/* Profilee Button */}
+            {/* Desktop Sign In Button */}
+            <SignedOut>
+              <div className="flex items-center gap-2">
+                <Link href="/sign-in" className="cursor-pointer">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full flex items-center gap-2 border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black hover:border-[#adff2f] transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#adff2f]/25 px-4 py-2"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/sign-up" className="cursor-pointer">
+                  <Button
+                    size="sm"
+                    className="rounded-full bg-gradient-to-r from-[#adff2f] to-[#9dff07] text-black hover:from-[#9dff07] hover:to-[#adff2f] transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#adff2f]/25 px-4 py-2"
+                  >
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
+            </SignedOut>
+
+            {/* Profile Button - Always visible when signed in */}
             <SignedIn>
               <div className="flex items-center">
                 <UserButton />
@@ -120,12 +126,11 @@ export default function Navbar() {
               onClick={toggleMenu}
               className="md:hidden flex items-center p-2 rounded-full hover:bg-[#adff2f]/10"
             >
-              <motion.div
-                animate={{ rotate: isMenuOpen ? -90 : 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              >
+              {isMenuOpen ? (
+                <X className="h-6 w-6 text-[#adff2f]" />
+              ) : (
                 <Menu className="h-6 w-6 text-[#adff2f]" />
-              </motion.div>
+              )}
             </button>
           </div>
         </div>
@@ -180,14 +185,7 @@ export default function Navbar() {
                   </Button>
                 </Link>
 
-                <SignedOut>
-                  <Link href="/sign-in" className="block">
-                    <Button className="w-full bg-gradient-to-r from-[#adff2f] to-[#9dff07] text-black rounded-full hover:from-[#9dff07] hover:to-[#adff2f]">
-                      Sign In
-                    </Button>
-                  </Link>
-                </SignedOut>
-
+                {/* Mobile Dashboard Button */}
                 <SignedIn>
                   <Link href="/dashboard" className="block">
                     <Button
@@ -200,6 +198,22 @@ export default function Navbar() {
                   </Link>
                 </SignedIn>
 
+                {/* Mobile GitHub Star Button */}
+                <div className="block">
+                  <a
+                    href="https://github.com/vatsal-bhakodia/smriti-ai"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-full rounded-full flex items-center justify-center gap-2 border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black"
+                    >
+                      <Star className="h-4 w-4" />
+                      Star on GitHub
+                    </Button>
+                  </a>
+                </div>
               </motion.div>
             </motion.div>
           )}
