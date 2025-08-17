@@ -47,6 +47,7 @@ const Hero = () => {
         <TextAnimate
           animation="blurIn"
           as="h1"
+          duration={1}
           className="font-display text-center text-3xl md:text-7xl font-bold w-full lg:w-auto max-w-4xl mx-auto"
         >
           Phadlo Chahe Kahi se, Yaad Hoga Yahi se.
