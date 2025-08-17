@@ -1,7 +1,7 @@
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Brain, Star, LayoutDashboard, Users } from "lucide-react";
+import { Brain, Star, LayoutDashboard } from "lucide-react";
 
 export default function Navbar() {
   return (
@@ -44,7 +44,6 @@ export default function Navbar() {
                 variant="ghost"
                 className="rounded-full cursor-pointer hover:bg-[#adff2f]/10 hover:text-[#adff2f] transition-all duration-300 hover:scale-105 flex items-center gap-2"
               >
-                <Users className="h-4 w-4" />
                 Contributors
               </Button>
             </Link>
