@@ -37,3 +37,4 @@ Contributors:
 | 17        | https://github.com/git-lakshy             | 10        | #73        | feat: add study reminders feature to dashboard           |
 | 18        | https://github.com/Aaditya-0701           | 3         | #75        | Added 2 column layout for sign-in and sign-up pages      |
 | 19        | https://github.com/Ankit-Matth            | 3         | #76        | Fix: make navbar logo responsive on smaller screens      |
+
