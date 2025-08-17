@@ -31,13 +31,13 @@
      </thead>
     <tbody>
          <tr>
-            <td><img alt="Stars" src="https://img.shields.io/github/stars/TanmayKalra09/SmartLog?style=flat&logo=github"/></td>
-            <td><img alt="Forks" src="https://img.shields.io/github/forks/TanmayKalra09/SmartLog?style=flat&logo=github"/></td>
-            <td><img alt="Issues" src="https://img.shields.io/github/issues/TanmayKalra09/SmartLog?style=flat&logo=github"/></td>
-            <td><img alt="Open PRs" src="https://img.shields.io/github/issues-pr/TanmayKalra09/SmartLog?style=flat&logo=github"/></td>
-            <td><img alt="Closed PRs" src="https://img.shields.io/github/issues-pr-closed/TanmayKalra09/SmartLog?style=flat&color=critical&logo=github"/></td>
-            <td><img alt="Languages Count" src="https://img.shields.io/github/languages/count/TanmayKalra09/SmartLog?style=flat&color=green&logo=github"></td>
-            <td><img alt="Contributors Count" src="https://img.shields.io/github/contributors/TanmayKalra09/SmartLog?style=flat&color=blue&logo=github"/></td>
+            <td><img alt="Stars" src="https://img.shields.io/github/stars/vatsal-bhakodia/smriti-ai?style=flat&logo=github"/></td>
+            <td><img alt="Forks" src="https://img.shields.io/github/forks/vatsal-bhakodia/smriti-ai?style=flat&logo=github"/></td>
+            <td><img alt="Issues" src="https://img.shields.io/github/issues/vatsal-bhakodia/smriti-ai?style=flat&logo=github"/></td>
+            <td><img alt="Open PRs" src="https://img.shields.io/github/issues-pr/vatsal-bhakodia/smriti-ai?style=flat&logo=github"/></td>
+            <td><img alt="Closed PRs" src="https://img.shields.io/github/issues-pr-closed/vatsal-bhakodia/smriti-ai?style=flat&color=critical&logo=github"/></td>
+            <td><img alt="Languages Count" src="https://img.shields.io/github/languages/count/vatsal-bhakodia/smriti-ai?style=flat&color=green&logo=github"></td>
+            <td><img alt="Contributors Count" src="https://img.shields.io/github/contributors/vatsal-bhakodia/smriti-ai?style=flat&color=blue&logo=github"/></td>
         </tr>
     </tbody>
 </table>
