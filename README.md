@@ -1,19 +1,6 @@
-# 📚 Smriti AI – Your Smart Learning Companion
+# Smriti AI – Your Smart Learning Companion
 
-> Smriti AI is an intelligent, all-in-one learning assistant that helps you **organize**, **understand**, and **retain** everything you study 🧠. Whether you're a student, a self-learner, or a professional, Smriti AI transforms passive content into active learning tools.
-
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
-
-## 🛠️ Tech Stack
-
-- 🧩 **Frontend**: Next.js, TypeScript, Tailwind CSS
-- 🧠 **AI Layer**: Gemini APIS,LLMs
-- 🔐 **Auth**: Clerk
-- ☁️ **Backend**: Next.js,Prisma,Mongodb (shifted to postgres )
-- 🤖 **Bot Layer**: WhatsApp + Twilio Integration
-- 🧪 **Chrome Extension**: Capture videos directly from YouTube //upcoming
-
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="150%">
+Smriti AI is an intelligent, all-in-one learning assistant that helps you **organize**, **understand**, and **retain** everything you study 🧠. Whether you're a student, a self-learner, or a professional, Smriti AI transforms passive content into active learning tools.
 
 **📊 Project Insights**
 
@@ -49,6 +36,17 @@
 </div>
 
 <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="150%">
+
+## 🛠️ Tech Stack
+
+- 🧩 **Frontend**: Next.js, TypeScript, Tailwind CSS
+- 🧠 **AI Layer**: Gemini APIS,LLMs
+- 🔐 **Auth**: Clerk
+- ☁️ **Backend**: Next.js,Prisma,Postgres
+- 🤖 **Bot Layer**: WhatsApp + Twilio Integration
+- 🧪 **Chrome Extension**: Capture videos directly from YouTube //upcoming
+
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 ## 🚀 Getting Started (Developer Mode)
 
@@ -150,14 +148,14 @@ npm run dev
 
 The app should now be running at [http://localhost:3000](http://localhost:3000) 🚀
 
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="150%">
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 <h2 align="center">🎯 Open Source Programmes ⭐</h2>
 <p align="center">
   <b>This project is now OFFICIALLY accepted for:</b>
 </p>
 
-![GSSoC Logo](/public/gssoc%20logo.png)
+![GSSoC Logo](/public/gssoc.png)
 
 🌟 **Exciting News...**
 
@@ -174,7 +172,7 @@ The app should now be running at [http://localhost:3000](http://localhost:3000) 
 
 🎉 **I can’t wait to welcome new contributors** from GSSoC 2025 to this SmartLog project family! Let's build, learn, and grow together — one commit at a time. 🔥👨‍💻👩‍💻
 
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="150%">
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 ## ✨ Why Smriti AI?
 
@@ -185,9 +183,7 @@ In today's world of scattered PDFs, YouTube videos, and online tutorials — **S
 ⏰ **Revise** smarter with spaced repetition and WhatsApp reminders  
 📈 **Track** progress and stay motivated with performance dashboards
 
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="500">
-</div>
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 ## 🌟 Features
 
@@ -210,9 +206,7 @@ See how much you’ve improved over time, identify weak areas, and never lose tr
 💬 **Multimodal Interface**  
 Use it on web, and soon — on WhatsApp & mobile apps too!
 
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="500">
-</div>
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 ## 👥 Who Is It For?
 
@@ -221,15 +215,16 @@ Use it on web, and soon — on WhatsApp & mobile apps too!
 👩‍💼 **Professionals** – Upskilling with limited time  
 👨‍🏫 **Educators & Coaching Institutes** – To create structured, AI-enhanced revision modules
 
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="150%">
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 **🤝👤 Contribution Guidelines**
 
- We love our contributors! If you'd like to help, please check out our [`CONTRIBUTE.md`](https://github.com/vatsal-bhakodia/smriti-ai/blob/main/CONTRIBUTING.md) file for guidelines.
+We love our contributors! If you'd like to help, please check out our [`CONTRIBUTE.md`](https://github.com/vatsal-bhakodia/smriti-ai/blob/main/CONTRIBUTING.md) file for guidelines.
 
 > Thank you once again to all our contributors who has contributed to **SmartLog!** Your efforts are truly appreciated. 💖👏
 
 <!-- Contributors badge (auto-updating) -->
+
 [![Contributors](https://img.shields.io/github/contributors/vatsal-bhakodia/smriti-ai?style=for-the-badge)](https://github.com/vatsal-bhakodia/smriti-ai/graphs/contributors)
 
 <!-- Contributors avatars (auto-updating) -->
@@ -245,34 +240,36 @@ See the full list of contributors and their contributions on the [`GitHub Contri
 <p style="font-family:var(--ff-philosopher);font-size:3rem;"><b> Show some <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Red%20Heart.png" alt="Red Heart" width="40" height="40" /> by starring this awesome repository! </p>
 </p>
 
- **💡 Suggestions & Feedback**
+**💡 Suggestions & Feedback**
 
 Feel free to open issues or discussions if you have any feedback, feature suggestions, or want to collaborate!
 
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="150%">
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 **📄 License**
 
 This project is licensed under the MIT License - see the [`License`](https://github.com/vatsal-bhakodia/smriti-ai/blob/main/LICENSE) file for details.
 
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="150%">
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 **⭐ Stargazers**
+
 <div align="center">
   <a href="https://github.com/vatsal-bhakodia/smriti-ai/stargazers">
     <img src="https://reporoster.com/stars/vatsal-bhakodia/smriti-ai?type=svg&limit=100&names=false" alt="Stargazers" />
   </a>
 </div>
 
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="150%">
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 **🍴 Forkers**
+
 <div align="center">
   <a href="https://github.com/vatsal-bhakodia/smriti-ai/network/members">
     <img src="https://reporoster.com/forks/vatsal-bhakodia/smriti-ai?type=svg&limit=100&names=false" alt="Forkers" />
   </a>
 
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="150%">
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 <h2>Project Admin:</h2>
 <table>
@@ -283,16 +280,16 @@ This project is licensed under the MIT License - see the [`License`](https://git
 </tr>
 </table>
 
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 **👨‍🏫 Mentors – smriti-ai (GSSoC'25)**
 
-| Role          | Name               | GitHub Profile                                      | LinkedIn Profile                                                        |
-| ------------- | ------------------ | --------------------------------------------------- | ----------------------------------------------------------------------- |
-| Mentor 1      | Sanjana Gurav  |[213sanjana](https://github.com/213sanjana) | [sanjana-gurav](https://www.linkedin.com/in/sanjana-gurav-59357028a/)   |
-| Mentor 2      | Bhavik Dodda  |[BhavikDodda](https://github.com/BhavikDodda)  | [bhavik-dodda](https://www.linkedin.com/in/bhavik-dodda/)  |
+| Name          | GitHub Profile                                | LinkedIn Profile                                                      |
+| ------------- | --------------------------------------------- | --------------------------------------------------------------------- |
+| Sanjana Gurav | [213sanjana](https://github.com/213sanjana)   | [sanjana-gurav](https://www.linkedin.com/in/sanjana-gurav-59357028a/) |
+| Bhavik Dodda  | [BhavikDodda](https://github.com/BhavikDodda) | [bhavik-dodda](https://www.linkedin.com/in/bhavik-dodda/)             |
 
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 <h1 align="center"><img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Glowing%20Star.png" alt="Glowing Star" width="25" height="25" /> Give us a Star and let's make magic! <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Glowing%20Star.png" alt="Glowing Star" width="25" height="25" /></h1>
 
@@ -300,15 +297,13 @@ This project is licensed under the MIT License - see the [`License`](https://git
      <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Mirror%20Ball.png" alt="Mirror Ball" width="150" height="150" />
 </p>
 
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="150%">
-
-**👨‍💻 Developed By** 
-  **❤️Vatsal Bhakodia and Contributors❤️** [Watch Demo](https://www.smriti.live/) • [Request Feature](https://github.com/vatsal-bhakodia/smriti-ai/issues) • [Documentation](https://github.com/vatsal-bhakodia)
-
- <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=65&section=footer"/>
+**👨‍💻 Developed By**
+**❤️Vatsal Bhakodia and Contributors❤️** [Watch Demo](https://www.smriti.live/) • [Request Feature](https://github.com/vatsal-bhakodia/smriti-ai/issues)
 
 <div align="center">
     <a href="#top">
         <img src="https://img.shields.io/badge/Back%20to%20Top-000000?style=for-the-badge&logo=github&logoColor=white" alt="Back to Top">
     </a>
 </div>
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=65&section=footer"/>
