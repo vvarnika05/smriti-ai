@@ -1,9 +1,12 @@
+// app/(authenticated_Pages)/dashboard/topic/[[...id]]/page.tsx
+
 "use client";
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
 import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Import Tabs
 import TopicHeader from "@/components/topic/TopicHeader";
 import TopicModal from "@/components/topic/TopicModal";
 import ResourceGrid from "@/components/topic/ResourceGrid";
@@ -12,6 +15,7 @@ import DeleteDialog from "@/components/topic/DeleteDialog";
 import SearchBar from "@/components/topic/SearchBar";
 import { useTopic } from "@/hooks/useTopic";
 import { useResources } from "@/hooks/useResources";
+import { SimpleNoteEditor } from "@/components/notes/SimpleNoteEditor"; // Import our new editor
 
 export default function TopicPage({ params }: { params: any }) {
   const rawId = (use(params) as { id: string | string[] }).id;
@@ -92,12 +96,18 @@ export default function TopicPage({ params }: { params: any }) {
           topicName={topicName}
           onClick={() => setTopicModalOpen(true)}
         />
-
         <Button onClick={() => setResourceModalOpen(true)} className="gap-2">
           <PlusCircle className="h-4 w-4" />
           Add Resource
         </Button>
       </div>
+      
+      {/* --- ADD TABS TO ORGANIZE CONTENT --- */}
+      <Tabs defaultValue="resources" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="resources">Resources</TabsTrigger>
+          <TabsTrigger value="notes">Notes</TabsTrigger>
+        </TabsList>
 
       {/* Resource Modal */}
       <ResourceModal
@@ -141,6 +151,7 @@ export default function TopicPage({ params }: { params: any }) {
           setDeleteDialogOpen(true);
         }}
       />
+
     </div>
   );
 }
