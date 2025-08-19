@@ -46,6 +46,10 @@ export default function TopicPage({ params }: { params: any }) {
     setPdfTitle,
     pdfFile,
     setPdfFile,
+    notesTitle,
+    setNotesTitle,
+    notesContent,
+    setNotesContent,
     handleAddResource,
     deleteDialogOpen,
     setDeleteDialogOpen,
@@ -106,6 +110,10 @@ export default function TopicPage({ params }: { params: any }) {
         pdfTitle={pdfTitle}
         setPdfTitle={setPdfTitle}
         setPdfFile={setPdfFile}
+        notesTitle={notesTitle}
+        setNotesTitle={setNotesTitle}
+        notesContent={notesContent}
+        setNotesContent={setNotesContent}
         onAdd={handleAddResource}
         isLoading={isLoading}
         pdfFile={pdfFile}

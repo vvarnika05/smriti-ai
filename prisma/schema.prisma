@@ -6,7 +6,6 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -47,6 +46,7 @@ model Resource {
   updatedAt DateTime   @updatedAt
   topic     Topic      @relation(fields: [topicId], references: [id],onDelete: Cascade)
   quizzes   Quiz[]
+  flashcardDeck FlashcardDeck?
 }
 
 model Quiz {
@@ -76,6 +76,37 @@ model QuizResult {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   quiz      Quiz     @relation(fields: [quizId], references: [id],onDelete: Cascade)
+}
+
+model FlashcardDeck {
+  id        String       @id @default(uuid())
+  resourceId String      @unique
+  title     String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  resource  Resource     @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  cards     Flashcard[]
+}
+
+model Flashcard {
+  id        String        @id @default(uuid())
+  deckId    String
+  term      String
+  definition String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  deck      FlashcardDeck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  reviews   FlashcardReview[]
+}
+
+model FlashcardReview {
+  id          String    @id @default(uuid())
+  cardId      String
+  difficulty  Int       // 1-5 scale (1=easy, 5=hard)
+  nextReview  DateTime
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  card        Flashcard @relation(fields: [cardId], references: [id], onDelete: Cascade)
 }
 
 model ContactQuery {

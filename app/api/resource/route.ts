@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
   const contentType = req.headers.get("content-type");
   if (contentType?.includes("application/json")) {
     const body = await req.json();
-  const { topicId, title, type, url, summary } = body;
+    const { topicId, title, type, url, summary } = body;
 
   if (!topicId || !title || !type || !url) {
     return NextResponse.json(

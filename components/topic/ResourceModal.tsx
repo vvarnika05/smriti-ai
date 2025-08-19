@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { ResourceType } from "@/types";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ResourceModalProps {
   open: boolean;
@@ -15,6 +16,11 @@ interface ResourceModalProps {
   setPdfTitle: (title: string) => void;
   pdfFile: File | null;
   setPdfFile: (file: File | null) => void;
+  // Notes/Article
+  notesTitle?: string;
+  setNotesTitle?: (title: string) => void;
+  notesContent?: string;
+  setNotesContent?: (text: string) => void;
   onAdd: () => Promise<void>;
   isLoading: boolean;
 }
@@ -30,6 +36,10 @@ export default function ResourceModal({
   setPdfTitle,
   pdfFile,
   setPdfFile,
+  notesTitle,
+  setNotesTitle,
+  notesContent,
+  setNotesContent,
   onAdd,
   isLoading,
 }: ResourceModalProps) {
@@ -69,6 +79,15 @@ export default function ResourceModal({
               />
               <span className="ml-2">PDF File</span>
             </Label>
+            <Label>
+              <input
+                type="radio"
+                name="resource"
+                checked={resourceType === "ARTICLE"}
+                onChange={() => setResourceType("ARTICLE")}
+              />
+              <span className="ml-2">Notes</span>
+            </Label>
           </div>
 
           {resourceType === "VIDEO" ? (
@@ -78,7 +97,7 @@ export default function ResourceModal({
               placeholder="YouTube video URL"
               autoFocus
             />
-          ) : (
+          ) : resourceType === "PDF" ? (
             <>
               <Input
                 value={pdfTitle}
@@ -97,6 +116,22 @@ export default function ResourceModal({
                 className="mt-2"
               />
             </>
+          ) : (
+            <>
+              <Input
+                value={notesTitle || ""}
+                onChange={(e) => setNotesTitle && setNotesTitle(e.target.value)}
+                placeholder="Notes title"
+                autoFocus
+              />
+              <Textarea
+                value={notesContent || ""}
+                onChange={(e) => setNotesContent && setNotesContent(e.target.value)}
+                placeholder="Paste or write your notes here"
+                rows={8}
+                className="mt-2"
+              />
+            </>
           )}
         </div>
 
@@ -108,7 +143,11 @@ export default function ResourceModal({
             onClick={onAdd}
             disabled={
               isLoading ||
-              (resourceType === "VIDEO" ? !youtubeUrl : !pdfTitle || !pdfFile)
+              (resourceType === "VIDEO"
+                ? !youtubeUrl
+                : resourceType === "PDF"
+                ? !pdfTitle || !pdfFile
+                : !notesTitle || !notesContent)
             }
           >
             {isLoading ? "Loading..." : "Add"}

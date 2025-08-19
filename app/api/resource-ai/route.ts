@@ -5,12 +5,14 @@ import {
   MINDMAP_PROMPT,
   ROADMAP_PROMPT,
   QUIZ_PROMPT,
+  FLASHCARD_PROMPT,
 } from "@/lib/prompts";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getYoutubeTranscript } from "@/utils/youtube";
+import axios from "axios";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
@@ -49,11 +51,8 @@ export async function POST(req: NextRequest) {
       where: { id: resourceId },
     });
 
-    if (!resource || resource.type !== "VIDEO") {
-      return NextResponse.json(
-        { message: "Invalid or unsupported resource" },
-        { status: 400 }
-      );
+    if (!resource) {
+      return NextResponse.json({ message: "Resource not found" }, { status: 404 });
     }
 
     let summary = resource.summary;
@@ -73,7 +72,37 @@ export async function POST(req: NextRequest) {
           const fallbackPrompt = FALLBACK_PROMPT(resource.title);
           summary = await askGemini(fallbackPrompt);
         }
+      } else if (resource.type === "PDF") {
+        try {
+          // Download PDF bytes from Cloudinary (or any URL) and extract text
+          const pdfBytes = await axios.get<ArrayBuffer>(resource.url, {
+            responseType: "arraybuffer",
+          });
+          const { default: pdfParse } = await import("pdf-parse");
+          const parsed = await pdfParse(Buffer.from(pdfBytes.data));
+          const prompt = SUMMARY_PROMPT(parsed.text || "");
+          summary = await askGemini(prompt);
+        } catch (err) {
+          console.error("PDF parse failed. Falling back to title-based summary.", err);
+          const fallbackPrompt = FALLBACK_PROMPT(resource.title);
+          summary = await askGemini(fallbackPrompt);
+        }
+      } else if (resource.type === "ARTICLE") {
+        // For notes/text resources, we treat current resource.summary (if provided during creation)
+        // as the raw content to summarize. If empty, fall back to the title.
+        const baseText = resource.summary && resource.summary.length > 0 ? resource.summary : resource.title;
+        try {
+          const prompt = SUMMARY_PROMPT(baseText);
+          summary = await askGemini(prompt);
+        } catch (err) {
+          console.error("ARTICLE summary generation failed.", err);
+          const fallbackPrompt = FALLBACK_PROMPT(resource.title);
+          summary = await askGemini(fallbackPrompt);
+        }
+      }
 
+      // Persist computed summary back to the resource for future reuse
+      if (summary && summary.length > 0) {
         await prisma.resource.update({
           where: { id: resourceId },
           data: { summary },
@@ -171,6 +200,62 @@ export async function POST(req: NextRequest) {
           message: "Quiz created with questions",
           quiz: quizRecord,
           quizQAs,
+        });
+      }
+    }
+
+    if (task === "flashcards") {
+      // Step 1: Check if a flashcard deck already exists for this resourceId
+      const existingDeck = await prisma.flashcardDeck.findUnique({
+        where: { resourceId: resource.id },
+        include: {
+          cards: true, // Include related flashcards
+        },
+      });
+
+      if (existingDeck) {
+        return NextResponse.json({
+          message: "Flashcard deck already exists for this resource",
+          deck: existingDeck,
+          cards: existingDeck.cards,
+        });
+      } else {
+        // Step 2: Generate new flashcards
+        const prompt = FLASHCARD_PROMPT(summary);
+
+        const flashcardText = await askGemini(prompt);
+        const flashcards = extractJSON(flashcardText);
+
+        interface Flashcard {
+          term: string;
+          definition: string;
+        }
+
+        // Step 3: Create a new flashcard deck record
+        const deckRecord = await prisma.flashcardDeck.create({
+          data: {
+            resourceId: resource.id,
+            title: `Flashcards for ${resource.title}`,
+          },
+        });
+
+        // Step 4: Add the flashcards to the Flashcard model
+        const cards = await Promise.all(
+          flashcards.map((card: Flashcard) =>
+            prisma.flashcard.create({
+              data: {
+                deckId: deckRecord.id,
+                term: card.term,
+                definition: card.definition,
+              },
+            })
+          )
+        );
+
+        return NextResponse.json({
+          message: "Flashcard deck created with cards",
+          deck: deckRecord,
+          cards,
         });
       }
     }
