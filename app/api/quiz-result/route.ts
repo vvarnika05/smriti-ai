@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import { getLevelAndTtile } from "@/lib/levelUtils";
 
 // POST: Save quiz result
 export async function POST(req: NextRequest) {
@@ -35,6 +36,26 @@ export async function POST(req: NextRequest) {
         score,
       },
     });
+
+    let xpGain = 10;
+    if(score === 100) xpGain += 20;
+
+    const user = await prisma.user.update({
+      where: {id: userId},
+      data: {
+        experience: {
+          increment: xpGain
+        }
+      }
+    })
+
+    const {level} = getLevelAndTtile(user.experience);
+    await prisma.user.update({
+      where: {id: userId},
+      data: {
+        level
+      }
+    })
 
     return NextResponse.json(
       {

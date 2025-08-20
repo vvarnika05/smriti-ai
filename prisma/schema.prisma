@@ -18,6 +18,9 @@ model User {
   lastLogin     DateTime @default(now())
   currentStreak Int      @default(0)
   topics        Topic[]
+
+  level        Int      @default(1)
+  experience   Int      @default(0)
 }
 
 model Topic {
