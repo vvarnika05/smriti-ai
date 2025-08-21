@@ -18,8 +18,8 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/samadhan
-      DIRECT_URL: postgres://postgres:postgres@postgres:5432/samadhan
+      DATABASE_URL: postgresql://postgres:Ashish@123@db.hdkvikxhqshhlpiynoku.supabase.co:5432/postgres
+      DIRECT_URL: postgresql://postgres:Ashish@123@db.hdkvikxhqshhlpiynoku.supabase.co:5432/postgres
     ports:
       - "3000:3000"
     env_file:
