@@ -1,280 +1,198 @@
 "use client";
-import { useRef, use, useState, useEffect } from "react";
-import QuizQuestion from "@/components/quiz/QuizQuestion";
-import QuizFinalResult from "@/components/quiz/QuizResult";
-import QuizReview from "@/components/quiz/QuizReview";
-import { ArrowLeft, ArrowRight, AlertCircle } from "lucide-react";
+
+import { useState, useEffect, use } from "react";
 import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LoaderCircle, CheckCircle, XCircle } from "lucide-react";
+import { QuizQA, Resource } from "@prisma/client";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import {
+  QuizGenerationResponse,
+  CheckAnswerResponse,
+} from "@/types/quiz";
+import { QUIZ_LENGTH } from "@/config/quiz";
+import { QUIZ_STATUS } from "@/lib/constants";
 
-export default function QuizPage({ params }: { params: any }) {
-  const rawId = (use(params) as { id: string | string[] }).id;
-  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+type QuizParams = {
+  id: string | string[];
+};
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [resourceTopic, setResourceTopic] = useState("");
-  const [quizData, setQuizData] = useState<
-    {
-      question: string;
-      options: string[];
-      answer: string;
-      explanation: string;
-    }[]
-  >([]);
+type QuestionWithTopic = QuizQA & {
+  quiz: {
+    resource: Resource;
+  };
+};
 
-  // Quiz state
-  const [currentQ, setCurrentQ] = useState(0);
-  const [score, setScore] = useState(0);
-  const [selected, setSelected] = useState<string | null>(null);
-  const [userAnswers, setUserAnswers] = useState<(string | null)[]>([]);
-  const [showWarning, setShowWarning] = useState(false);
+type AdaptiveQuestionResponse = {
+    question: QuestionWithTopic | null;
+}
 
-  // Display state
-  const [quizState, setQuizState] = useState<"quiz" | "results" | "review">(
-    "quiz"
-  );
+type QuizStatus = typeof QUIZ_STATUS[keyof typeof QUIZ_STATUS];
+
+export default function AdaptiveQuizPage({ params }: { params: any }) {
+  const resolvedParams = use(params) as QuizParams;
+  const id = Array.isArray(resolvedParams.id) ? resolvedParams.id[0] : resolvedParams.id;
+  const router = useRouter();
+
+  const [skillScore, setSkillScore] = useState(50);
+  const [currentQuestion, setCurrentQuestion] = useState<QuestionWithTopic | null>(null);
+  const [answeredIds, setAnsweredIds] = useState<string[]>([]);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [result, setResult] = useState<CheckAnswerResponse | null>(null);
+  const [status, setStatus] = useState<QuizStatus>(QUIZ_STATUS.GENERATING);
+  const [correctCount, setCorrectCount] = useState(0);
   const [quizId, setQuizId] = useState<string | null>(null);
-
-  const resourceAPI = "/api/resource";
-
-  type QuizQA = {
-    id: string;
-    quizId: string;
-    question: string;
-    options: string[];
-    correctAnswer: string;
-    explanation: string;
-  };
-
-  type QuizResponse = {
-    message: string;
-    quiz: { id: string; resourceId: string };
-    quizQAs: QuizQA[];
-  };
-
-  const hasFetched = useRef(false);
+  const [topicId, setTopicId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (hasFetched.current) return;
-    hasFetched.current = true;
-
-    async function Datafetcher() {
-      // Fetch resource title
-      const res = await axios.get<{ resource?: { title: string } }>(
-        resourceAPI,
-        {
-          params: { id },
-        }
-      );
-      if (res.data.resource) {
-        setResourceTopic(res.data.resource.title);
-      } else {
-        console.error("Resource not found");
-      }
-
-      // Call quiz API
-      const payload = {
-        resourceId: id,
-        task: "quiz",
-      };
-
+    const generateQuizPool = async () => {
       try {
-        const resQuiz = await axios.post<QuizResponse>(
-          "/api/resource-ai",
-          payload
-        );
-        console.log("Quiz response:", resQuiz.data);
-
-        const quizItems = resQuiz.data.quizQAs.map((qa) => ({
-          question: qa.question,
-          options: qa.options,
-          answer: qa.correctAnswer,
-          explanation: qa.explanation,
-        }));
-
-        setQuizData(quizItems);
-        // Store the quiz ID for saving results later
-        setQuizId(resQuiz.data.quiz.id);
-        // Initialize userAnswers array with null values
-        setUserAnswers(Array(quizItems.length).fill(null));
+        // --- THIS IS THE FIX ---
+        // We now call the new, dedicated `/api/quiz` endpoint and no longer need to send the 'task' parameter.
+        const response = await axios.post<QuizGenerationResponse>('/api/quiz', { resourceId: id });
+        setQuizId(response.data.quiz.id);
       } catch (error) {
-        console.error("Error fetching quiz:", error);
-      } finally {
-        setIsLoading(false);
+        console.error("Failed to generate quiz pool:", error);
+        setStatus(QUIZ_STATUS.FINISHED);
       }
-    }
-
-    Datafetcher();
+    };
+    generateQuizPool();
   }, [id]);
 
-  const total = quizData.length;
-
-  const handleSubmit = async () => {
-    if (!selected && currentQ === total - 1) {
-      // On last question, show warning if no answer selected
-      setShowWarning(true);
+  useEffect(() => {
+    if (!quizId || answeredIds.length >= QUIZ_LENGTH) {
+      if (quizId && answeredIds.length >= QUIZ_LENGTH) {
+        endQuiz();
+      }
       return;
     }
 
-    setShowWarning(false);
+    const fetchQuestion = async () => {
+      setStatus(QUIZ_STATUS.LOADING);
+      try {
+        const response = await axios.get<AdaptiveQuestionResponse>(`/api/adaptive-quiz`, {
+          params: { quizId, skillScore, excludedIds: answeredIds.join(',') },
+        });
 
-    // Update user answers array
-    const updatedAnswers = [...userAnswers];
-    updatedAnswers[currentQ] = selected;
-    setUserAnswers(updatedAnswers);
+        const questionData = response.data.question;
 
-    let finalScore = score;
-    if (selected === quizData[currentQ].answer) {
-      finalScore = score + 1;
-      setScore(finalScore);
-    }
-
-    // Move to next or end
-    if (currentQ < total - 1) {
-      setCurrentQ((prev) => prev + 1);
-      setSelected(null);
-    } else {
-      // Quiz completed - save result to database
-      if (quizId) {
-        try {
-          await axios.post("/api/quiz-result", {
-            quizId,
-            score: finalScore,
-          });
-          console.log("Quiz result saved successfully");
-        } catch (error) {
-          console.error("Error saving quiz result:", error);
-          // Don't prevent showing results even if saving fails
+        if (questionData) {
+          setCurrentQuestion(questionData);
+          if (!topicId && questionData.quiz.resource.topicId) {
+            setTopicId(questionData.quiz.resource.topicId);
+          }
+          setStatus(QUIZ_STATUS.ANSWERING);
+        } else {
+          endQuiz();
         }
+      } catch (error) {
+        console.error("Failed to fetch question:", error);
+        endQuiz();
       }
-      // Change to results view
-      setQuizState("results");
+    };
+    
+    fetchQuestion();
+  }, [quizId, answeredIds]);
+
+  const endQuiz = async () => {
+    if (status === QUIZ_STATUS.FINISHED) return;
+    setStatus(QUIZ_STATUS.FINISHED);
+    const finalScore = Math.round((correctCount / Math.max(1, answeredIds.length)) * 100);
+    try {
+      if (quizId) {
+        await axios.post('/api/quiz-result', { quizId, score: finalScore });
+      }
+    } catch (error) {
+      console.error("Failed to save quiz result:", error);
     }
   };
 
-  const handlePrevious = () => {
-    setCurrentQ((prev) => prev - 1);
-    setSelected(userAnswers[currentQ - 1]);
-    setShowWarning(false);
+  const handleSubmitAnswer = async () => {
+    if (!selectedOption || !currentQuestion) return;
+    setStatus(QUIZ_STATUS.LOADING);
+    try {
+      const response = await axios.post<CheckAnswerResponse>(`/api/adaptive-quiz`, {
+        questionId: currentQuestion.id,
+        userAnswer: selectedOption,
+      });
+      setResult(response.data);
+      if (response.data.isCorrect) {
+        setCorrectCount(prev => prev + 1);
+      }
+      setStatus(QUIZ_STATUS.ANSWERED);
+    } catch (error) {
+      console.error("Failed to check answer:", error);
+      setStatus(QUIZ_STATUS.ANSWERING);
+    }
   };
 
-  const resetQuiz = () => {
-    setCurrentQ(0);
-    setScore(0);
-    setSelected(null);
-    setUserAnswers(Array(quizData.length).fill(null));
-    setQuizState("quiz");
+  const handleNextQuestion = () => {
+    const scoreChange = result?.isCorrect ? 10 : -10;
+    setSkillScore(prev => Math.max(1, Math.min(100, prev + scoreChange)));
+    setAnsweredIds(prev => [...prev, currentQuestion!.id]);
+    setSelectedOption(null);
+    setResult(null);
   };
 
-  const startReview = () => {
-    setQuizState("review");
+  const getDynamicMessage = () => {
+    if (skillScore >= 75) return "Excellent! You've demonstrated a deep understanding of the advanced concepts in this topic.";
+    if (skillScore >= 40) return "Great job! You have a solid grasp of the core material. A little review on the tougher questions will make you an expert.";
+    return "Good start! You're building a solid foundation. Revisiting the material will help solidify the key ideas.";
   };
 
-  const returnToResults = () => {
-    setQuizState("results");
-  };
+  if (status === QUIZ_STATUS.GENERATING) {
+    return <div className="min-h-screen flex flex-col gap-4 justify-center items-center"><LoaderCircle className="w-12 h-12 animate-spin" /><p className="text-muted-foreground">Preparing your assessment...</p></div>;
+  }
+  
+  if (status === QUIZ_STATUS.FINISHED) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
+        <Card className="w-full max-w-2xl mx-auto text-center">
+          <CardHeader><CardTitle>Assessment Complete!</CardTitle></CardHeader>
+          <CardContent>
+            <p className="text-4xl font-bold mb-4">{Math.round((correctCount / QUIZ_LENGTH) * 100)}%</p>
+            <p className="text-lg text-muted-foreground mb-2">Final Skill Score: {skillScore}</p>
+            <p className="mt-4 p-4 bg-muted rounded-md">{getDynamicMessage()}</p>
+            <Button className="mt-6" onClick={() => router.push(`/dashboard/topic/${topicId || ''}`)}>Back to Topic</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!currentQuestion || status === QUIZ_STATUS.LOADING) {
+    return <div className="min-h-screen flex justify-center items-center"><LoaderCircle className="w-12 h-12 animate-spin" /></div>;
+  }
 
   return (
-    <div className="mt-10 min-h-[90vh] h-full px-6 max-w-3xl mx-auto flex flex-col items-center justify-center">
-      {quizState !== "results" && (
-        <div className="py-8 space-y-4 text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold text-lime-400">
-            Quiz On
-          </h1>
-          <h2 className="text-xl sm:text-xl font-medium text-white px-4">
-            {resourceTopic}
-          </h2>
-        </div>
-      )}
-
-      {isLoading ? (
-        <div className="h-[50vh] flex flex-col items-center justify-center text-white text-lg gap-4">
-          <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
-          <span>Loading...</span>
-        </div>
-      ) : (
-        <div className="bg-zinc-900 rounded-xl p-6 shadow-xl">
-          {quizState === "quiz" && (
-            <>
-              {/* Progress Bar */}
-              <div className="w-full mb-6">
-                <div className="w-full h-2 bg-zinc-700 rounded-full">
-                  <div
-                    className="h-2 bg-primary rounded-full transition-all duration-300"
-                    style={{ width: `${(currentQ / total) * 100}%` }}
-                  />
-                </div>
-                <p className="text-sm text-right mt-1 text-gray-400">
-                  Question {currentQ + 1} of {total}
-                </p>
-              </div>
-
-              <QuizQuestion
-                question={quizData[currentQ].question}
-                options={quizData[currentQ].options}
-                selected={selected}
-                setSelected={(value) => {
-                  setSelected(value);
-                  setShowWarning(false);
-                }}
-              />
-
-              {showWarning && (
-                <div className="mt-4 p-3 bg-red-900/30 border border-red-500/50 rounded-lg flex items-center gap-2 text-red-200">
-                  <AlertCircle size={18} />
-                  <p className="text-sm">
-                    Please select an answer before proceeding to results.
-                  </p>
-                </div>
-              )}
-
-              <div className="flex items-center justify-between mt-6">
-                <div>
-                  {currentQ > 0 && (
-                    <button
-                      onClick={handlePrevious}
-                      className="flex items-center gap-2 bg-zinc-700 text-white px-4 py-2 rounded hover:bg-zinc-600 transition-colors"
-                    >
-                      <ArrowLeft size={16} />
-                      Previous
-                    </button>
-                  )}
-                </div>
-
-                <div>
-                  <button
-                    onClick={handleSubmit}
-                    className={`bg-primary text-black px-6 py-2 rounded hover:bg-lime-300 flex items-center gap-2 transition-colors ${
-                      !selected && currentQ < total - 1 ? "opacity-70" : ""
-                    }`}
-                  >
-                    {currentQ === total - 1 ? "Finish Quiz" : "Next"}
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </>
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>Question {answeredIds.length + 1} of {QUIZ_LENGTH}</CardTitle>
+          <p className="pt-4 text-lg">{currentQuestion.question}</p>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          {currentQuestion.options.map((option, index) => (
+            <Button
+              key={index}
+              variant="outline"
+              className={cn("justify-start text-left h-auto whitespace-normal py-3", selectedOption === option && "ring-2 ring-primary", status === QUIZ_STATUS.ANSWERED && result?.correctAnswer === option && "bg-green-500/20 border-green-500 hover:bg-green-500/30", status === QUIZ_STATUS.ANSWERED && selectedOption === option && !result?.isCorrect && "bg-red-500/20 border-red-500 hover:bg-red-500/30")}
+              onClick={() => setSelectedOption(option)}
+              disabled={status === QUIZ_STATUS.ANSWERED}
+            >{option}</Button>
+          ))}
+          {status === QUIZ_STATUS.ANSWERING && <Button onClick={handleSubmitAnswer} disabled={!selectedOption} className="mt-4">Submit</Button>}
+          {status === QUIZ_STATUS.ANSWERED && result && (
+            <div className={cn("mt-4 p-4 rounded-md", result.isCorrect ? "bg-green-500/10 text-green-800 dark:text-green-300" : "bg-red-500/10 text-red-800 dark:text-red-300")}>
+              <div className="flex items-center gap-2"><p className="font-semibold text-lg">{result.isCorrect ? "Correct!" : `Incorrect. The right answer is "${result.correctAnswer}"`}</p></div>
+              <p className="text-sm mt-2 ml-8">{result.explanation}</p>
+              <Button onClick={handleNextQuestion} className="mt-4 w-full">Next Question</Button>
+            </div>
           )}
-
-          {quizState === "results" && (
-            <QuizFinalResult
-              score={score}
-              total={total}
-              userAnswers={userAnswers}
-              quizData={quizData}
-              resetQuiz={resetQuiz}
-              startReview={startReview}
-            />
-          )}
-
-          {quizState === "review" && (
-            <QuizReview
-              quizData={quizData}
-              userAnswers={userAnswers}
-              returnToResults={returnToResults}
-            />
-          )}
-        </div>
-      )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
