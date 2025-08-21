@@ -69,36 +69,28 @@ ${summary}
 `;
 
 export const QUIZ_PROMPT = (summary: string) => `
-You are an expert AI quiz generator. Based on the summary below, create 15 multiple choice questions (MCQs) that assess a user's understanding across different levels of depth.
+You are an AI quiz generator. Based on the summary below, create 5 multiple choice questions (MCQs) that test understanding of the key concepts.
 
 Each MCQ must include:
-- "question": A clear and well-structured question.
-- "options": An array of exactly 4 plausible options.
-- "answer": The correct option from the list.
-- "explanation": A brief 1-2 sentence explanation for the correct answer.
-- "difficulty": An integer from 1 to 100, where 1 is extremely easy (simple factual recall) and 100 is very difficult (requires synthesis, application, or nuanced understanding of the concepts).
+- "question": a well-structured, clear question.
+- "options": an array of exactly 4 plausible options.
+- "answer": the correct option from the list.
+- "explanation": a brief 1-2 sentence explanation that justifies the correct answer.
 
 Rules:
-- Generate a wide and varied range of difficulties. Aim for roughly 5 easy (1-35), 5 medium (36-70), and 5 hard (71-100) questions.
-- Do NOT include any introductory or closing text.
-- Return ONLY a valid JSON array.
+- Do NOT include introductory or closing text.
+- Return ONLY a valid JSON array (no markdown, no text outside the array).
+- Avoid overly easy or irrelevant questions—focus on comprehension and application.
 
 Example format:
 [
   {
-    "question": "What color is the sky on a clear day?",
-    "options": ["Red", "Green", "Blue", "Yellow"],
-    "answer": "Blue",
-    "explanation": "The sky appears blue due to Rayleigh scattering of sunlight in the atmosphere.",
-    "difficulty": 5
+    "question": "What is 2 + 2?",
+    "options": ["1", "2", "3", "4"],
+    "answer": "4",
+    "explanation": "2 + 2 equals 4."
   },
-  {
-    "question": "What is the primary mechanism that causes Rayleigh scattering?",
-    "options": ["Atmospheric temperature", "The size of atmospheric particles relative to the wavelength of light", "The angle of the sun", "The presence of water vapor"],
-    "answer": "The size of atmospheric particles relative to the wavelength of light",
-    "explanation": "Scattering is most effective when the particles are much smaller than the light's wavelength, which is true for nitrogen and oxygen molecules scattering sunlight.",
-    "difficulty": 80
-  }
+  ...
 ]
 
 Summary:
