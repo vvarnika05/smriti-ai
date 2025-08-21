@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/prisma";
+import { getAdaptiveQuestion } from "@/lib/services/quizService"; 
 
 export async function GET(req: NextRequest) {
   try {
@@ -19,29 +20,7 @@ export async function GET(req: NextRequest) {
       return new NextResponse("Quiz ID is required", { status: 400 });
     }
 
-    const difficultyRange = 15;
-    const minDifficulty = Math.max(1, skillScore - difficultyRange);
-    const maxDifficulty = Math.min(100, skillScore + difficultyRange);
-
-    const question = await db.quizQA.findFirst({
-      where: {
-        quizId: quizId,
-        id: { notIn: excludedIds },
-        difficulty: { gte: minDifficulty, lte: maxDifficulty },
-      },
-      include: {
-        quiz: {
-          include: {
-            resource: {
-              select: {
-                topicId: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: { difficulty: 'asc' }
-    });
+    const question = await getAdaptiveQuestion(quizId, skillScore, excludedIds);
 
     if (!question) {
       return NextResponse.json({ message: "No more questions available.", question: null });
