@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "npx prisma migrate deploy && next start",
-    "lint": "next lint"
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start",
+  "deploy:db": "prisma migrate deploy",
+  "lint": "next lint"
   },
   "dependencies": {
   "@clerk/nextjs": "^6.31.3",
