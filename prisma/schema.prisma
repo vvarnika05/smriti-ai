@@ -17,12 +17,10 @@ model User {
   dob           String
   lastLogin     DateTime @default(now())
   currentStreak Int      @default(0)
-  // --- Changes from main branch ---
-  level         Int      @default(1)
-  experience    Int      @default(0)
-  xpToNextLevel Int      @default(100)
-  // --- End of changes ---
   topics        Topic[]
+
+  level        Int      @default(1)
+  experience   Int      @default(0)
 }
 
 model Topic {
@@ -33,7 +31,7 @@ model Topic {
   updatedAt DateTime   @updatedAt
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   resources Resource[]
-  note      Note? // Your change
+  note      Note? // <-- This line is new
 }
 
 enum ResourceType {
@@ -72,7 +70,6 @@ model QuizQA {
   options       String[]
   correctAnswer String
   explanation   String?
-  difficulty    Int      @default(50) // Your change
   quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
 }
 
@@ -94,6 +91,7 @@ model ContactQuery {
   createdAt DateTime @default(now())
 }
 
+// v-- This entire model is new --v
 model Note {
   id        String   @id @default(uuid())
   content   String?  @db.Text
