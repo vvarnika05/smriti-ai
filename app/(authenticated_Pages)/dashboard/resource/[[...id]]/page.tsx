@@ -59,7 +59,6 @@ export default function ResourceChatPage({ params }: { params: any }) {
       { sender: "bot", text: "🧠 Smriti AI is thinking...", type: "text" },
     ]);
 
-    // Check if task is 'summary' and we already have it
     if (task === "summary" && resourceSummary) {
       setMessages((prev) => [
         ...prev.slice(0, -1),
@@ -90,7 +89,6 @@ export default function ResourceChatPage({ params }: { params: any }) {
         botText = res.data.summary;
       } else if ("mindmap" in res.data) {
         botText = res.data.mindmap;
-        console.log(JSON.stringify(botText));
       } else if ("answer" in res.data) {
         botText = res.data.answer;
       }
@@ -132,7 +130,6 @@ export default function ResourceChatPage({ params }: { params: any }) {
       const res = await axios.get<ResourceResponse>(resourceAPI, {
         params: { id },
       });
-      console.log(res.data);
       if (res.data.resource) {
         setResourceTopic(res.data.resource.title);
         setResourceUrl(res.data.resource.url);
@@ -143,7 +140,7 @@ export default function ResourceChatPage({ params }: { params: any }) {
       }
     }
     Datafetcher();
-  }, []);
+  }, [id]);
 
   return (
     <div className="h-screen bg-muted/50 text-foreground pt-24">
@@ -277,7 +274,8 @@ export default function ResourceChatPage({ params }: { params: any }) {
                   className="w-full rounded-full border-zinc-700 text-white hover:bg-zinc-800"
                 >
                   <FileQuestion className="h-4 w-4" />
-                  <span className="hidden sm:inline ml-2">Attempt a Quiz</span>
+                  {/* --- THIS TEXT IS CHANGED --- */}
+                  <span className="hidden sm:inline ml-2">Assess Your Level</span>
                 </Button>
               </Link>
             </div>

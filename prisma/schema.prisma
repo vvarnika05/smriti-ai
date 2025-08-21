@@ -67,6 +67,7 @@ model QuizQA {
   options       String[]
   correctAnswer String
   explanation   String?
+  difficulty    Int      @default(50)
   quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
 }
 

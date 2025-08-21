@@ -23,7 +23,7 @@ async function askGemini(prompt: string): Promise<string> {
 }
 
 function extractJSON(text: string): any {
-  const match = text.match(/\[.*\]/s); // non-greedy multiline match
+  const match = text.match(/\[.*\]/s);
   if (!match) throw new Error("No JSON found in Gemini response.");
   return JSON.parse(match[0]);
 }
@@ -81,48 +81,34 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // --- Unchanged tasks (summary, roadmap, qa, mindmap) ---
     if (task === "summary") {
-      return NextResponse.json({
-        message: "Summary generated",
-        summary,
-      });
+      return NextResponse.json({ message: "Summary generated", summary });
     }
-
     if (task === "roadmap") {
       const prompt = ROADMAP_PROMPT(summary);
-
       const answer = await askGemini(prompt);
       return NextResponse.json({ message: "Roadmap generated", answer });
     }
-
     if (task === "qa") {
       if (!question) {
-        return NextResponse.json(
-          { message: "Question is required for Q&A" },
-          { status: 400 }
-        );
+        return NextResponse.json({ message: "Question is required for Q&A" }, { status: 400 });
       }
-
       const prompt = QA_PROMPT(summary, question);
-
       const answer = await askGemini(prompt);
       return NextResponse.json({ message: "Answer generated", answer });
     }
-
     if (task === "mindmap") {
       const prompt = MINDMAP_PROMPT(summary);
-
       const mindmap = await askGemini(prompt);
       return NextResponse.json({ message: "Mindmap code generated", mindmap });
     }
-
+    
+    // --- Updated quiz task ---
     if (task === "quiz") {
-      // Step 1: Check if a quiz already exists for this resourceId
       const existingQuiz = await prisma.quiz.findUnique({
         where: { resourceId: resource.id },
-        include: {
-          quizQAs: true, // Include related questions and answers
-        },
+        include: { quizQAs: true },
       });
 
       if (existingQuiz) {
@@ -132,27 +118,26 @@ export async function POST(req: NextRequest) {
           quizQAs: existingQuiz.quizQAs,
         });
       } else {
-        // Step 2: Generate new quiz questions
         const prompt = QUIZ_PROMPT(summary);
-
         const mcqText = await askGemini(prompt);
         const mcqs = extractJSON(mcqText);
 
+        // Define the shape of the AI's response, including new field
         interface QuizQuestion {
           question: string;
           options: string[];
           answer: string;
           explanation: string;
+          difficulty: number; //
         }
 
-        // Step 3: Create a new quiz record
         const quizRecord = await prisma.quiz.create({
           data: {
             resourceId: resource.id,
           },
         });
 
-        // Step 4: Add the questions and answers to the QuizQA model
+        // Add questions and answers to the database, now including the difficulty
         const quizQAs = await Promise.all(
           mcqs.map((q: QuizQuestion) =>
             prisma.quizQA.create({
@@ -162,6 +147,7 @@ export async function POST(req: NextRequest) {
                 options: q.options,
                 correctAnswer: q.answer,
                 explanation: q.explanation,
+                difficulty: q.difficulty,
               },
             })
           )
