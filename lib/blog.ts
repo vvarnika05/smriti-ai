@@ -1,22 +1,24 @@
-import { contentfulClient } from '@/lib/contentful';
-import { BlogPost } from '@/types/blog';
+import { contentfulClient } from "@/lib/contentful";
+import { BlogPost } from "@/types/blog";
 
 // Fetch all blog posts
 type Entry = any;
 
 export async function getAllBlogPosts(): Promise<BlogPost[]> {
   const entries = await contentfulClient.getEntries({
-    content_type: 'blogPost',
-    order: '-fields.publishDate',
+    content_type: "blogPost",
+    order: ["-fields.publishDate"],
   });
   return entries.items.map(mapEntryToBlogPost);
 }
 
 // Fetch single blog post by slug
-export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+export async function getBlogPostBySlug(
+  slug: string
+): Promise<BlogPost | null> {
   const entries = await contentfulClient.getEntries({
-    content_type: 'blogPost',
-    'fields.slug': slug,
+    content_type: "blogPost",
+    "fields.slug": slug,
     limit: 1,
   });
   if (!entries.items.length) return null;
@@ -31,7 +33,7 @@ function mapEntryToBlogPost(entry: Entry): BlogPost {
     featureImage: {
       url: fields.featureImage?.fields?.file?.url
         ? `https:${fields.featureImage.fields.file.url}`
-        : '',
+        : "",
       description: fields.featureImage?.fields?.description,
     },
     summary: fields.summary,
