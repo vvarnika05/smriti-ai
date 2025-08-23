@@ -21,7 +21,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <Image src={post.featureImage.url} alt={post.featureImage.description || post.title} fill className="object-cover rounded" />
         </div>
       )}
-      <div className="prose prose-lg">
+      
         {documentToReactComponents(post.content)}
       </div>
     </main>
