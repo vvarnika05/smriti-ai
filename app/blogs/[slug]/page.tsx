@@ -17,16 +17,18 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       <p className="text-gray-500 text-sm mb-4">
         By {post.author} • {new Date(post.publishDate).toLocaleDateString()}
       </p>
-      {post.featureImage.url && (
-        <div className="relative w-full h-64 mb-6">
-          <Image
-            src={post.featureImage.url}
-            alt={post.featureImage.description || post.title}
-            fill
-            className="object-cover rounded"
-          />
-        </div>
-      )}
+    {post.featureImage?.url && (
+  <div className="relative w-full h-64 mb-6">
+    <Image
+      src={post.featureImage.url}
+      alt={post.featureImage.description || post.title}
+      fill
+      sizes="(min-width: 640px) 42rem, 100vw"
+      className="object-cover rounded"
+    />
+  </div>
+)}
+
 
       <div className="prose prose-lg">
         {documentToReactComponents(post.content)}
