@@ -1,104 +1,122 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id            String   @id @default(uuid())
-  username      String   @unique
-  email         String   @unique
-  mobile        String
-  dob           String
-  lastLogin     DateTime @default(now())
-  currentStreak Int      @default(0)
-  topics        Topic[]
+  id            String   @id @default(uuid())
+  username      String   @unique
+  email         String   @unique
+  mobile        String
+  dob           String
+  lastLogin     DateTime @default(now())
+  currentStreak Int      @default(0)
+  topics        Topic[]
+  userAnswers   UserAnswer[]
 
-  level        Int      @default(1)
-  experience   Int      @default(0)
+  level        Int      @default(1)
+  experience   Int      @default(0)
 }
 
 model Topic {
-  id        String     @id @default(uuid())
-  userId    String
-  title     String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  resources Resource[]
-  note      Note? // <-- This line is new
+  id        String     @id @default(uuid())
+  userId    String
+  title     String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resources Resource[]
+  note      Note? // <-- This line is new
 }
 
 enum ResourceType {
-  ARTICLE
-  VIDEO
-  PDF
+  ARTICLE
+  VIDEO
+  PDF
 }
 
 model Resource {
-  id        String       @id @default(uuid())
-  topicId   String
-  title     String
-  type      ResourceType
-  url       String
-  summary   String
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  topic     Topic        @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  quizzes   Quiz[]
+  id        String       @id @default(uuid())
+  topicId   String
+  title     String
+  type      ResourceType
+  url       String
+  summary   String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  topic     Topic        @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  quizzes   Quiz[]
 }
 
 model Quiz {
-  id          String       @id @default(uuid())
-  resourceId  String       @unique
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  resource    Resource     @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-  quizQAs     QuizQA[]
-  quizResults QuizResult[]
+  id          String       @id @default(uuid())
+  resourceId  String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  resource    Resource     @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  quizQAs     QuizQA[]
+  quizResults QuizResult[]
+  userAnswers   UserAnswer[]
 }
 
 model QuizQA {
-  id            String   @id @default(uuid())
-  quizId        String
-  question      String
-  options       String[]
-  correctAnswer String
-  explanation   String?
-  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  id              String   @id @default(uuid())
+  quizId          String
+  question        String
+  options         String[]
+  correctAnswer   String
+  explanation     String?
+  difficulty      String @default("Medium")
+  userAnswers     UserAnswer[]
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
 }
 
 model QuizResult {
-  id        String   @id @default(uuid())
-  quizId    String
-  score     Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  id             String   @id @default(uuid())
+  quizId         String
+  score          Int
+  totalQuestions Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  quiz           Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+}
+
+model UserAnswer {
+  id              String   @id @default(uuid())
+  userId          String
+  quizId          String
+  quizQAId        String
+  selectedOption  String
+  isCorrect       Boolean
+  createdAt       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz            Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizQA          QuizQA   @relation(fields: [quizQAId], references: [id], onDelete: Cascade)
 }
 
 model ContactQuery {
-  id        String   @id @default(uuid())
-  name      String
-  email     String
-  subject   String?
-  message   String
-  createdAt DateTime @default(now())
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  createdAt DateTime @default(now())
 }
 
-// v-- This entire model is new --v
 model Note {
-  id        String   @id @default(uuid())
-  content   String?  @db.Text
-  topicId   String   @unique
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String   @id @default(uuid())
+  content   String?  @db.Text
+  topicId   String   @unique
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
 }

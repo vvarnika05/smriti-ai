@@ -69,13 +69,13 @@ ${summary}
 `;
 
 export const QUIZ_PROMPT = (summary: string) => `
-You are an AI quiz generator. Based on the summary below, create 5 multiple choice questions (MCQs) that test understanding of the key concepts.
-
-Each MCQ must include:
-- "question": a well-structured, clear question.
-- "options": an array of exactly 4 plausible options.
-- "answer": the correct option from the list.
-- "explanation": a brief 1-2 sentence explanation that justifies the correct answer.
+Based on the following summary, generate exactly 15 multiple-choice questions. Each question must have:
+- a "question" key.
+- an "options" key with an array of exactly 4 plausible options.
+- a "correctAnswer" key with the correct option as a string.
+- an "explanation" key with a brief 1-2 sentence explanation that justifies the correct answer.
+- a "difficulty" key with a value of 'Easy', 'Medium', or 'Hard'.
+Ensure there are 5 questions for each difficulty level.
 
 Rules:
 - Do NOT include introductory or closing text.
@@ -88,7 +88,8 @@ Example format:
     "question": "What is 2 + 2?",
     "options": ["1", "2", "3", "4"],
     "answer": "4",
-    "explanation": "2 + 2 equals 4."
+    "explanation": "2 + 2 equals 4.",
+    "difficulty": "Easy"
   },
   ...
 ]

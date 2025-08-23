@@ -1,3 +1,5 @@
+// app/api/resource-ai/route.ts
+
 import {
   FALLBACK_PROMPT,
   SUMMARY_PROMPT,
@@ -11,6 +13,7 @@ import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getYoutubeTranscript } from "@/utils/youtube";
+import { QuizQA as PrismaQuizQA } from "@prisma/client";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
@@ -118,12 +121,23 @@ export async function POST(req: NextRequest) {
 
     if (task === "quiz") {
       // Step 1: Check if a quiz already exists for this resourceId
-      const existingQuiz = await prisma.quiz.findUnique({
+      let existingQuiz = await prisma.quiz.findUnique({
         where: { resourceId: resource.id },
         include: {
           quizQAs: true, // Include related questions and answers
         },
       });
+
+      // Step 2: If quiz exists, check if questions have a difficulty field.
+      // If not, we will regenerate the quiz.
+      if (existingQuiz && existingQuiz.quizQAs.length > 0 && !existingQuiz.quizQAs[0].difficulty) {
+        // Delete old quiz and associated questions
+        await prisma.quiz.delete({
+          where: { id: existingQuiz.id }
+        });
+        // Set existingQuiz to null to trigger a new quiz generation
+        existingQuiz = null;
+      }
 
       if (existingQuiz) {
         return NextResponse.json({
@@ -132,7 +146,7 @@ export async function POST(req: NextRequest) {
           quizQAs: existingQuiz.quizQAs,
         });
       } else {
-        // Step 2: Generate new quiz questions
+        // Step 3: Generate new quiz questions with difficulty
         const prompt = QUIZ_PROMPT(summary);
 
         const mcqText = await askGemini(prompt);
@@ -143,16 +157,17 @@ export async function POST(req: NextRequest) {
           options: string[];
           answer: string;
           explanation: string;
+          difficulty: string;
         }
 
-        // Step 3: Create a new quiz record
+        // Step 4: Create a new quiz record
         const quizRecord = await prisma.quiz.create({
           data: {
             resourceId: resource.id,
           },
         });
 
-        // Step 4: Add the questions and answers to the QuizQA model
+        // Step 5: Add the questions and answers to the QuizQA model
         const quizQAs = await Promise.all(
           mcqs.map((q: QuizQuestion) =>
             prisma.quizQA.create({
@@ -162,6 +177,7 @@ export async function POST(req: NextRequest) {
                 options: q.options,
                 correctAnswer: q.answer,
                 explanation: q.explanation,
+                difficulty: q.difficulty,
               },
             })
           )

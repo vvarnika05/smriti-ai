@@ -1,3 +1,5 @@
+// components/quiz/QuizResult.tsx
+
 "use client";
 import { useEffect, useMemo } from "react";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
@@ -5,9 +7,7 @@ import "react-circular-progressbar/dist/styles.css";
 import confetti from "canvas-confetti";
 
 export type QuizFinalResultProps = {
-  score: number;
-  total: number;
-  userAnswers: (string | null)[];
+  userAnswers: { quizQAId: string; selectedOption: string; isCorrect: boolean }[];
   quizData: {
     question: string;
     options: string[];
@@ -25,13 +25,13 @@ const getColorForScore = (percentage: number): string => {
 };
 
 const QuizFinalResult = ({
-  score,
-  total,
   userAnswers,
   quizData,
   resetQuiz,
   startReview,
 }: QuizFinalResultProps) => {
+  const score = useMemo(() => userAnswers.filter((a) => a.isCorrect).length, [userAnswers]);
+  const total = useMemo(() => userAnswers.length, [userAnswers]);
   const percentage = Math.round((score / total) * 100);
   const color = getColorForScore(percentage);
 
@@ -47,9 +47,9 @@ const QuizFinalResult = ({
 
   const wrongAnswersCount = useMemo(() => {
     return userAnswers.filter(
-      (answer, index) => answer !== quizData[index].answer
+      (answer, index) => !answer.isCorrect
     ).length;
-  }, [userAnswers, quizData]);
+  }, [userAnswers]);
 
   return (
     <div className="flex flex-col items-center justify-center text-center space-y-6">
