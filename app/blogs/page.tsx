@@ -10,11 +10,16 @@ export default async function BlogsPage() {
       <div className="space-y-8">
         {posts.map(post => (
           <article key={post.slug} className="border rounded-lg p-4 flex flex-col md:flex-row gap-4">
-            {post.featureImage.url && (
-              <div className="relative w-full md:w-48 h-40 flex-shrink-0">
-                <Image src={post.featureImage.url} alt={post.featureImage.description || post.title} fill className="object-cover rounded" />
-              </div>
-            )}
+            images: {
+  remotePatterns: [
+    {
+      protocol: "https",
+      hostname: "images.ctfassets.net",
+      port: "",
+      pathname: "/**",
+    },
+  ],
+},
             <div>
               <h2 className="text-xl font-semibold">
                 <Link href={`/blogs/${post.slug}`}>{post.title}</Link>
