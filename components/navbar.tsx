@@ -8,6 +8,116 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+// Navigation links array
+const navigationLinks = [
+  { href: "/#", label: "Home" },
+  { href: "/about", label: "About Us" },
+  { href: "/contributors", label: "Contributors" },
+  { href: "/blogs", label: "Blogs" },
+  { href: "/contact", label: "Contact Us" },
+];
+
+// Additional action buttons for mobile menu
+const mobileActionButtons: {
+  href: string;
+  label: string;
+  icon?: React.ElementType;
+  variant?: "ghost" | "outline" | "default";
+  authRequired?: boolean;
+  external?: boolean;
+}[] = [
+  {
+    href: "/dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    variant: "outline",
+    authRequired: true,
+  },
+  {
+    href: "https://github.com/vatsal-bhakodia/smriti-ai",
+    label: "Star on GitHub",
+    icon: Star,
+    variant: "outline",
+    external: true,
+  },
+];
+
+// Reusable NavButton component
+type NavButtonProps = {
+  href: string;
+  label: string;
+  className?: string;
+  external?: boolean;
+};
+
+const NavButton = ({
+  href,
+  label,
+  className = "",
+  external = false,
+}: NavButtonProps) => {
+  const baseClassName =
+    "rounded-full cursor-pointer hover:bg-[#adff2f]/10 hover:text-[#adff2f] transition-all duration-300 hover:scale-105";
+
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer">
+        <Button variant="ghost" className={`${baseClassName} ${className}`}>
+          {label}
+        </Button>
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} className="cursor-pointer">
+      <Button variant="ghost" className={`${baseClassName} ${className}`}>
+        {label}
+      </Button>
+    </Link>
+  );
+};
+
+// Reusable ActionButton component
+type ActionButtonProps = {
+  href: string;
+  label: string;
+  icon?: React.ElementType;
+  variant?: "ghost" | "outline" | "default";
+  className?: string;
+  external?: boolean;
+};
+
+const ActionButton = ({
+  href,
+  label,
+  icon: Icon,
+  variant = "ghost",
+  className = "",
+  external = false,
+}: ActionButtonProps) => {
+  const buttonContent = (
+    <Button variant={variant} className={className}>
+      {Icon && <Icon className="h-4 w-4" />}
+      {label}
+    </Button>
+  );
+
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer">
+        {buttonContent}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} className="cursor-pointer">
+      {buttonContent}
+    </Link>
+  );
+};
+
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -40,38 +150,9 @@ export default function Navbar() {
 
           {/* Center Navigation Links - Hidden on Mobile */}
           <div className="hidden md:flex items-center justify-center gap-4 w-3/5">
-            <Link href="/#" className="cursor-pointer">
-              <Button
-                variant="ghost"
-                className="rounded-full cursor-pointer hover:bg-[#adff2f]/10 hover:text-[#adff2f] transition-all duration-300 hover:scale-105"
-              >
-                Home
-              </Button>
-            </Link>
-            <Link href="/about" className="cursor-pointer">
-              <Button
-                variant="ghost"
-                className="rounded-full cursor-pointer hover:bg-[#adff2f]/10 hover:text-[#adff2f] transition-all duration-300 hover:scale-105"
-              >
-                About Us
-              </Button>
-            </Link>
-            <Link href="/contributors" className="cursor-pointer">
-              <Button
-                variant="ghost"
-                className="rounded-full cursor-pointer hover:bg-[#adff2f]/10 hover:text-[#adff2f] transition-all duration-300 hover:scale-105 flex items-center gap-2"
-              >
-                Contributors
-              </Button>
-            </Link>
-            <Link href="/contact" className="cursor-pointer">
-              <Button
-                variant="ghost"
-                className="rounded-full cursor-pointer hover:bg-[#adff2f]/10 hover:text-[#adff2f] transition-all duration-300 hover:scale-105"
-              >
-                Contact Us
-              </Button>
-            </Link>
+            {navigationLinks.map((link) => (
+              <NavButton key={link.href} href={link.href} label={link.label} />
+            ))}
           </div>
 
           {/* Right side buttons */}
@@ -79,38 +160,30 @@ export default function Navbar() {
             {/* Desktop Dashboard Button */}
             <SignedIn>
               <div className="hidden md:flex items-center">
-                <Link href="/dashboard" className="cursor-pointer">
-                  <Button
-                    variant="outline"
-                    className="rounded-full flex items-center gap-2 cursor-pointer border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black hover:border-[#adff2f] transition-all duration-300 hover:scale-105"
-                  >
-                    <LayoutDashboard className="h-4 w-4" />
-                    Dashboard
-                  </Button>
-                </Link>
+                <ActionButton
+                  href="/dashboard"
+                  label="Dashboard"
+                  icon={LayoutDashboard}
+                  variant="outline"
+                  className="rounded-full flex items-center gap-2 cursor-pointer border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black hover:border-[#adff2f] transition-all duration-300 hover:scale-105"
+                />
               </div>
             </SignedIn>
 
-            {/* Desktop Sign In Button */}
+            {/* Desktop Sign In/Up Buttons */}
             <SignedOut>
               <div className="flex items-center gap-2">
-                <Link href="/sign-in" className="cursor-pointer">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-full flex items-center gap-2 border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black hover:border-[#adff2f] transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#adff2f]/25 px-4 py-2"
-                  >
-                    Sign In
-                  </Button>
-                </Link>
-                <Link href="/sign-up" className="cursor-pointer">
-                  <Button
-                    size="sm"
-                    className="rounded-full bg-gradient-to-r from-[#adff2f] to-[#9dff07] text-black hover:from-[#9dff07] hover:to-[#adff2f] transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#adff2f]/25 px-4 py-2"
-                  >
-                    Sign Up
-                  </Button>
-                </Link>
+                <ActionButton
+                  href="/sign-in"
+                  label="Sign In"
+                  variant="outline"
+                  className="rounded-full flex items-center gap-2 border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black hover:border-[#adff2f] transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#adff2f]/25 px-4 py-2"
+                />
+                <ActionButton
+                  href="/sign-up"
+                  label="Sign Up"
+                  className="rounded-full bg-gradient-to-r from-[#adff2f] to-[#9dff07] text-black hover:from-[#9dff07] hover:to-[#adff2f] transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#adff2f]/25 px-4 py-2"
+                />
               </div>
             </SignedOut>
 
@@ -152,68 +225,49 @@ export default function Navbar() {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="py-4 px-2 space-y-3"
               >
-                <Link href="/#" className="block">
-                  <Button
-                    variant="ghost"
-                    className="w-full text-left rounded-full hover:bg-[#adff2f]/10 hover:text-[#adff2f]"
-                  >
-                    Home
-                  </Button>
-                </Link>
-                <Link href="/about" className="block">
-                  <Button
-                    variant="ghost"
-                    className="w-full text-left rounded-full hover:bg-[#adff2f]/10 hover:text-[#adff2f]"
-                  >
-                    About Us
-                  </Button>
-                </Link>
-                <Link href="/contributors" className="block">
-                  <Button
-                    variant="ghost"
-                    className="w-full text-left rounded-full hover:bg-[#adff2f]/10 hover:text-[#adff2f]"
-                  >
-                    Contributors
-                  </Button>
-                </Link>
-                <Link href="/contact" className="block">
-                  <Button
-                    variant="ghost"
-                    className="w-full text-left rounded-full hover:bg-[#adff2f]/10 hover:text-[#adff2f]"
-                  >
-                    Contact Us
-                  </Button>
-                </Link>
+                {/* Mobile Navigation Links */}
+                {navigationLinks.map((link) => (
+                  <div key={link.href} className="block">
+                    <NavButton
+                      href={link.href}
+                      label={link.label}
+                      className="w-full text-left"
+                    />
+                  </div>
+                ))}
 
-                {/* Mobile Dashboard Button */}
-                <SignedIn>
-                  <Link href="/dashboard" className="block">
-                    <Button
-                      variant="outline"
-                      className="w-full rounded-full flex items-center justify-center gap-2 border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black"
-                    >
-                      <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
-                    </Button>
-                  </Link>
-                </SignedIn>
+                {/* Mobile Action Buttons */}
+                {mobileActionButtons.map((button) => {
+                  if (button.authRequired) {
+                    return (
+                      <SignedIn key={button.href}>
+                        <div className="block">
+                          <ActionButton
+                            href={button.href}
+                            label={button.label}
+                            icon={button.icon}
+                            variant={button.variant}
+                            external={button.external}
+                            className="w-full rounded-full flex items-center justify-center gap-2 border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black"
+                          />
+                        </div>
+                      </SignedIn>
+                    );
+                  }
 
-                {/* Mobile GitHub Star Button */}
-                <div className="block">
-                  <a
-                    href="https://github.com/vatsal-bhakodia/smriti-ai"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Button
-                      variant="outline"
-                      className="w-full rounded-full flex items-center justify-center gap-2 border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black"
-                    >
-                      <Star className="h-4 w-4" />
-                      Star on GitHub
-                    </Button>
-                  </a>
-                </div>
+                  return (
+                    <div key={button.href} className="block">
+                      <ActionButton
+                        href={button.href}
+                        label={button.label}
+                        icon={button.icon}
+                        variant={button.variant}
+                        external={button.external}
+                        className="w-full rounded-full flex items-center justify-center gap-2 border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black"
+                      />
+                    </div>
+                  );
+                })}
               </motion.div>
             </motion.div>
           )}
