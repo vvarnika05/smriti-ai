@@ -1,12 +1,10 @@
-// app/(authenticated_Pages)/dashboard/topic/[[...id]]/page.tsx
-
 "use client";
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
 import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Import Tabs
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TopicHeader from "@/components/topic/TopicHeader";
 import TopicModal from "@/components/topic/TopicModal";
 import ResourceGrid from "@/components/topic/ResourceGrid";
@@ -15,7 +13,7 @@ import DeleteDialog from "@/components/topic/DeleteDialog";
 import SearchBar from "@/components/topic/SearchBar";
 import { useTopic } from "@/hooks/useTopic";
 import { useResources } from "@/hooks/useResources";
-import { SimpleNoteEditor } from "@/components/notes/SimpleNoteEditor"; // Import our new editor
+import { SimpleNoteEditor } from "@/components/notes/SimpleNoteEditor";
 
 export default function TopicPage({ params }: { params: any }) {
   const rawId = (use(params) as { id: string | string[] }).id;
@@ -50,6 +48,10 @@ export default function TopicPage({ params }: { params: any }) {
     setPdfTitle,
     pdfFile,
     setPdfFile,
+    notesTitle,
+    setNotesTitle,
+    notesContent,
+    setNotesContent,
     handleAddResource,
     deleteDialogOpen,
     setDeleteDialogOpen,
@@ -97,7 +99,7 @@ export default function TopicPage({ params }: { params: any }) {
           Add Resource
         </Button>
       </div>
-      
+
       {/* --- ADD TABS TO ORGANIZE CONTENT --- */}
       <Tabs defaultValue="resources" className="w-full">
         <TabsList className="grid w-full grid-cols-2 max-w-md">
@@ -105,8 +107,8 @@ export default function TopicPage({ params }: { params: any }) {
           <TabsTrigger value="notes">Notes</TabsTrigger>
         </TabsList>
 
-        {/* Resources Tab Content (Existing Code) */}
         <TabsContent value="resources" className="mt-4">
+          {/* Resource Modal */}
           <ResourceModal
             open={resourceModalOpen}
             setOpen={setResourceModalOpen}
@@ -117,10 +119,16 @@ export default function TopicPage({ params }: { params: any }) {
             pdfTitle={pdfTitle}
             setPdfTitle={setPdfTitle}
             setPdfFile={setPdfFile}
+            notesTitle={notesTitle}
+            setNotesTitle={setNotesTitle}
+            notesContent={notesContent}
+            setNotesContent={setNotesContent}
             onAdd={handleAddResource}
             isLoading={isLoading}
             pdfFile={pdfFile}
           />
+
+          {/* Delete Confirmation Dialog */}
           <DeleteDialog
             open={deleteDialogOpen}
             onOpenChange={setDeleteDialogOpen}
@@ -128,7 +136,13 @@ export default function TopicPage({ params }: { params: any }) {
             onDelete={handleDeleteResource}
             isDeleting={isDeleting}
           />
-          {media.length > 0 && <SearchBar value={search} onChange={setSearch} />}
+
+          {/* Search Bar */}
+          {media.length > 0 && (
+            <SearchBar value={search} onChange={setSearch} />
+          )}
+
+          {/* Resource Grid */}
           <ResourceGrid
             isLoading={isLoading}
             media={filteredMedia}
@@ -139,7 +153,7 @@ export default function TopicPage({ params }: { params: any }) {
             }}
           />
         </TabsContent>
-        
+
         {/* Notes Tab Content (New Feature) */}
         <TabsContent value="notes" className="mt-4">
           <SimpleNoteEditor topicId={id} />

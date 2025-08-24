@@ -10,7 +10,11 @@ export const OpenSourceBtn = () => {
           "https://api.github.com/repos/vatsal-bhakodia/smriti-ai"
         );
         const data = await response.json();
-        setStarCount(data.stargazers_count);
+        if (typeof data.stargazers_count === "number" && !isNaN(data.stargazers_count)) {
+          setStarCount(data.stargazers_count);
+        } else {
+          setStarCount(0); // fallback to 0 if API fails or returns invalid data
+        }
       } catch (error) {
         console.error("Failed to fetch star count:", error);
       }

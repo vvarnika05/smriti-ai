@@ -96,3 +96,35 @@ Example format:
 Summary:
 ${summary}
 `;
+
+export const FLASHCARD_PROMPT = (summary: string) => `
+You are an AI flashcard generator. Based on the summary below, create 10-15 flashcards in Term → Definition format that cover the most important concepts, definitions, and key points.
+
+Each flashcard must include:
+- "term": a clear, concise term or concept name.
+- "definition": a detailed but concise explanation of the term.
+
+Rules:
+- Focus on key concepts, definitions, processes, and important facts.
+- Make terms specific and memorable.
+- Keep definitions clear and educational.
+- Do NOT include introductory or closing text.
+- Return ONLY a valid JSON array (no markdown, no text outside the array).
+- Avoid overly complex terms or definitions.
+
+Example format:
+[
+  {
+    "term": "Photosynthesis",
+    "definition": "The process by which plants convert sunlight, carbon dioxide, and water into glucose and oxygen."
+  },
+  {
+    "term": "Mitochondria",
+    "definition": "Organelles in cells that produce energy through cellular respiration."
+  },
+  ...
+]
+
+Summary:
+${summary}
+`;

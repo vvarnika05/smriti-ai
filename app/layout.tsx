@@ -25,8 +25,8 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="en" className="dark">
-        <body className={`${poppins.variable} antialiased`}>
+      <html lang="en" className="dark" suppressHydrationWarning>
+        <body className={`${poppins.variable} antialiased`} suppressHydrationWarning>
           {/* Google Analytics */}
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-K0Q80X3Y6D"

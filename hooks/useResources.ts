@@ -16,6 +16,8 @@ export function useResources(topicId: string | null) {
   const [pdfTitle, setPdfTitle] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [notesTitle, setNotesTitle] = useState("");
+  const [notesContent, setNotesContent] = useState("");
   const [resourceToDelete, setResourceToDelete] = useState<ResourceItem | null>(
     null
   );
@@ -144,7 +146,7 @@ export function useResources(topicId: string | null) {
         setResourceModalOpen(false);
         setIsLoading(false);
       }
-    } else {
+    } else if (newResourceType === "PDF") {
       if (!pdfTitle.trim() || !pdfFile) {
         toast.error("Please enter PDF title and select a file");
         return;
@@ -177,6 +179,47 @@ export function useResources(topicId: string | null) {
       } finally {
         setPdfTitle("");
         setPdfFile(null);
+        setResourceModalOpen(false);
+        setIsLoading(false);
+      }
+    } else if (newResourceType === "ARTICLE") {
+      if (!notesTitle.trim() || !notesContent.trim()) {
+        toast.error("Please enter notes title and content");
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+
+        const resourceData = {
+          topicId,
+          title: notesTitle,
+          type: "ARTICLE",
+          url: "about:blank",
+          summary: notesContent,
+        };
+
+        const response = await axios.post<ResourceResponse>(resourceAPI, resourceData, {
+          headers: { "Content-Type": "application/json" },
+        });
+
+        setMedia((prev) => [
+          {
+            id: response.data.resource.id,
+            title: notesTitle,
+            type: "ARTICLE",
+            url: "about:blank",
+          },
+          ...prev,
+        ]);
+
+        setNotesTitle("");
+        setNotesContent("");
+        toast.success(response.data.message);
+      } catch (error) {
+        console.error("Error saving notes:", error);
+        toast.error("Something went wrong while saving the notes.");
+      } finally {
         setResourceModalOpen(false);
         setIsLoading(false);
       }
@@ -224,6 +267,10 @@ export function useResources(topicId: string | null) {
     setPdfTitle,
     pdfFile,
     setPdfFile,
+    notesTitle,
+    setNotesTitle,
+    notesContent,
+    setNotesContent,
     handleAddResource,
     deleteDialogOpen,
     setDeleteDialogOpen,

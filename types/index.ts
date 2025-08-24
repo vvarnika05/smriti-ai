@@ -1,6 +1,6 @@
 // /types/index.ts
 
-export type ResourceType = "VIDEO" | "PDF";
+export type ResourceType = "VIDEO" | "PDF" | "ARTICLE";
 
 export interface ResourceItem {
   id: string;
