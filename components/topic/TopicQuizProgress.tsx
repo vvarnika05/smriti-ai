@@ -1,3 +1,4 @@
+// components/topic/TopicQuizProgress.tsx
 "use client";
 
 import { use } from "react";
@@ -11,7 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-// Simple fetcher function for SWR
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function TopicQuizProgress({ topicId }: { topicId: string }) {
@@ -36,41 +36,41 @@ export default function TopicQuizProgress({ topicId }: { topicId: string }) {
     );
   }
 
-  const quizResults = data?.data || [];
-  const totalQuizzes = quizResults.length;
-  const totalScore = quizResults.reduce((sum: number, result: any) => sum + result.score, 0);
-  const totalQuestions = quizResults.reduce((sum: number, result: any) => sum + result.totalQuestions, 0);
-  const averageScore = totalQuizzes > 0 ? (totalScore / totalQuizzes).toFixed(2) : "N/A";
+  const userAnswers = data?.data || [];
+  const totalQuestionsAnswered = userAnswers.length;
+  const correctAnswers = userAnswers.filter((answer: any) => answer.isCorrect).length;
+  const percentage = totalQuestionsAnswered > 0 ? (correctAnswers / totalQuestionsAnswered) * 100 : 0;
+  const averageScore = totalQuestionsAnswered > 0 ? (correctAnswers / totalQuestionsAnswered * 100).toFixed(2) : "N/A";
 
   return (
     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <Card>
         <CardHeader>
-          <CardTitle>Quizzes Taken</CardTitle>
-          <CardDescription>Number of quizzes completed for this topic.</CardDescription>
+          <CardTitle>Questions Answered</CardTitle>
+          <CardDescription>Total number of questions answered for this topic.</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-4xl font-bold">{totalQuizzes}</p>
+          <p className="text-4xl font-bold">{totalQuestionsAnswered}</p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Average Score</CardTitle>
-          <CardDescription>Average correct answers per quiz.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-4xl font-bold">{averageScore}</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Total Correct Answers</CardTitle>
+          <CardTitle>Correct Answers</CardTitle>
           <CardDescription>Overall correct answers across all quizzes.</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-4xl font-bold">{totalScore} / {totalQuestions}</p>
+          <p className="text-4xl font-bold">{correctAnswers}</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Success Rate</CardTitle>
+          <CardDescription>Average correct answers per quiz.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-4xl font-bold">{averageScore}%</p>
         </CardContent>
       </Card>
     </div>

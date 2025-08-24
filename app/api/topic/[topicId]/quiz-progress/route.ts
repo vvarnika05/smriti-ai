@@ -12,7 +12,7 @@ export async function GET(
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const { topicId } = params;
+  const { topicId } = await params;
 
   if (!topicId) {
     return NextResponse.json(
@@ -22,7 +22,6 @@ export async function GET(
   }
 
   try {
-    // 1. Verify user is the topic owner
     const topic = await prisma.topic.findUnique({
       where: { id: topicId },
       select: {
@@ -34,40 +33,25 @@ export async function GET(
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     }
 
-    // 2. Fetch all quiz results for the topic and user
-    const topicQuizResults = await prisma.quiz.findMany({
+    // Fetch all user answers for this topic
+    const userAnswers = await prisma.userAnswer.findMany({
       where: {
-        resource: {
-          topicId: topicId,
+        userId: userId,
+        quiz: {
+          resource: {
+            topicId: topicId,
+          },
         },
       },
       select: {
-        quizResults: {
-          where: {
-            quiz: {
-              userAnswers: {
-                some: {
-                  userId: userId,
-                },
-              },
-            },
-          },
-          orderBy: {
-            createdAt: "asc",
-          },
-        },
+        isCorrect: true,
       },
     });
-
-    // Flatten the results and filter out quizzes without user results
-    const results = topicQuizResults
-      .flatMap((quiz) => quiz.quizResults)
-      .filter(Boolean);
 
     return NextResponse.json(
       {
         message: "Quiz progress data fetched successfully",
-        data: results,
+        data: userAnswers,
       },
       { status: 200 }
     );

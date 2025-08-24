@@ -69,13 +69,12 @@ ${summary}
 `;
 
 export const QUIZ_PROMPT = (summary: string) => `
-Based on the following summary, generate exactly 15 multiple-choice questions. Each question must have:
+Based on the following summary, generate up to 15 multiple-choice questions. Each question must have:
 - a "question" key.
 - an "options" key with an array of exactly 4 plausible options.
 - a "correctAnswer" key with the correct option as a string.
 - an "explanation" key with a brief 1-2 sentence explanation that justifies the correct answer.
 - a "difficulty" key with a value of 'Easy', 'Medium', or 'Hard'.
-Ensure there are 5 questions for each difficulty level.
 
 Rules:
 - Do NOT include introductory or closing text.

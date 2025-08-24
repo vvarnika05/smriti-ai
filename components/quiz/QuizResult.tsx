@@ -6,14 +6,18 @@ import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import confetti from "canvas-confetti";
 
+export type QuizQA = {
+  id: string;
+  question: string;
+  options: string[];
+  correctAnswer: string;
+  explanation: string;
+  difficulty: string;
+};
+
 export type QuizFinalResultProps = {
   userAnswers: { quizQAId: string; selectedOption: string; isCorrect: boolean }[];
-  quizData: {
-    question: string;
-    options: string[];
-    answer: string;
-    explanation: string;
-  }[];
+  quizData: QuizQA[];
   resetQuiz: () => void;
   startReview: () => void;
 };
@@ -32,7 +36,7 @@ const QuizFinalResult = ({
 }: QuizFinalResultProps) => {
   const score = useMemo(() => userAnswers.filter((a) => a.isCorrect).length, [userAnswers]);
   const total = useMemo(() => userAnswers.length, [userAnswers]);
-  const percentage = Math.round((score / total) * 100);
+  const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
   const color = getColorForScore(percentage);
 
   useEffect(() => {
@@ -47,7 +51,7 @@ const QuizFinalResult = ({
 
   const wrongAnswersCount = useMemo(() => {
     return userAnswers.filter(
-      (answer, index) => !answer.isCorrect
+      (answer) => !answer.isCorrect
     ).length;
   }, [userAnswers]);
 

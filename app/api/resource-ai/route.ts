@@ -1,5 +1,4 @@
 // app/api/resource-ai/route.ts
-
 import {
   FALLBACK_PROMPT,
   SUMMARY_PROMPT,
@@ -52,15 +51,14 @@ export async function POST(req: NextRequest) {
       where: { id: resourceId },
     });
 
-    if (!resource || resource.type !== "VIDEO") {
+    if (!resource) {
       return NextResponse.json(
-        { message: "Invalid or unsupported resource" },
-        { status: 400 }
+        { message: "Resource not found" },
+        { status: 404 }
       );
     }
 
     let summary = resource.summary;
-
     if (!summary || summary.length === 0) {
       if (resource.type === "VIDEO") {
         try {
@@ -72,16 +70,18 @@ export async function POST(req: NextRequest) {
             "Transcript fetch failed. Falling back to title-based summary.",
             err
           );
-
           const fallbackPrompt = FALLBACK_PROMPT(resource.title);
           summary = await askGemini(fallbackPrompt);
         }
-
-        await prisma.resource.update({
-          where: { id: resourceId },
-          data: { summary },
-        });
+      } else {
+        const fallbackPrompt = FALLBACK_PROMPT(resource.title);
+        summary = await askGemini(fallbackPrompt);
       }
+      
+      await prisma.resource.update({
+        where: { id: resourceId },
+        data: { summary },
+      });
     }
 
     if (task === "summary") {
@@ -93,7 +93,6 @@ export async function POST(req: NextRequest) {
 
     if (task === "roadmap") {
       const prompt = ROADMAP_PROMPT(summary);
-
       const answer = await askGemini(prompt);
       return NextResponse.json({ message: "Roadmap generated", answer });
     }
@@ -105,86 +104,107 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
-
       const prompt = QA_PROMPT(summary, question);
-
       const answer = await askGemini(prompt);
       return NextResponse.json({ message: "Answer generated", answer });
     }
 
     if (task === "mindmap") {
       const prompt = MINDMAP_PROMPT(summary);
-
       const mindmap = await askGemini(prompt);
       return NextResponse.json({ message: "Mindmap code generated", mindmap });
     }
 
     if (task === "quiz") {
-      // Step 1: Check if a quiz already exists for this resourceId
-      let existingQuiz = await prisma.quiz.findUnique({
+      let existingQuizzes = await prisma.quiz.findMany({
         where: { resourceId: resource.id },
         include: {
-          quizQAs: true, // Include related questions and answers
+          quizQAs: true,
         },
+        orderBy: { createdAt: 'desc' }
       });
 
-      // Step 2: If quiz exists, check if questions have a difficulty field.
-      // If not, we will regenerate the quiz.
-      if (existingQuiz && existingQuiz.quizQAs.length > 0 && !existingQuiz.quizQAs[0].difficulty) {
-        // Delete old quiz and associated questions
-        await prisma.quiz.delete({
-          where: { id: existingQuiz.id }
-        });
-        // Set existingQuiz to null to trigger a new quiz generation
-        existingQuiz = null;
+      // Find a quiz that the user hasn't completed twice
+      let quizToServe = null;
+      for (const quiz of existingQuizzes) {
+        if (quiz.quizQAs.length > 0) {
+          const quizQAIds = quiz.quizQAs.map(q => q.id);
+          const userAnswersCount = await prisma.userAnswer.count({
+            where: {
+              userId: userId,
+              quizQAId: { in: quizQAIds }
+            }
+          });
+          if (userAnswersCount < quiz.quizQAs.length * 2) {
+            quizToServe = quiz;
+            break;
+          }
+        }
       }
 
-      if (existingQuiz) {
+      if (quizToServe) {
         return NextResponse.json({
-          message: "Quiz already exists for this resource",
-          quiz: existingQuiz,
-          quizQAs: existingQuiz.quizQAs,
+          message: "Existing quiz found",
+          quiz: quizToServe,
+          quizQAs: quizToServe.quizQAs,
         });
       } else {
-        // Step 3: Generate new quiz questions with difficulty
-        const prompt = QUIZ_PROMPT(summary);
-
-        const mcqText = await askGemini(prompt);
-        const mcqs = extractJSON(mcqText);
+        // If no suitable quiz is found, generate a new one
+        let mcqText, mcqs;
+        try {
+          const prompt = QUIZ_PROMPT(summary);
+          mcqText = await askGemini(prompt);
+          mcqs = extractJSON(mcqText);
+        } catch (genError) {
+          console.error("AI quiz generation failed:", genError);
+          return NextResponse.json(
+            { message: "Failed to generate a quiz from this resource. The content may be too short." },
+            { status: 400 }
+          );
+        }
 
         interface QuizQuestion {
           question: string;
           options: string[];
-          answer: string;
+          correctAnswer: string;
           explanation: string;
           difficulty: string;
         }
 
-        // Step 4: Create a new quiz record
-        const quizRecord = await prisma.quiz.create({
-          data: {
-            resourceId: resource.id,
-          },
+        if (!Array.isArray(mcqs) || mcqs.length === 0) {
+          return NextResponse.json(
+            { message: "AI failed to generate quiz questions. The content was likely too short or could not be formatted correctly." },
+            { status: 400 }
+          );
+        }
+
+        const [quizRecord, quizQAs] = await prisma.$transaction(async (tx) => {
+          const newQuizRecord = await tx.quiz.create({
+            data: {
+              resourceId: resource.id,
+            },
+          });
+
+          const newQuizQAs = await Promise.all(
+            mcqs.map((q: QuizQuestion) =>
+              tx.quizQA.create({
+                data: {
+                  quizId: newQuizRecord.id,
+                  question: q.question,
+                  options: q.options,
+                  correctAnswer: q.correctAnswer,
+                  explanation: q.explanation,
+                  difficulty: q.difficulty,
+                },
+              })
+            )
+          );
+
+          return [newQuizRecord, newQuizQAs];
         });
 
-        // Step 5: Add the questions and answers to the QuizQA model
-        const quizQAs = await Promise.all(
-          mcqs.map((q: QuizQuestion) =>
-            prisma.quizQA.create({
-              data: {
-                quizId: quizRecord.id,
-                question: q.question,
-                options: q.options,
-                correctAnswer: q.answer,
-                explanation: q.explanation,
-                difficulty: q.difficulty,
-              },
-            })
-          )
-        );
-
         return NextResponse.json({
-          message: "Quiz created with questions",
+          message: "New quiz created with questions",
           quiz: quizRecord,
           quizQAs,
         });

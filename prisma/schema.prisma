@@ -56,7 +56,7 @@ model Resource {
 
 model Quiz {
   id          String       @id @default(uuid())
-  resourceId  String       @unique
+  resourceId  String       
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   resource    Resource     @relation(fields: [resourceId], references: [id], onDelete: Cascade)

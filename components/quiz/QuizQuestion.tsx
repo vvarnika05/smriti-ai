@@ -1,6 +1,6 @@
 // components/quiz/QuizQuestion.tsx
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 
 export type QuizQA = {
@@ -18,16 +18,40 @@ type Props = {
 };
 
 const QuizQuestion = ({ quizData, onQuizEnd }: Props) => {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [askedQuestions, setAskedQuestions] = useState<string[]>([]);
   const [userAnswers, setUserAnswers] = useState<
     { quizQAId: string; selectedOption: string; isCorrect: boolean }[]
   >([]);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
-  // Adaptive logic
-  const getNextQuestion = (isCorrect: boolean): number => {
-    let nextIndex = currentQuestionIndex + 1;
-    let nextDifficulty = quizData[currentQuestionIndex].difficulty;
+  const totalQuestionsToAsk = 7;
+
+  const currentQuestion = useMemo(() => {
+    // Return the current question based on the last item in the askedQuestions list
+    if (askedQuestions.length === 0) return null;
+    return quizData.find(q => q.id === askedQuestions[askedQuestions.length - 1]);
+  }, [askedQuestions, quizData]);
+
+
+  useEffect(() => {
+    if (quizData.length > 0 && askedQuestions.length === 0) {
+      // Start the quiz with a random 'Medium' question
+      const mediumQuestions = quizData.filter(q => q.difficulty === "Medium");
+      if (mediumQuestions.length > 0) {
+        const randomIndex = Math.floor(Math.random() * mediumQuestions.length);
+        setAskedQuestions([mediumQuestions[randomIndex].id]);
+      } else {
+        // Fallback if no medium questions are found
+        const firstQuestion = quizData[Math.floor(Math.random() * quizData.length)];
+        setAskedQuestions([firstQuestion.id]);
+      }
+    }
+  }, [quizData, askedQuestions.length]);
+
+
+  const getNextQuestion = (isCorrect: boolean) => {
+    let nextDifficulty = currentQuestion?.difficulty;
+    let nextQuestionId: string | undefined;
 
     if (isCorrect) {
       if (nextDifficulty === "Easy") nextDifficulty = "Medium";
@@ -37,43 +61,56 @@ const QuizQuestion = ({ quizData, onQuizEnd }: Props) => {
       else if (nextDifficulty === "Medium") nextDifficulty = "Easy";
     }
 
-    // Find the next available question with the target difficulty
-    while (nextIndex < quizData.length) {
-      if (quizData[nextIndex].difficulty === nextDifficulty) {
-        return nextIndex;
-      }
-      nextIndex++;
+    // Filter out already asked questions and find one with the target difficulty
+    const availableQuestions = quizData.filter(q => !askedQuestions.includes(q.id));
+    const nextQuestionPool = availableQuestions.filter(q => q.difficulty === nextDifficulty);
+
+    if (nextQuestionPool.length > 0) {
+      nextQuestionId = nextQuestionPool[Math.floor(Math.random() * nextQuestionPool.length)].id;
+    } else if (availableQuestions.length > 0) {
+      // Fallback: if no questions of that difficulty are left, choose a random one from the remaining pool
+      nextQuestionId = availableQuestions[Math.floor(Math.random() * availableQuestions.length)].id;
     }
 
-    // If no questions of the target difficulty are left, just move to the next one
-    return currentQuestionIndex + 1;
+    return nextQuestionId;
   };
 
   const handleNext = () => {
-    if (!selectedOption) return;
+    if (!selectedOption || !currentQuestion) return;
 
-    const isCorrect = selectedOption === quizData[currentQuestionIndex].correctAnswer;
+    const isCorrect = selectedOption === currentQuestion.correctAnswer;
     const newUserAnswers = [
       ...userAnswers,
       {
-        quizQAId: quizData[currentQuestionIndex].id,
+        quizQAId: currentQuestion.id,
         selectedOption: selectedOption,
         isCorrect: isCorrect,
       },
     ];
     setUserAnswers(newUserAnswers);
 
-    if (currentQuestionIndex + 1 >= quizData.length) {
-      // Quiz ends here
+    if (newUserAnswers.length >= totalQuestionsToAsk) {
+      // Quiz ends after 7 questions
       onQuizEnd(newUserAnswers);
     } else {
-      const nextIndex = getNextQuestion(isCorrect);
-      setCurrentQuestionIndex(nextIndex);
+      const nextQuestionId = getNextQuestion(isCorrect);
+      if (nextQuestionId) {
+        setAskedQuestions([...askedQuestions, nextQuestionId]);
+      } else {
+        // Fallback if no more questions can be found
+        onQuizEnd(newUserAnswers);
+      }
       setSelectedOption(null);
     }
   };
 
-  const currentQuestion = quizData[currentQuestionIndex];
+  if (!currentQuestion) {
+    return (
+      <div className="text-center text-red-500">
+        Error: Quiz data is not available.
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -93,9 +130,12 @@ const QuizQuestion = ({ quizData, onQuizEnd }: Props) => {
           </div>
         ))}
       </div>
-      <div className="mt-6 flex justify-end">
+      <div className="mt-6 flex justify-between">
+        <span className="text-sm text-gray-400">
+          Question {userAnswers.length + 1} of {totalQuestionsToAsk}
+        </span>
         <Button onClick={handleNext} disabled={!selectedOption}>
-          Next Question
+          {userAnswers.length + 1 === totalQuestionsToAsk ? "Finish Quiz" : "Next Question"}
         </Button>
       </div>
     </div>
