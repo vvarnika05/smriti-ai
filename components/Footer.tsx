@@ -4,11 +4,40 @@ import React, { useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Brain, ArrowUpRight, Heart } from "lucide-react";
+import {
+  Github,
+  Linkedin,
+  Twitter,
+  Instagram, 
+  Facebook,
+  Mail,
+} from "lucide-react";
 
 const Footer = () => {
   const router = useRouter();
   const pathname = usePathname();
   const currentYear = new Date().getFullYear();
+
+   const socialLinks = [
+    {
+      name: "GitHub",
+      href: "https://github.com/vatsal-bhakodia",
+      icon: Github,
+      color: "!hover:text-gray-800",
+    },
+    {
+    name: "LinkedIn",
+    href: "https://www.linkedin.com/in/vatsal-bhakodia/",
+    icon: Linkedin, 
+    color: "!hover:text-blue-700",
+  },
+  {
+    name: "Twitter",
+    href: "https://x.com/VatsalBhakodia",
+    icon: Twitter, 
+    color: "!hover:text-blue-700",
+  },
+  ];
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash) {
@@ -80,8 +109,23 @@ const Footer = () => {
               helps you retain knowledge faster with AI-powered study tools and
               spaced repetition.
             </p>
+          
+                {/* Social Links */}
+            <div className="flex space-x-4 mt-4">
+              {socialLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`hover:text-primary transition-colors duration-300 ${link.color}`}
+                  aria-label={link.name}
+                >
+                  <link.icon className="h-5 w-5" />
+                </a>
+              ))}
+            </div>
           </div>
-
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category} className="space-y-4">
               <h3 className="text-white font-semibold text-sm uppercase tracking-wider">
