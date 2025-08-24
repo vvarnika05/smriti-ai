@@ -7,9 +7,10 @@ import Hero from "@/components/landing/Hero";
 import About from "@/components/landing/About";
 import Features from "@/components/landing/Features";
 import { Pricing } from "@/components/landing/Pricing";
-import Testimonials from "@/components/landing/Testimonials"
+import Testimonials from "@/components/landing/Testimonials";
+import HowItWorks from "@/components/landing/HowItWorks";
+import CTA from "@/components/landing/CTA";
 import Footer from "@/components/Footer";
-
 
 export default function Home() {
   const pathname = usePathname();
@@ -28,9 +29,11 @@ export default function Home() {
     <>
       <Hero />
       <Features />
+      <HowItWorks />
       <Pricing />
       <About />
-      <Testimonials/>
+      <Testimonials />
+      <CTA />
       <Footer />
     </>
   );

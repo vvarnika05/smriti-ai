@@ -1,5 +1,20 @@
 import Footer from "@/components/Footer";
 
+export const metadata = {
+  title: "Privacy Policy | Smriti AI",
+  description:
+    "Read the Privacy Policy of Smriti AI to learn how we collect, use, and protect your personal information. Your data privacy and security are our top priority.",
+  keywords: [
+    "Smriti AI Privacy Policy",
+    "AI data protection",
+    "Smriti AI security",
+    "user privacy",
+    "data collection policy",
+    "GDPR compliance",
+    "AI privacy guidelines",
+  ],
+};
+
 export default function PrivacyPolicy() {
   return (
     <>
