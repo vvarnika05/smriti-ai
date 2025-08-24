@@ -45,6 +45,39 @@ Smriti AI is an intelligent, all-in-one learning assistant that helps you **orga
 - ☁️ **Backend**: Next.js,Prisma,Postgres
 - 🤖 **Bot Layer**: WhatsApp + Twilio Integration
 - 🧪 **Chrome Extension**: Capture videos directly from YouTube //upcoming
+## 📸 Screenshots
+
+Here’s a quick look at **Smriti AI in action** 👇
+
+<p align="center">
+  <img src="./screenshots/Home.jpg" alt="Homepage" width="80%"/>
+</p>
+
+<p align="center">
+  <img src="./screenshots/about1.jpg"
+   alt="About" width="80%"/>
+</p>
+<p align="center">
+  <img src="./screenshots/about2.jpg"
+   width="80%"/>
+</p>
+<p align="center">
+  <img src="./screenshots/about3.jpg"
+   width="80%"/>
+</p>
+<p align="center">
+  <img src="./screenshots/about4.jpg"
+   width="80%"/>
+</p>
+
+<p align="center">
+  <img src="./screenshots/contributors1.jpg" alt="Contributors" width="80%"/>
+</p>
+<p align="center">
+  <img src="./screenshots/blogs.jpg"
+   alt="Blogs" width="80%"/>
+</p>
+
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
