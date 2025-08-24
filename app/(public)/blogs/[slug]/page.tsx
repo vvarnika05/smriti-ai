@@ -13,7 +13,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   if (!post) return notFound();
 
   return (
-    <main className="max-w-2xl mx-auto py-10 px-4">
+    <main className="max-w-2xl mx-auto pb-24 px-4">
       <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
       <p className="text-gray-500 text-sm mb-4">
         By {post.author} • {new Date(post.publishDate).toLocaleDateString()}

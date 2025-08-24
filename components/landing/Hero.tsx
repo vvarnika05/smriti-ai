@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -30,7 +32,7 @@ const Hero = () => {
   const linkHref = isSignedIn ? "/dashboard" : "/sign-up";
   return (
     <motion.div
-      className="relative z-10 flex flex-col items-center justify-start min-h-screen space-y-4 px-4 pt-32 pb-12"
+      className="relative z-10 flex flex-col items-center justify-start min-h-screen space-y-4 px-4 pb-12"
       variants={containerVariants}
       initial="hidden"
       animate="visible"

@@ -6,7 +6,7 @@ export default async function BlogsPage() {
   const posts = await getAllBlogPosts();
   return (
     <>
-      <section className="max-w-7xl mx-auto py-32 px-6">
+      <section className="max-w-7xl mx-auto pb-32 px-6">
         <h1 className="text-3xl font-bold mb-8">Blogs</h1>
         <div className="space-y-8">
           {posts.map((post) => (

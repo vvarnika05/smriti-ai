@@ -26,7 +26,10 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" className="dark" suppressHydrationWarning>
-        <body className={`${poppins.variable} antialiased`} suppressHydrationWarning>
+        <body
+          className={`${poppins.variable} antialiased`}
+          suppressHydrationWarning
+        >
           {/* Google Analytics */}
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-K0Q80X3Y6D"
@@ -42,7 +45,7 @@ export default function RootLayout({
           </Script>
 
           <Navbar />
-          <main>{children}</main>
+          <main className="pt-32">{children}</main>
           <Toaster />
           <BackToTopButton />
         </body>

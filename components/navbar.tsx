@@ -182,7 +182,7 @@ export default function Navbar() {
                 <ActionButton
                   href="/sign-up"
                   label="Sign Up"
-                  className="rounded-full bg-gradient-to-r from-[#adff2f] to-[#9dff07] text-black hover:from-[#9dff07] hover:to-[#adff2f] transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#adff2f]/25 px-4 py-2"
+                  className="rounded-full bg-gradient-to-r from-[#adff2f] to-[#9dff07] text-black hover:text-black transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#adff2f]/25 px-4 py-2"
                 />
               </div>
             </SignedOut>

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Brain, ArrowUpRight, Heart } from "lucide-react";
@@ -9,6 +9,16 @@ const Footer = () => {
   const router = useRouter();
   const pathname = usePathname();
   const currentYear = new Date().getFullYear();
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash) {
+      const el = document.querySelector(window.location.hash);
+      if (el) {
+        // Scroll smoothly to the element
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [pathname]);
 
   const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith("#")) {
