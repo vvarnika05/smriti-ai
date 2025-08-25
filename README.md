@@ -49,34 +49,33 @@ Smriti AI is an intelligent, all-in-one learning assistant that helps you **orga
 
 Here’s a quick look at **Smriti AI in action** 👇
 
+<<p align="center"><b>🏠 Homepage</b></p>
 <p align="center">
   <img src="./screenshots/Home.jpg" alt="Homepage" width="80%"/>
 </p>
 
+<p align="center"><b>🚀 Getting Started</b></p>
 <p align="center">
-  <img src="./screenshots/about1.jpg"
-   alt="About" width="80%"/>
-</p>
-<p align="center">
-  <img src="./screenshots/about2.jpg"
-   width="80%"/>
-</p>
-<p align="center">
-  <img src="./screenshots/about3.jpg"
-   width="80%"/>
-</p>
-<p align="center">
-  <img src="./screenshots/about4.jpg"
-   width="80%"/>
+  <img src="./screenshots/GettingStarted.jpg" alt="About" width="80%"/>
 </p>
 
+<p align="center"><b>📊 Dashboard</b></p>
 <p align="center">
-  <img src="./screenshots/contributors1.jpg" alt="Contributors" width="80%"/>
+  <img src="./screenshots/Dashboard.jpg" width="80%"/>
 </p>
+
+<p align="center"><b>⏰ Study Reminder</b></p>
 <p align="center">
-  <img src="./screenshots/blogs.jpg"
-   alt="Blogs" width="80%"/>
+  <img src="./screenshots/StudyReminder.jpg" width="80%"/>
 </p>
+
+<p align="center"><b>📝 Topic-wise Notes</b></p>
+<p align="center">
+  <img src="./screenshots/TopicWisenotes.jpg" width="80%"/>
+</p>
+
+
+
 
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
