@@ -49,7 +49,7 @@ Smriti AI is an intelligent, all-in-one learning assistant that helps you **orga
 
 Here’s a quick look at **Smriti AI in action** 👇
 
-<<p align="center"><b>🏠 Homepage</b></p>
+<p align="center"><b>🏠 Homepage</b></p>
 <p align="center">
   <img src="./screenshots/Home.jpg" alt="Homepage" width="80%"/>
 </p>
@@ -66,7 +66,7 @@ Here’s a quick look at **Smriti AI in action** 👇
 
 <p align="center"><b>⏰ Study Reminder</b></p>
 <p align="center">
-  <img src="./screenshots/StudyReminder.jpg" width="80%"/>
+  <img src="./screenshots/StudyReminders.jpg" width="80%"/>
 </p>
 
 <p align="center"><b>📝 Topic-wise Notes</b></p>
