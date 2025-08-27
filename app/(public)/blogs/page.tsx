@@ -34,8 +34,8 @@ export default async function BlogsPage() {
           ))}
         </div>
       </section>
-
-      <Footer />
+          {/* Already we are adding footer in main layout so,every page already have footer we needd not to add footer in every page */}
+      {/* <Footer /> */}
     </>
   );
 }
