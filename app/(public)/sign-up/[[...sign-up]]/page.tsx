@@ -32,58 +32,83 @@ export default function Page() {
             isLargeScreen ? "w-1/2" : "w-full"
           }`}
         >
-          <SignUp
-            appearance={{
-              variables: {
-                colorBackground: "#171717",
-                colorPrimary: "#a3ff19", // Neon green
-                colorPrimaryForeground: "#222", // Button text
-                colorForeground: "#fff", // Normal text
-                colorInput: "#222", // Input background
-                colorBorder: "#333",
-                fontSize: "14px",
+          <SignUp appearance={{ 
+            variables: 
+            { colorBackground: "#171717", 
+              colorPrimary: "#a3ff19", // Neon green 
+              colorPrimaryForeground: "#222", // Button text 
+              colorForeground: "#fff", // Normal text 
+              colorInput: "#222", // Input background 
+              colorBorder: "#333", 
+              fontSize: "14px", 
+            }, 
+            elements: 
+            { 
+              cardBox: 
+              { 
+                boxShadow: "none", 
+                width: "500px", 
+              }, 
+              card: { 
+                width: "100%", 
+              }, 
+              formFieldInput: 
+              { 
+                backgroundColor: "#222", 
+                color: "#fff", 
+                border: "1px solid #fff", 
+                height: "35px", 
+              }, 
+              formButtonPrimary: 
+              { 
+                background: "#a3ff19", 
+                color: "#333", 
+                border: "none", 
+                boxShadow: "0 0 10px #39FF14, 0 0 20px #39FF14", 
+                fontWeight: 700, 
+              }, 
+              formFieldLabel: 
+              { 
+                color: "#eee" 
+              }, 
+              socialButtonsBlockButton__google: 
+              { 
+                backgroundColor: "#222", 
+                transition: "all 0.2s", 
+                width: "420px", 
+                height: "40px", 
+                margin: "0 auto", 
+              }, 
+              socialButtonsBlockButtonText: 
+              { 
+                color: "#fff", 
               },
-              elements: {
-                cardBox: {
-                  boxShadow: "none",
-                  width: "500px",
-                },
-                card: {
-                  width: "100%",
-                },
 
-                formFieldInput: {
-                  backgroundColor: "#222",
-                  color: "#fff",
-                  border: "1px solid #fff",
-
-                  height: "35px",
-                },
-
-                formButtonPrimary: {
-                  background: "#a3ff19",
-                  color: "#333",
-                  border: "none",
-                  boxShadow: "0 0 10px #39FF14, 0 0 20px #39FF14",
-                  fontWeight: 700,
-                },
-
-                formFieldLabel: { color: "#eee" },
-
-                socialButtonsBlockButton__google: {
-                  backgroundColor: "#222",
-                  transition: "all 0.2s",
-                  width: "420px",
-                  height: "40px",
-                  margin: "0 auto",
-                },
-
-                socialButtonsBlockButtonText: {
-                  color: "#fff",
+              // ✅ make eye icon white
+              formFieldInputShowPasswordIcon: {
+                color: "#fff",
+                border: "none",
+                outline : "none",
+                "&:hover": {
+                  color: "#a3ff19",     // neon green on hover
                 },
               },
-            }}
-          />
+              formFieldInputHidePasswordIcon: {
+                color: "#fff",
+                border: "none",
+                outline : "none",
+                "&:hover": {
+                  color: "#a3ff19",     // neon green on hover
+                },
+              },
+
+              // // ✅ add autocomplete for password
+              // formFieldInput__password: {
+              //   autocomplete: "new-password",
+              // },
+            },
+          }}
+        />
         </div>
       </div>
     </main>
