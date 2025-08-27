@@ -43,7 +43,7 @@ type Status = "loading" | "error" | "idle";
 
 export default function RichNoteEditor({
   topicId,
-  mock = true, // default to mock/localStorage while testing
+  mock = false, // default to mock/localStorage while testing
 }: {
   topicId: string;
   mock?: boolean;
