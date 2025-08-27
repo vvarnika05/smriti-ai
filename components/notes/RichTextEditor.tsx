@@ -88,6 +88,36 @@ export default function RichNoteEditor({
     };
     run();
   }, [topicId, mock]);
+    const basePlugins = useMemo(() => [
+    headingsPlugin(),
+    listsPlugin(),
+    linkPlugin(),
+    linkDialogPlugin(),
+    quotePlugin(),
+    tablePlugin(),
+    imagePlugin(),
+    thematicBreakPlugin(),
+    codeBlockPlugin({ defaultCodeBlockLanguage: "" }),
+    codeMirrorPlugin({
+      codeBlockLanguages: {
+        css: "css",
+        txt: "txt",
+        sql: "sql",
+        html: "html",
+        sass: "sass",
+        scss: "scss",
+        bash: "bash",
+        json: "json",
+        js: "javascript",
+        ts: "typescript",
+        "": "unspecified",
+        tsx: "TypeScript (React)",
+        jsx: "JavaScript (React)"
+      },
+      autoLoadLanguageSupport: true
+    }),
+    diffSourcePlugin({ viewMode: "rich-text", diffMarkdown: "" }),
+  ], []);
 
   const handleSave = async () => {
     try {
@@ -121,36 +151,7 @@ export default function RichNoteEditor({
     );
   }
 
-  const basePlugins = useMemo(() => [
-    headingsPlugin(),
-    listsPlugin(),
-    linkPlugin(),
-    linkDialogPlugin(),
-    quotePlugin(),
-    tablePlugin(),
-    imagePlugin(),
-    thematicBreakPlugin(),
-    codeBlockPlugin({ defaultCodeBlockLanguage: "" }),
-    codeMirrorPlugin({
-      codeBlockLanguages: {
-        css: "css",
-        txt: "txt",
-        sql: "sql",
-        html: "html",
-        sass: "sass",
-        scss: "scss",
-        bash: "bash",
-        json: "json",
-        js: "javascript",
-        ts: "typescript",
-        "": "unspecified",
-        tsx: "TypeScript (React)",
-        jsx: "JavaScript (React)"
-      },
-      autoLoadLanguageSupport: true
-    }),
-    diffSourcePlugin({ viewMode: "rich-text", diffMarkdown: "" }),
-  ], []);
+
 
   return (
     <div className="custom-mdx-editor-wrapper p-4 border rounded-md min-h-[200px] prose dark:prose-invert">
