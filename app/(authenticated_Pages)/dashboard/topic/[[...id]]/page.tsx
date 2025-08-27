@@ -13,7 +13,8 @@ import DeleteDialog from "@/components/topic/DeleteDialog";
 import SearchBar from "@/components/topic/SearchBar";
 import { useTopic } from "@/hooks/useTopic";
 import { useResources } from "@/hooks/useResources";
-import RichTextEditor from "@/components/notes/RichTextEditor";
+import dynamic from "next/dynamic";
+const RichTextEditor = dynamic(() => import("@/components/notes/RichTextEditor"), { ssr: false });
 
 export default function TopicPage({ params }: { params: any }) {
   const rawId = (use(params) as { id: string | string[] }).id;
@@ -156,7 +157,11 @@ export default function TopicPage({ params }: { params: any }) {
 
         {/* Notes Tab Content (New Feature) */}
         <TabsContent value="notes" className="mt-4">
-          <RichTextEditor topicId={id} />
+           {id ? (
+            <RichTextEditor topicId={id} />
+            ) : (
+              <p className="text-muted-foreground">Open a topic to write notes.</p>
+            )}
         </TabsContent>
       </Tabs>
     </div>

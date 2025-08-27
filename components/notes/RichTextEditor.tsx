@@ -1,7 +1,7 @@
-// components/notes/RichNoteEditor.tsx
+// components/notes/RichTextEditor.tsx
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import axios from "axios";
 import {
   MDXEditor,
@@ -50,8 +50,9 @@ export default function RichNoteEditor({
 }) {
   const [note, setNote] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
+  const [savedAtEditStart, setSavedAtEditStart] = useState<string>("");
   const [status, setStatus] = useState<Status>("loading");
-  const editorRef = useRef<MDXEditorMethods>(null);
+ 
 
   // --- mock helpers (localStorage) ---
   const lsKey = `notes:${topicId}`;
@@ -120,7 +121,7 @@ export default function RichNoteEditor({
     );
   }
 
-  const basePlugins = [
+  const basePlugins = useMemo(() => [
     headingsPlugin(),
     listsPlugin(),
     linkPlugin(),
@@ -149,15 +150,14 @@ export default function RichNoteEditor({
       autoLoadLanguageSupport: true
     }),
     diffSourcePlugin({ viewMode: "rich-text", diffMarkdown: "" }),
-  ];
+  ], []);
 
   return (
-    <div className="p-4 border rounded-md min-h-[200px] prose dark:prose-invert">
+    <div className="custom-mdx-editor-wrapper p-4 border rounded-md min-h-[200px] prose dark:prose-invert">
       {isEditing ? (
         <div className="flex flex-col gap-4">
           <MDXEditor
-            markdown={note}
-            ref={editorRef}
+            markdown={note}        
             onChange={setNote}
             className="w-full border-0 rounded-none shadow-none custom-mdx-editor"
             contentEditableClassName="custom-editor-content"
@@ -202,7 +202,14 @@ export default function RichNoteEditor({
           />
 
           <div className="flex justify-end gap-2">
-            <Button variant="ghost" type="button" onClick={() => setIsEditing(false)}>
+             <Button
+              variant="ghost"
+              type="button"
+              onClick={() => {
+                setNote(savedAtEditStart);
+                setIsEditing(false);
+             }}
+            >
               Cancel
             </Button>
             <Button type="button" onClick={handleSave}>Save</Button>
@@ -216,7 +223,10 @@ export default function RichNoteEditor({
               variant="ghost"
               size="icon"
               type="button"
-              onClick={() => { console.log("edit clicked"); setIsEditing(true); }}
+              onClick={() => {
+                setSavedAtEditStart(note);
+                setIsEditing(true);
+              }}
               aria-label="Edit note"
             >
               <Edit2 className="h-4 w-4" />
