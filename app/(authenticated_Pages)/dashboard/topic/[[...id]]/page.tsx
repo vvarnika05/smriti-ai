@@ -14,8 +14,6 @@ import SearchBar from "@/components/topic/SearchBar";
 import { useTopic } from "@/hooks/useTopic";
 import { useResources } from "@/hooks/useResources";
 import RichTextEditor from "@/components/notes/RichTextEditor";
-import { MDXEditorMethods } from "@mdxeditor/editor";
-import { useRef } from "react";
 
 export default function TopicPage({ params }: { params: any }) {
   const rawId = (use(params) as { id: string | string[] }).id;
@@ -63,8 +61,6 @@ export default function TopicPage({ params }: { params: any }) {
     isLoading: isResourceLoading,
     isDeleting,
   } = useResources(id);
-
-  const editorRef = useRef<MDXEditorMethods>(null);
 
   const handleResourceClick = (item: any) => {
     router.push(`/dashboard/resource/${item.id}`);
@@ -159,45 +155,9 @@ export default function TopicPage({ params }: { params: any }) {
         </TabsContent>
 
         {/* Notes Tab Content (New Feature) */}
-       <TabsContent value="notes" className="mt-4">
-          <div className="space-y-4">
-            {/* Note title */}
-            <input
-              type="text"
-              className="w-full rounded border bg-background p-2 outline-none"
-              placeholder="Note title"
-              value={notesTitle}
-              onChange={(e) => setNotesTitle(e.target.value)}
-            />
-
-            {/* Rich text editor (markdown-backed) */}
-            <RichTextEditor
-              value={notesContent}
-              editorRef={editorRef}
-              fieldChange={setNotesContent}
-            />
-
-            <div className="flex items-center gap-2 justify-end">
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  // Optional: clear note draft
-                  setNotesTitle("");
-                  setNotesContent("");
-                }}
-              >
-                Clear
-              </Button>
-              <Button
-                onClick={handleAddResource}
-                disabled={isLoading || !notesTitle.trim()}
-              >
-                Save Note
-              </Button>
-            </div>
-          </div>
+        <TabsContent value="notes" className="mt-4">
+          <RichTextEditor topicId={id} />
         </TabsContent>
-
       </Tabs>
     </div>
   );
