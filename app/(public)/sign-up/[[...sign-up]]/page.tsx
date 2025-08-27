@@ -84,13 +84,42 @@ export default function Page() {
                 color: "#fff", 
               },
 
-              // ✅ make eye icon white
+              
+                otpCodeFieldInput: {
+                  backgroundColor: "#222",
+                  color: "#fff",
+                  border: "2px solid #fff",
+                  borderRadius: "8px",
+                  width: "50px",
+                  height: "50px",
+                  fontSize: "18px",
+                  textAlign: "center",
+                  margin: "0 5px",
+                },
+                otpCodeFieldInputs: {
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "10px",
+                },
+                
+                verificationCodeInput: {
+                  backgroundColor: "#222",
+                  color: "#fff",
+                  border: "2px solid #fff",
+                  borderRadius: "8px",
+                  width: "50px",
+                  height: "50px",
+                  fontSize: "18px",
+                  textAlign: "center",
+                },
+
+              
               formFieldInputShowPasswordIcon: {
                 color: "#fff",
                 border: "none",
                 outline : "none",
                 "&:hover": {
-                  color: "#a3ff19",     // neon green on hover
+                  color: "#a3ff19",     
                 },
               },
               formFieldInputHidePasswordIcon: {
@@ -98,14 +127,11 @@ export default function Page() {
                 border: "none",
                 outline : "none",
                 "&:hover": {
-                  color: "#a3ff19",     // neon green on hover
+                  color: "#a3ff19",     
                 },
               },
 
-              // // ✅ add autocomplete for password
-              // formFieldInput__password: {
-              //   autocomplete: "new-password",
-              // },
+              
             },
           }}
         />
