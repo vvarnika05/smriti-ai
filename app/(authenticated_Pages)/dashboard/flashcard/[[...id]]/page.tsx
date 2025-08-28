@@ -29,7 +29,9 @@ export default function FlashcardPage({ params }: { params: any }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [resourceTitle, setResourceTitle] = useState("");
-  const [flashcardDeck, setFlashcardDeck] = useState<FlashcardDeckData | null>(null);
+  const [flashcardDeck, setFlashcardDeck] = useState<FlashcardDeckData | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
 
   const hasFetched = useRef(false);
@@ -47,7 +49,7 @@ export default function FlashcardPage({ params }: { params: any }) {
             params: { id },
           }
         );
-        
+
         if (res.data.resource) {
           setResourceTitle(res.data.resource.title);
         }
@@ -59,8 +61,13 @@ export default function FlashcardPage({ params }: { params: any }) {
         };
 
         const resFlashcards = await axios.post("/api/resource-ai", payload);
-        
-        if (resFlashcards.data && typeof resFlashcards.data === 'object' && 'deck' in resFlashcards.data && 'cards' in resFlashcards.data) {
+
+        if (
+          resFlashcards.data &&
+          typeof resFlashcards.data === "object" &&
+          "deck" in resFlashcards.data &&
+          "cards" in resFlashcards.data
+        ) {
           const data = resFlashcards.data as { deck: any; cards: any[] };
           setFlashcardDeck({
             id: data.deck.id,
@@ -98,8 +105,13 @@ export default function FlashcardPage({ params }: { params: any }) {
       };
 
       const res = await axios.post("/api/resource-ai", payload);
-      
-      if (res.data && typeof res.data === 'object' && 'deck' in res.data && 'cards' in res.data) {
+
+      if (
+        res.data &&
+        typeof res.data === "object" &&
+        "deck" in res.data &&
+        "cards" in res.data
+      ) {
         const data = res.data as { deck: any; cards: any[] };
         setFlashcardDeck({
           id: data.deck.id,
@@ -129,10 +141,17 @@ export default function FlashcardPage({ params }: { params: any }) {
         responseType: "blob",
       });
 
-      const url = window.URL.createObjectURL(new Blob([response.data as BlobPart]));
+      const url = window.URL.createObjectURL(
+        new Blob([response.data as BlobPart])
+      );
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", response.headers["content-disposition"]?.split("filename=")[1]?.replace(/"/g, "") || `flashcards.${format}`);
+      link.setAttribute(
+        "download",
+        response.headers["content-disposition"]
+          ?.split("filename=")[1]
+          ?.replace(/"/g, "") || `flashcards.${format}`
+      );
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -168,7 +187,7 @@ export default function FlashcardPage({ params }: { params: any }) {
 
   if (error && !flashcardDeck) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pb-14">
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -293,7 +312,8 @@ export default function FlashcardPage({ params }: { params: any }) {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground">
-                  Export your flashcards for offline use or import into other applications.
+                  Export your flashcards for offline use or import into other
+                  applications.
                 </p>
                 <div className="flex space-x-4">
                   <Button
@@ -326,8 +346,9 @@ export default function FlashcardPage({ params }: { params: any }) {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              Generate AI-powered flashcards from your resource content. This will create
-              term-definition pairs based on the key concepts in your material.
+              Generate AI-powered flashcards from your resource content. This
+              will create term-definition pairs based on the key concepts in
+              your material.
             </p>
             <Button onClick={generateFlashcards} disabled={isGenerating}>
               {isGenerating ? (

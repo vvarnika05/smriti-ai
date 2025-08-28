@@ -76,7 +76,7 @@ export default function TopicPage({ params }: { params: any }) {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-14">
+    <div className="min-h-screen bg-background text-foreground max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14">
       {/* Topic Modal */}
       <TopicModal
         open={topicModalOpen}

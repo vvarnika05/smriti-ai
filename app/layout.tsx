@@ -34,7 +34,7 @@ export default function RootLayout({
         >
           {/* Skip Links for keyboard navigation */}
           <SkipLinks />
-          
+
           {/* Google Analytics */}
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-K0Q80X3Y6D"
@@ -50,7 +50,7 @@ export default function RootLayout({
           </Script>
 
           <Navbar />
-          <main id="main-content" className="pt-32">{children}</main>
+          {children}
           <Toaster />
           <BackToTopButton />
         </body>
