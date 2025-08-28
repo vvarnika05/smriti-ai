@@ -28,6 +28,7 @@ export default function FlashcardPage({ params }: { params: any }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [resourceTitle, setResourceTitle] = useState("");
   const [flashcardDeck, setFlashcardDeck] = useState<FlashcardDeckData | null>(
     null
@@ -132,6 +133,7 @@ export default function FlashcardPage({ params }: { params: any }) {
   };
 
   const handleExport = async (format: "txt" | "anki" = "txt") => {
+    setIsExporting(true);
     try {
       const response = await axios.get(`/api/flashcard-export`, {
         params: {
@@ -159,6 +161,8 @@ export default function FlashcardPage({ params }: { params: any }) {
     } catch (error) {
       console.error("Error exporting flashcards:", error);
       setError("Failed to export flashcards. Please try again.");
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -281,6 +285,7 @@ export default function FlashcardPage({ params }: { params: any }) {
               title={flashcardDeck.title}
               cards={flashcardDeck.cards}
               onExport={() => handleExport("txt")}
+              isExporting={isExporting}
             />
           </TabsContent>
 
@@ -302,6 +307,7 @@ export default function FlashcardPage({ params }: { params: any }) {
               resourceId={id}
               title={`${flashcardDeck.title} - Review`}
               cards={flashcardDeck.cards}
+              isExporting={isExporting}
             />
           </TabsContent>
 
@@ -319,17 +325,37 @@ export default function FlashcardPage({ params }: { params: any }) {
                   <Button
                     onClick={() => handleExport("txt")}
                     className="flex items-center space-x-2"
+                    disabled={isExporting}
                   >
-                    <FileText className="h-4 w-4" />
-                    <span>Export as Text</span>
+                    {isExporting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Exporting...
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="h-4 w-4" />
+                        <span>Export as Text</span>
+                      </>
+                    )}
                   </Button>
                   <Button
                     variant="outline"
                     onClick={() => handleExport("anki")}
                     className="flex items-center space-x-2"
+                    disabled={isExporting}
                   >
-                    <Download className="h-4 w-4" />
-                    <span>Export as CSV (Anki)</span>
+                    {isExporting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Exporting...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4" />
+                        <span>Export as CSV (Anki)</span>
+                      </>
+                    )}
                   </Button>
                 </div>
               </CardContent>

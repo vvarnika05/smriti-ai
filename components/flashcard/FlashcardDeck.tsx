@@ -4,7 +4,13 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, ChevronRight, Play, Pause, RotateCcw } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Play,
+  Pause,
+  RotateCcw,
+} from "lucide-react";
 import Flashcard from "./Flashcard";
 import axios from "axios";
 
@@ -19,6 +25,7 @@ interface FlashcardDeckProps {
   title: string;
   cards: FlashcardData[];
   onExport?: () => void;
+  isExporting: boolean;
 }
 
 export default function FlashcardDeck({
@@ -26,6 +33,7 @@ export default function FlashcardDeck({
   title,
   cards,
   onExport,
+  isExporting,
 }: FlashcardDeckProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isReviewMode, setIsReviewMode] = useState(false);
@@ -58,7 +66,7 @@ export default function FlashcardDeck({
       });
 
       // Mark card as reviewed
-      setReviewedCards(prev => new Set([...prev, currentCard.id]));
+      setReviewedCards((prev) => new Set([...prev, currentCard.id]));
 
       // Move to next card if in review mode
       if (isReviewMode && currentIndex < cards.length - 1) {
@@ -116,31 +124,50 @@ export default function FlashcardDeck({
       {/* Header */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>{title}</span>
-            <div className="flex items-center space-x-2">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+            {/* Title */}
+            <span className="text-lg font-medium">{title}</span>
+
+            {/* Buttons */}
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={toggleReviewMode}
-                className={isReviewMode ? "bg-primary text-primary-foreground" : ""}
+                className={
+                  isReviewMode ? "bg-primary text-primary-foreground" : ""
+                }
               >
                 {isReviewMode ? "Study Mode" : "Review Mode"}
               </Button>
+
               <Button
                 variant="outline"
                 size="sm"
                 onClick={toggleAutoPlay}
-                className={isAutoPlay ? "bg-primary text-primary-foreground" : ""}
+                className={
+                  isAutoPlay ? "bg-primary text-primary-foreground" : ""
+                }
               >
-                {isAutoPlay ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                {isAutoPlay ? (
+                  <Pause className="w-4 h-4" />
+                ) : (
+                  <Play className="w-4 h-4" />
+                )}
               </Button>
+
               <Button variant="outline" size="sm" onClick={resetDeck}>
                 <RotateCcw className="w-4 h-4" />
               </Button>
+
               {onExport && (
-                <Button variant="outline" size="sm" onClick={onExport}>
-                  Export
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onExport}
+                  disabled={isExporting}
+                >
+                  {isExporting ? <>Exporting...</> : <>Export</>}
                 </Button>
               )}
             </div>
@@ -149,7 +176,9 @@ export default function FlashcardDeck({
         <CardContent>
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>Card {currentIndex + 1} of {cards.length}</span>
+              <span>
+                Card {currentIndex + 1} of {cards.length}
+              </span>
               <span>{Math.round(progress)}% complete</span>
             </div>
             <Progress value={progress} className="w-full" />
