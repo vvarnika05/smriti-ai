@@ -71,7 +71,7 @@ const NavButton = ({
 
   return (
     <Link href={href} className="cursor-pointer">
-      <Button variant="ghost" className={`${baseClassName} ${className}`}>
+      <Button variant="ghost" className={`${baseClassName} ${className}`} size="adaptive">
         {label}
       </Button>
     </Link>
