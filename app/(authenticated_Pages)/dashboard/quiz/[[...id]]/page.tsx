@@ -17,7 +17,7 @@ type QuizPageParams = {
 
 // Define the props for the Page component
 type QuizPageProps = {
-  params: Promise<QuizPageParams>; // CHANGE: Typed 'params' as a Promise
+  params: Promise<QuizPageParams>;
 };
 
 type QuizQA = {
@@ -46,14 +46,12 @@ type FinalAnswer = {
 };
 
 export default function QuizPage({ params }: QuizPageProps) {
-  // Unwrapping the promise and asserting the type of the result
   const resolvedParams = use(params);
   const id = Array.isArray(resolvedParams.id) ? resolvedParams.id[0] : resolvedParams.id;
   const hasFetched = useRef(false);
 
   const [isLoading, setIsLoading] = useState(true);
   const [resourceTopic, setResourceTopic] = useState("");
-  // ... rest of the component code remains the same
   const [quizData, setQuizData] = useState<QuizQA[]>([]);
   const [quizId, setQuizId] = useState<string | null>(null);
   
@@ -64,7 +62,7 @@ export default function QuizPage({ params }: QuizPageProps) {
 
   const [quizState, setQuizState] = useState<"quiz" | "results" | "review">("quiz");
   const [ariaMessage, setAriaMessage] = useState("");
-  const totalQuestionsToAsk = 7;
+  const totalQuestionsToAsk = 5;
 
   const currentQuestion = useMemo(() => {
     if (askedQuestions.length === 0 || currentQIndex >= askedQuestions.length) return null;
@@ -113,23 +111,36 @@ export default function QuizPage({ params }: QuizPageProps) {
   }, [id]);
   
   const getNextQuestion = (isCorrect: boolean) => {
-    if (!currentQuestion) return;
-    let nextDifficulty = currentQuestion.difficulty;
-    if (isCorrect) {
-      if (nextDifficulty === "Easy") nextDifficulty = "Medium";
-      else if (nextDifficulty === "Medium") nextDifficulty = "Hard";
-    } else {
-      if (nextDifficulty === "Hard") nextDifficulty = "Medium";
-      else if (nextDifficulty === "Medium") nextDifficulty = "Easy";
+    if (!currentQuestion) return undefined;
+
+    const difficultyHierarchy = ["Easy", "Medium", "Hard"];
+    const currentDifficultyIndex = difficultyHierarchy.indexOf(currentQuestion.difficulty);
+
+    let nextDifficultyIndex = currentDifficultyIndex;
+    if (isCorrect && currentDifficultyIndex < difficultyHierarchy.length - 1) {
+      nextDifficultyIndex++;
+    } else if (!isCorrect && currentDifficultyIndex > 0) {
+      nextDifficultyIndex--;
     }
+
     const availableQuestions = quizData.filter(q => !askedQuestions.includes(q.id));
-    let nextQuestionPool = availableQuestions.filter(q => q.difficulty === nextDifficulty);
-    if (nextQuestionPool.length === 0 && availableQuestions.length > 0) {
-      nextQuestionPool = availableQuestions;
+
+    for (let i = 0; i < difficultyHierarchy.length; i++) {
+        const searchIndex = isCorrect ? nextDifficultyIndex - i : nextDifficultyIndex + i;
+        if (searchIndex >= 0 && searchIndex < difficultyHierarchy.length) {
+            const targetDifficulty = difficultyHierarchy[searchIndex];
+            const pool = availableQuestions.filter(q => q.difficulty === targetDifficulty);
+            if (pool.length > 0) {
+                return pool[Math.floor(Math.random() * pool.length)].id;
+            }
+        }
     }
-    if (nextQuestionPool.length > 0) {
-      return nextQuestionPool[Math.floor(Math.random() * nextQuestionPool.length)].id;
+
+    if (availableQuestions.length > 0) {
+      return availableQuestions[Math.floor(Math.random() * availableQuestions.length)].id;
     }
+    
+    console.warn("No more questions available for adaptive selection.");
     return undefined;
   };
 
@@ -146,19 +157,29 @@ export default function QuizPage({ params }: QuizPageProps) {
     if (currentQIndex === totalQuestionsToAsk - 1) {
         setQuizState("results");
         setAriaMessage(`Quiz completed!`);
-        const finalAnswers: FinalAnswer[] = askedQuestions.map((qaId, index) => {
-          const question = quizData.find(q => q.id === qaId)!;
-          return {
+        
+        const finalAnswersPayload = askedQuestions.map((qaId, index) => ({
             quizQAId: qaId,
-            selectedOption: newSelections[index]!,
-            isCorrect: newSelections[index] === question.correctAnswer,
-          };
-        });
+            selectedOption: newSelections[index],
+        }));
 
-        if (quizId) {
-            try {
-                await axios.post("/api/quiz-result", { quizId, answers: finalAnswers.map(a => ({ quizQAId: a.quizQAId, selectedOption: a.selectedOption })) });
-            } catch (error) { console.error("Error saving quiz result:", error); }
+        // CHANGE 1: More robust check to prevent saving incomplete results
+        const allQuestionsAnswered = finalAnswersPayload.every(a => a.selectedOption);
+
+        if (quizId && allQuestionsAnswered) {
+            // CHANGE 2: Cleaner way to handle toast.promise
+            const saveResults = async () => {
+                await axios.post("/api/quiz-result", { quizId, answers: finalAnswersPayload });
+            };
+
+            toast.promise(saveResults(), {
+                loading: "Saving your results...",
+                success: "Results saved successfully!",
+                error: (err) => `Error: ${err.message || "Could not save results."}`,
+            });
+        } else if (!allQuestionsAnswered) {
+            toast.error("Could not save results: Not all questions were answered.");
+            console.error("Attempted to save quiz with incomplete answers.", finalAnswersPayload);
         }
     } else {
         if (currentQIndex === askedQuestions.length - 1) {

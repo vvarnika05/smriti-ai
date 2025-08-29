@@ -24,7 +24,6 @@ export default function TopicPage({ params }: { params: any }) {
   const id = Array.isArray(rawId) ? rawId[0] : rawId;
   const router = useRouter();
 
-  // Topic state management (no changes needed)
   const {
     topicId,
     topicName,
@@ -36,7 +35,6 @@ export default function TopicPage({ params }: { params: any }) {
     isLoading: isTopicLoading,
   } = useTopic(id);
 
-  // Resource state management (no changes needed)
   const {
     media,
     filteredMedia,
@@ -81,7 +79,6 @@ export default function TopicPage({ params }: { params: any }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14">
-      {/* Topic Modal */}
       <TopicModal
         open={topicModalOpen}
         setOpen={setTopicModalOpen}
@@ -91,8 +88,6 @@ export default function TopicPage({ params }: { params: any }) {
         onSave={handleSaveTopic}
         onCancel={handleCancelModal}
       />
-
-      {/* Topic Header */}
       <div className="mb-6 flex items-center justify-between gap-4">
         <TopicHeader
           topicName={topicName}
@@ -103,10 +98,7 @@ export default function TopicPage({ params }: { params: any }) {
           Add Resource
         </Button>
       </div>
-      
-      {/* --- TABS SECTION --- */}
       <Tabs defaultValue="resources" className="w-full">
-        {/* CHANGE: Using your 3-column layout for the tabs */}
         <TabsList className="grid w-full grid-cols-3 max-w-md">
           <TabsTrigger value="resources">Resources</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
@@ -153,7 +145,6 @@ export default function TopicPage({ params }: { params: any }) {
           />
         </TabsContent>
 
-        {/* CHANGE: Integrated the original repo's RichTextEditor */}
         <TabsContent value="notes" className="mt-4">
            {id ? (
             <RichTextEditor topicId={id} />
@@ -162,9 +153,15 @@ export default function TopicPage({ params }: { params: any }) {
             )}
         </TabsContent>
 
-        {/* CHANGE: Added your new Quiz Progress tab */}
+        {/* CHANGE: Added a guard to prevent rendering when id is missing */}
         <TabsContent value="quiz-progress" className="mt-4">
-          <TopicQuizProgress topicId={id} />
+          {id ? (
+            <TopicQuizProgress topicId={id} />
+          ) : (
+            <p className="text-center text-muted-foreground">
+              Select a topic to view your quiz progress.
+            </p>
+          )}
         </TabsContent>
       </Tabs>
     </div>
