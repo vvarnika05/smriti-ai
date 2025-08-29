@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
 import cloudinary from "@/lib/cloudinary";
 import { uploadPDFBuffer } from "@/lib/bufferToStream";
-
+import pdfParse from "pdf-parse/lib/pdf-parse.js";
 // GET: get single or multiple resources
 export async function GET(req: NextRequest) {
   const { userId } = getAuth(req);
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
   const contentType = req.headers.get("content-type");
   if (contentType?.includes("application/json")) {
     const body = await req.json();
-  const { topicId, title, type, url, summary } = body;
+    const { topicId, title, type, url, summary } = body;
 
   if (!topicId || !title || !type || !url) {
     return NextResponse.json(
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 
   else if (contentType?.includes("multipart/form-data")) {
     const formData = await req.formData();
-    const file = formData.get("file");
+    const file = formData.get("file") as File;
     const type =  formData.get("type");
     const title = formData.get("title");
     const topicId = formData.get("topicId")
@@ -94,16 +94,16 @@ export async function POST(req: NextRequest) {
     }
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    
+    const data = await pdfParse(buffer);
+    const url = data.text;
     // Now you can do anything with `buffer`
     // e.g., save to disk, upload to S3, or store in DB
   
     const uploadResult = await uploadPDFBuffer(buffer, file.name.replace(/\.pdf$/, ""));
     console.log(uploadResult)
-    const url= (uploadResult as any).secure_url
     console.log(url)
     const resource = await prisma.resource.create({
-      data: { topicId, title, type, url, summary: "" }, //summary: summary || "" //create krte hue summary paas ni ho ri toh "" hi store krwa rha hu
+      data: { topicId, title, type, url, summary : "" }, //summary: summary || "" //create krte hue summary paas ni ho ri toh "" hi store krwa rha hu
     });
     return NextResponse.json(
       { message: "Resource created", resource },

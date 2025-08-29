@@ -9,6 +9,7 @@ import {
   FileQuestion,
   Route,
   ExternalLink,
+  Brain,
 } from "lucide-react";
 import axios from "axios";
 import Mermaid from "@/components/mermaid/mermaid";
@@ -246,7 +247,7 @@ export default function ResourceChatPage({ params }: { params: any }) {
             </div>
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-4 gap-2 sm:flex-nowrap">
+            <div className="grid grid-cols-5 gap-2 sm:flex-nowrap">
               <Button
                 variant="outline"
                 className="rounded-full border-zinc-700 text-white hover:bg-zinc-800"
@@ -278,6 +279,15 @@ export default function ResourceChatPage({ params }: { params: any }) {
                 >
                   <FileQuestion className="h-4 w-4" />
                   <span className="hidden sm:inline ml-2">Attempt a Quiz</span>
+                </Button>
+              </Link>
+              <Link href={`/dashboard/flashcard/${id}`}>
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full border-zinc-700 text-white hover:bg-zinc-800"
+                >
+                  <Brain className="h-4 w-4" />
+                  <span className="hidden sm:inline ml-2">Flashcards</span>
                 </Button>
               </Link>
             </div>

@@ -4,14 +4,14 @@ import { TopicsTable } from "@/components/dashboard/topics-table";
 import LevelCard from "@/components/dashboard/levelCard";
 import LoginStreakCard from "@/components/dashboard/loginStreakCard";
 import PerformanceCard from "@/components/dashboard/performanceCard";
-import { StudyReminder } from "@/components/dashboard/studyreminder"; // Import the new component
+import { StudyReminder } from "@/components/dashboard/studyreminder";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default function Page() {
   return (
-    <main className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-14 bg-background text-foreground">
+    <main className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 bg-background text-foreground">
       <div className="flex flex-col gap-6">
         {/* Page Header */}
         <div className="flex items-center justify-between">
@@ -39,7 +39,7 @@ export default function Page() {
           {/* performance Chart */}
           <PerformanceCard />
         </div>
-        
+
         {/*Study Reminder Modal */}
         <StudyReminder />
 

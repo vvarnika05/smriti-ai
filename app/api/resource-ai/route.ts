@@ -6,13 +6,15 @@ import {
   MINDMAP_PROMPT,
   ROADMAP_PROMPT,
   QUIZ_PROMPT,
+  FLASHCARD_PROMPT,
 } from "@/lib/prompts";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getYoutubeTranscript } from "@/utils/youtube";
-import { QuizQA as PrismaQuizQA } from "@prisma/client";
+import axios from "axios"; // CHANGE: Kept from original repo for PDF handling
+import { QuizQA as PrismaQuizQA } from "@prisma/client"; // CHANGE: Kept from your version for quiz logic
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
@@ -52,43 +54,58 @@ export async function POST(req: NextRequest) {
     });
 
     if (!resource) {
-      return NextResponse.json(
-        { message: "Resource not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "Resource not found" }, { status: 404 });
     }
 
     let summary = resource.summary;
     if (!summary || summary.length === 0) {
+      // CHANGE: Integrated summary logic for VIDEO, PDF, and ARTICLE from original repo
       if (resource.type === "VIDEO") {
         try {
           const transcript = await getYoutubeTranscript(resource.url);
           const prompt = SUMMARY_PROMPT(transcript);
           summary = await askGemini(prompt);
         } catch (err) {
-          console.error(
-            "Transcript fetch failed. Falling back to title-based summary.",
-            err
-          );
+          console.error("Transcript fetch failed. Falling back to title-based summary.", err);
           const fallbackPrompt = FALLBACK_PROMPT(resource.title);
           summary = await askGemini(fallbackPrompt);
         }
-      } else {
-        const fallbackPrompt = FALLBACK_PROMPT(resource.title);
-        summary = await askGemini(fallbackPrompt);
+      } else if (resource.type === "PDF") {
+        try {
+          const pdfBytes = await axios.get<ArrayBuffer>(resource.url, { responseType: "arraybuffer" });
+          const { default: pdfParse } = await import("pdf-parse");
+          const parsed = await pdfParse(Buffer.from(pdfBytes.data));
+          const prompt = SUMMARY_PROMPT(parsed.text);
+          summary = await askGemini(prompt);
+        } catch (err) {
+          console.error("PDF parse failed. Falling back to title-based summary.", err);
+          const fallbackPrompt = FALLBACK_PROMPT(resource.title);
+          summary = await askGemini(fallbackPrompt);
+        }
+      } else if (resource.type === "ARTICLE") {
+        const baseText = resource.summary && resource.summary.length > 0 ? resource.summary : resource.title;
+        try {
+          const prompt = SUMMARY_PROMPT(baseText);
+          summary = await askGemini(prompt);
+        } catch (err) {
+          console.error("ARTICLE summary generation failed.", err);
+          const fallbackPrompt = FALLBACK_PROMPT(resource.title);
+          summary = await askGemini(fallbackPrompt);
+        }
       }
-      
-      await prisma.resource.update({
-        where: { id: resourceId },
-        data: { summary },
-      });
+
+      if (summary && summary.length > 0) {
+        await prisma.resource.update({
+          where: { id: resourceId },
+          data: { summary },
+        });
+      }
     }
 
+    // --- The rest of the AI tasks ---
+
     if (task === "summary") {
-      return NextResponse.json({
-        message: "Summary generated",
-        summary,
-      });
+      return NextResponse.json({ message: "Summary generated", summary });
     }
 
     if (task === "roadmap") {
@@ -99,10 +116,7 @@ export async function POST(req: NextRequest) {
 
     if (task === "qa") {
       if (!question) {
-        return NextResponse.json(
-          { message: "Question is required for Q&A" },
-          { status: 400 }
-        );
+        return NextResponse.json({ message: "Question is required for Q&A" }, { status: 400 });
       }
       const prompt = QA_PROMPT(summary, question);
       const answer = await askGemini(prompt);
@@ -115,16 +129,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Mindmap code generated", mindmap });
     }
 
+    // CHANGE: This is YOUR advanced quiz logic, fully preserved.
     if (task === "quiz") {
       let existingQuizzes = await prisma.quiz.findMany({
         where: { resourceId: resource.id },
-        include: {
-          quizQAs: true,
-        },
+        include: { quizQAs: true },
         orderBy: { createdAt: 'desc' }
       });
 
-      // Find a quiz that the user hasn't completed twice
       let quizToServe = null;
       for (const quiz of existingQuizzes) {
         if (quiz.quizQAs.length > 0) {
@@ -135,6 +147,7 @@ export async function POST(req: NextRequest) {
               quizQAId: { in: quizQAIds }
             }
           });
+          // Check if the user has completed this specific quiz less than twice.
           if (userAnswersCount < quiz.quizQAs.length * 2) {
             quizToServe = quiz;
             break;
@@ -149,7 +162,7 @@ export async function POST(req: NextRequest) {
           quizQAs: quizToServe.quizQAs,
         });
       } else {
-        // If no suitable quiz is found, generate a new one
+        // No suitable quiz found, generate a new one.
         let mcqText, mcqs;
         try {
           const prompt = QUIZ_PROMPT(summary);
@@ -157,10 +170,7 @@ export async function POST(req: NextRequest) {
           mcqs = extractJSON(mcqText);
         } catch (genError) {
           console.error("AI quiz generation failed:", genError);
-          return NextResponse.json(
-            { message: "Failed to generate a quiz from this resource. The content may be too short." },
-            { status: 400 }
-          );
+          return NextResponse.json({ message: "Failed to generate a quiz from this resource." }, { status: 400 });
         }
 
         interface QuizQuestion {
@@ -172,19 +182,11 @@ export async function POST(req: NextRequest) {
         }
 
         if (!Array.isArray(mcqs) || mcqs.length === 0) {
-          return NextResponse.json(
-            { message: "AI failed to generate quiz questions. The content was likely too short or could not be formatted correctly." },
-            { status: 400 }
-          );
+          return NextResponse.json({ message: "AI failed to generate quiz questions." }, { status: 400 });
         }
 
         const [quizRecord, quizQAs] = await prisma.$transaction(async (tx) => {
-          const newQuizRecord = await tx.quiz.create({
-            data: {
-              resourceId: resource.id,
-            },
-          });
-
+          const newQuizRecord = await tx.quiz.create({ data: { resourceId: resource.id } });
           const newQuizQAs = await Promise.all(
             mcqs.map((q: QuizQuestion) =>
               tx.quizQA.create({
@@ -199,7 +201,6 @@ export async function POST(req: NextRequest) {
               })
             )
           );
-
           return [newQuizRecord, newQuizQAs];
         });
 
@@ -210,11 +211,57 @@ export async function POST(req: NextRequest) {
         });
       }
     }
+
+    if (task === "flashcards") {
+      const existingDeck = await prisma.flashcardDeck.findUnique({
+        where: { resourceId: resource.id },
+        include: { cards: true },
+      });
+
+      if (existingDeck) {
+        return NextResponse.json({
+          message: "Flashcard deck already exists for this resource",
+          deck: existingDeck,
+          cards: existingDeck.cards,
+        });
+      } else {
+        const prompt = FLASHCARD_PROMPT(summary);
+        const flashcardText = await askGemini(prompt);
+        const flashcards = extractJSON(flashcardText);
+
+        interface Flashcard {
+          term: string;
+          definition: string;
+        }
+
+        const deckRecord = await prisma.flashcardDeck.create({
+          data: {
+            resourceId: resource.id,
+            title: `Flashcards for ${resource.title}`,
+          },
+        });
+
+        const cards = await Promise.all(
+          flashcards.map((card: Flashcard) =>
+            prisma.flashcard.create({
+              data: {
+                deckId: deckRecord.id,
+                term: card.term,
+                definition: card.definition,
+              },
+            })
+          )
+        );
+
+        return NextResponse.json({
+          message: "Flashcard deck created with cards",
+          deck: deckRecord,
+          cards,
+        });
+      }
+    }
   } catch (error) {
     console.error("Error in resource AI task:", error);
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
 }

@@ -5,5 +5,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AuthGate>{children}</AuthGate>;
+  return (
+    <AuthGate>
+      <main className="pt-24">{children}</main>
+    </AuthGate>
+  );
 }

@@ -1,5 +1,3 @@
-// app/(authenticated_Pages)/dashboard/topic/[[...id]]/page.tsx
-
 "use client";
 
 import { use } from "react";
@@ -15,15 +13,18 @@ import DeleteDialog from "@/components/topic/DeleteDialog";
 import SearchBar from "@/components/topic/SearchBar";
 import { useTopic } from "@/hooks/useTopic";
 import { useResources } from "@/hooks/useResources";
-import { SimpleNoteEditor } from "@/components/notes/SimpleNoteEditor";
+import dynamic from "next/dynamic";
 import TopicQuizProgress from "@/components/topic/TopicQuizProgress";
+
+// Dynamically import the RichTextEditor for performance
+const RichTextEditor = dynamic(() => import("@/components/notes/RichTextEditor"), { ssr: false });
 
 export default function TopicPage({ params }: { params: any }) {
   const rawId = (use(params) as { id: string | string[] }).id;
   const id = Array.isArray(rawId) ? rawId[0] : rawId;
   const router = useRouter();
 
-  // Topic state management
+  // Topic state management (no changes needed)
   const {
     topicId,
     topicName,
@@ -35,7 +36,7 @@ export default function TopicPage({ params }: { params: any }) {
     isLoading: isTopicLoading,
   } = useTopic(id);
 
-  // Resource state management
+  // Resource state management (no changes needed)
   const {
     media,
     filteredMedia,
@@ -51,6 +52,10 @@ export default function TopicPage({ params }: { params: any }) {
     setPdfTitle,
     pdfFile,
     setPdfFile,
+    notesTitle,
+    setNotesTitle,
+    notesContent,
+    setNotesContent,
     handleAddResource,
     deleteDialogOpen,
     setDeleteDialogOpen,
@@ -75,7 +80,7 @@ export default function TopicPage({ params }: { params: any }) {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-14">
+    <div className="min-h-screen bg-background text-foreground max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14">
       {/* Topic Modal */}
       <TopicModal
         open={topicModalOpen}
@@ -98,16 +103,16 @@ export default function TopicPage({ params }: { params: any }) {
           Add Resource
         </Button>
       </div>
-
-      {/* --- ADD TABS TO ORGANIZE CONTENT --- */}
+      
+      {/* --- TABS SECTION --- */}
       <Tabs defaultValue="resources" className="w-full">
+        {/* CHANGE: Using your 3-column layout for the tabs */}
         <TabsList className="grid w-full grid-cols-3 max-w-md">
           <TabsTrigger value="resources">Resources</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
           <TabsTrigger value="quiz-progress">Quiz Progress</TabsTrigger>
         </TabsList>
 
-        {/* Resources Tab Content (Existing Code) */}
         <TabsContent value="resources" className="mt-4">
           <ResourceModal
             open={resourceModalOpen}
@@ -119,6 +124,10 @@ export default function TopicPage({ params }: { params: any }) {
             pdfTitle={pdfTitle}
             setPdfTitle={setPdfTitle}
             setPdfFile={setPdfFile}
+            notesTitle={notesTitle}
+            setNotesTitle={setNotesTitle}
+            notesContent={notesContent}
+            setNotesContent={setNotesContent}
             onAdd={handleAddResource}
             isLoading={isLoading}
             pdfFile={pdfFile}
@@ -130,7 +139,9 @@ export default function TopicPage({ params }: { params: any }) {
             onDelete={handleDeleteResource}
             isDeleting={isDeleting}
           />
-          {media.length > 0 && <SearchBar value={search} onChange={setSearch} />}
+          {media.length > 0 && (
+            <SearchBar value={search} onChange={setSearch} />
+          )}
           <ResourceGrid
             isLoading={isLoading}
             media={filteredMedia}
@@ -142,12 +153,16 @@ export default function TopicPage({ params }: { params: any }) {
           />
         </TabsContent>
 
-        {/* Notes Tab Content (Existing Code) */}
+        {/* CHANGE: Integrated the original repo's RichTextEditor */}
         <TabsContent value="notes" className="mt-4">
-          <SimpleNoteEditor topicId={id} />
+           {id ? (
+            <RichTextEditor topicId={id} />
+            ) : (
+              <p className="text-muted-foreground">Open a topic to write notes.</p>
+            )}
         </TabsContent>
 
-        {/* Quiz Progress Tab (New Content) */}
+        {/* CHANGE: Added your new Quiz Progress tab */}
         <TabsContent value="quiz-progress" className="mt-4">
           <TopicQuizProgress topicId={id} />
         </TabsContent>

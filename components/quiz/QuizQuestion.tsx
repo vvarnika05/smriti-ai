@@ -1,145 +1,75 @@
-// components/quiz/QuizQuestion.tsx
-
-import { useState, useEffect, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-
-export type QuizQA = {
-  id: string;
+type Props = {
   question: string;
   options: string[];
-  correctAnswer: string;
-  explanation: string;
-  difficulty: string;
+  selected: string | null;
+  setSelected: (value: string) => void;
+  questionNumber?: number;
+  totalQuestions?: number;
 };
 
-type Props = {
-  quizData: QuizQA[];
-  onQuizEnd: (userAnswers: { quizQAId: string; selectedOption: string; isCorrect: boolean }[]) => void;
-};
-
-const QuizQuestion = ({ quizData, onQuizEnd }: Props) => {
-  const [askedQuestions, setAskedQuestions] = useState<string[]>([]);
-  const [userAnswers, setUserAnswers] = useState<
-    { quizQAId: string; selectedOption: string; isCorrect: boolean }[]
-  >([]);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
-
-  const totalQuestionsToAsk = 7;
-
-  const currentQuestion = useMemo(() => {
-    // Return the current question based on the last item in the askedQuestions list
-    if (askedQuestions.length === 0) return null;
-    return quizData.find(q => q.id === askedQuestions[askedQuestions.length - 1]);
-  }, [askedQuestions, quizData]);
-
-
-  useEffect(() => {
-    if (quizData.length > 0 && askedQuestions.length === 0) {
-      // Start the quiz with a random 'Medium' question
-      const mediumQuestions = quizData.filter(q => q.difficulty === "Medium");
-      if (mediumQuestions.length > 0) {
-        const randomIndex = Math.floor(Math.random() * mediumQuestions.length);
-        setAskedQuestions([mediumQuestions[randomIndex].id]);
-      } else {
-        // Fallback if no medium questions are found
-        const firstQuestion = quizData[Math.floor(Math.random() * quizData.length)];
-        setAskedQuestions([firstQuestion.id]);
-      }
-    }
-  }, [quizData, askedQuestions.length]);
-
-
-  const getNextQuestion = (isCorrect: boolean) => {
-    let nextDifficulty = currentQuestion?.difficulty;
-    let nextQuestionId: string | undefined;
-
-    if (isCorrect) {
-      if (nextDifficulty === "Easy") nextDifficulty = "Medium";
-      else if (nextDifficulty === "Medium") nextDifficulty = "Hard";
-    } else {
-      if (nextDifficulty === "Hard") nextDifficulty = "Medium";
-      else if (nextDifficulty === "Medium") nextDifficulty = "Easy";
-    }
-
-    // Filter out already asked questions and find one with the target difficulty
-    const availableQuestions = quizData.filter(q => !askedQuestions.includes(q.id));
-    const nextQuestionPool = availableQuestions.filter(q => q.difficulty === nextDifficulty);
-
-    if (nextQuestionPool.length > 0) {
-      nextQuestionId = nextQuestionPool[Math.floor(Math.random() * nextQuestionPool.length)].id;
-    } else if (availableQuestions.length > 0) {
-      // Fallback: if no questions of that difficulty are left, choose a random one from the remaining pool
-      nextQuestionId = availableQuestions[Math.floor(Math.random() * availableQuestions.length)].id;
-    }
-
-    return nextQuestionId;
-  };
-
-  const handleNext = () => {
-    if (!selectedOption || !currentQuestion) return;
-
-    const isCorrect = selectedOption === currentQuestion.correctAnswer;
-    const newUserAnswers = [
-      ...userAnswers,
-      {
-        quizQAId: currentQuestion.id,
-        selectedOption: selectedOption,
-        isCorrect: isCorrect,
-      },
-    ];
-    setUserAnswers(newUserAnswers);
-
-    if (newUserAnswers.length >= totalQuestionsToAsk) {
-      // Quiz ends after 7 questions
-      onQuizEnd(newUserAnswers);
-    } else {
-      const nextQuestionId = getNextQuestion(isCorrect);
-      if (nextQuestionId) {
-        setAskedQuestions([...askedQuestions, nextQuestionId]);
-      } else {
-        // Fallback if no more questions can be found
-        onQuizEnd(newUserAnswers);
-      }
-      setSelectedOption(null);
-    }
-  };
-
-  if (!currentQuestion) {
-    return (
-      <div className="text-center text-red-500">
-        Error: Quiz data is not available.
-      </div>
-    );
-  }
+export default function QuizQuestion({
+  question,
+  options,
+  selected,
+  setSelected,
+  questionNumber,
+  totalQuestions,
+}: Props) {
+  const questionId = `question-${questionNumber || 'current'}`;
+  const fieldsetId = `options-${questionNumber || 'current'}`;
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">{currentQuestion.question}</h2>
-      <div className="space-y-3">
-        {currentQuestion.options.map((opt) => (
-          <div
-            key={opt}
-            onClick={() => setSelectedOption(opt)}
-            className={`p-3 rounded cursor-pointer border ${
-              selectedOption === opt
-                ? "bg-lime-400 text-black font-bold"
-                : "border-white/10 bg-zinc-800 hover:bg-zinc-700"
-            }`}
-          >
-            {opt}
-          </div>
-        ))}
-      </div>
-      <div className="mt-6 flex justify-between">
-        <span className="text-sm text-gray-400">
-          Question {userAnswers.length + 1} of {totalQuestionsToAsk}
-        </span>
-        <Button onClick={handleNext} disabled={!selectedOption}>
-          {userAnswers.length + 1 === totalQuestionsToAsk ? "Finish Quiz" : "Next Question"}
-        </Button>
-      </div>
+    <div role="group" aria-labelledby={questionId}>
+      <h2 id={questionId} className="text-xl font-semibold mb-4">
+        {questionNumber && totalQuestions
+          ? `Question ${questionNumber} of ${totalQuestions}: ${question}`
+          : question}
+      </h2>
+
+      <fieldset className="space-y-3" aria-labelledby={questionId}>
+        <legend className="sr-only">
+          Select your answer for: {question}
+        </legend>
+
+        {options.map((opt, index) => {
+          const optionId = `${fieldsetId}-option-${index}`;
+          const isSelected = selected === opt;
+
+          return (
+            <label
+              key={opt}
+              htmlFor={optionId}
+              className={`block p-3 rounded cursor-pointer border transition-all duration-200 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 ${
+                isSelected
+                  ? "bg-lime-400 text-black font-bold border-lime-500 ring-2 ring-lime-500"
+                  : "border-white/10 bg-zinc-800 hover:bg-zinc-700 hover:border-white/20"
+              }`}
+            >
+              <input
+                id={optionId}
+                type="radio"
+                name={`quiz-question-${questionNumber || 'current'}`}
+                value={opt}
+                checked={isSelected}
+                onChange={() => setSelected(opt)}
+                className="sr-only"
+                aria-describedby={`${optionId}-status`}
+              />
+              <div className="flex items-center justify-between">
+                <span className="flex-1">{opt}</span>
+                {isSelected && (
+                  <span className="ml-2 text-sm font-medium" aria-hidden="true">
+                    ✓
+                  </span>
+                )}
+              </div>
+              <span id={`${optionId}-status`} className="sr-only">
+                {isSelected ? "Selected answer" : "Not selected"}
+              </span>
+            </label>
+          );
+        })}
+      </fieldset>
     </div>
   );
-};
-
-export default QuizQuestion;
+}
