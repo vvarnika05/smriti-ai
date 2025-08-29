@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, use } from "react";
 import { toast } from "sonner";
 import { Loader2, ArrowLeft, ArrowRight, AlertCircle } from "lucide-react";
 import QuizQuestion from "@/components/quiz/QuizQuestion";
@@ -10,7 +10,16 @@ import { AccessibleProgressBar } from "@/components/accessibility/AccessibleProg
 import { AriaLiveRegion } from "@/components/accessibility/AriaLiveRegion";
 import axios from "axios";
 
-// Type definitions remain the same
+// Define the shape of the resolved params object
+type QuizPageParams = {
+  id: string | string[];
+};
+
+// Define the props for the Page component
+type QuizPageProps = {
+  params: Promise<QuizPageParams>; // CHANGE: Typed 'params' as a Promise
+};
+
 type QuizQA = {
   id: string;
   question: string;
@@ -21,42 +30,34 @@ type QuizQA = {
 };
 
 type ResourceResponse = {
-  resource?: {
-    id: string;
-    title: string;
-  };
+  resource?: { id: string; title: string };
 };
 
 type QuizResponse = {
   message: string;
-  quiz: {
-    id:string;
-    resourceId: string;
-  };
+  quiz: { id:string; resourceId: string };
   quizQAs: QuizQA[];
 };
 
-// This type will be used for the final result submission
 type FinalAnswer = {
   quizQAId: string;
   selectedOption: string;
   isCorrect: boolean;
 };
 
-export default function QuizPage({ params }: { params: { id: string | string[] } }) {
-  // CHANGE 4: Using Next.js 'params' for cleaner route handling
-  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+export default function QuizPage({ params }: QuizPageProps) {
+  // Unwrapping the promise and asserting the type of the result
+  const resolvedParams = use(params);
+  const id = Array.isArray(resolvedParams.id) ? resolvedParams.id[0] : resolvedParams.id;
   const hasFetched = useRef(false);
 
   const [isLoading, setIsLoading] = useState(true);
   const [resourceTopic, setResourceTopic] = useState("");
+  // ... rest of the component code remains the same
   const [quizData, setQuizData] = useState<QuizQA[]>([]);
   const [quizId, setQuizId] = useState<string | null>(null);
-
-  // Your adaptive logic state
-  const [askedQuestions, setAskedQuestions] = useState<string[]>([]);
   
-  // CHANGE 2: State management updated to support "Previous" button
+  const [askedQuestions, setAskedQuestions] = useState<string[]>([]);
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [userSelections, setUserSelections] = useState<(string | null)[]>([]);
@@ -67,12 +68,25 @@ export default function QuizPage({ params }: { params: { id: string | string[] }
 
   const currentQuestion = useMemo(() => {
     if (askedQuestions.length === 0 || currentQIndex >= askedQuestions.length) return null;
-    const currentQuestionId = askedQuestions[currentQIndex];
-    return quizData.find(q => q.id === currentQuestionId);
+    return quizData.find(q => q.id === askedQuestions[currentQIndex]);
   }, [currentQIndex, askedQuestions, quizData]);
 
+  const initializeQuiz = (questions: QuizQA[]) => {
+    if (questions.length > 0) {
+      const mediumQuestions = questions.filter(q => q.difficulty === "Medium");
+      const firstQuestion = mediumQuestions.length > 0 
+        ? mediumQuestions[Math.floor(Math.random() * mediumQuestions.length)]
+        : questions[Math.floor(Math.random() * questions.length)];
+      
+      setAskedQuestions([firstQuestion.id]);
+      setUserSelections(Array(totalQuestionsToAsk).fill(null));
+      setCurrentQIndex(0);
+      setSelectedOption(null);
+      setQuizState("quiz");
+    }
+  };
+
   useEffect(() => {
-    // CHANGE 3: useRef flag to prevent double-fetching
     if (hasFetched.current || !id) return;
     hasFetched.current = true;
 
@@ -87,16 +101,7 @@ export default function QuizPage({ params }: { params: { id: string | string[] }
 
         setQuizData(resQuiz.data.quizQAs);
         setQuizId(resQuiz.data.quiz.id);
-
-        if (resQuiz.data.quizQAs.length > 0) {
-          const mediumQuestions = resQuiz.data.quizQAs.filter(q => q.difficulty === "Medium");
-          const firstQuestion = mediumQuestions.length > 0 
-            ? mediumQuestions[Math.floor(Math.random() * mediumQuestions.length)]
-            : resQuiz.data.quizQAs[Math.floor(Math.random() * resQuiz.data.quizQAs.length)];
-          
-          setAskedQuestions([firstQuestion.id]);
-          setUserSelections(Array(totalQuestionsToAsk).fill(null)); // Initialize selections array
-        }
+        initializeQuiz(resQuiz.data.quizQAs);
       } catch (error) {
         console.error("Error fetching quiz:", error);
         toast.error("Failed to load quiz. Please try again.");
@@ -104,15 +109,11 @@ export default function QuizPage({ params }: { params: { id: string | string[] }
         setIsLoading(false);
       }
     }
-
     Datafetcher();
   }, [id]);
   
-  // Your core adaptive logic function remains unchanged
   const getNextQuestion = (isCorrect: boolean) => {
-    // ... (Your getNextQuestion logic is perfect, no changes needed here)
     if (!currentQuestion) return;
-
     let nextDifficulty = currentQuestion.difficulty;
     if (isCorrect) {
       if (nextDifficulty === "Easy") nextDifficulty = "Medium";
@@ -121,21 +122,17 @@ export default function QuizPage({ params }: { params: { id: string | string[] }
       if (nextDifficulty === "Hard") nextDifficulty = "Medium";
       else if (nextDifficulty === "Medium") nextDifficulty = "Easy";
     }
-
     const availableQuestions = quizData.filter(q => !askedQuestions.includes(q.id));
     let nextQuestionPool = availableQuestions.filter(q => q.difficulty === nextDifficulty);
-
     if (nextQuestionPool.length === 0 && availableQuestions.length > 0) {
-      nextQuestionPool = availableQuestions; // Fallback
+      nextQuestionPool = availableQuestions;
     }
-
     if (nextQuestionPool.length > 0) {
       return nextQuestionPool[Math.floor(Math.random() * nextQuestionPool.length)].id;
     }
     return undefined;
   };
 
-  // CHANGE 5: handleNext updated for new state and adaptive flow
   const handleNext = async () => {
     if (!selectedOption || !currentQuestion) return;
 
@@ -146,18 +143,15 @@ export default function QuizPage({ params }: { params: { id: string | string[] }
     const isCorrect = selectedOption === currentQuestion.correctAnswer;
     setAriaMessage(isCorrect ? "Correct answer!" : "Incorrect answer.");
 
-    // If we are on the last question, end the quiz
     if (currentQIndex === totalQuestionsToAsk - 1) {
         setQuizState("results");
         setAriaMessage(`Quiz completed!`);
-        // Finalize answers and submit
         const finalAnswers: FinalAnswer[] = askedQuestions.map((qaId, index) => {
           const question = quizData.find(q => q.id === qaId)!;
-          const selection = newSelections[index];
           return {
             quizQAId: qaId,
-            selectedOption: selection!,
-            isCorrect: selection === question.correctAnswer,
+            selectedOption: newSelections[index]!,
+            isCorrect: newSelections[index] === question.correctAnswer,
           };
         });
 
@@ -167,7 +161,6 @@ export default function QuizPage({ params }: { params: { id: string | string[] }
             } catch (error) { console.error("Error saving quiz result:", error); }
         }
     } else {
-        // If we haven't asked this question before, find the next one
         if (currentQIndex === askedQuestions.length - 1) {
             const nextQuestionId = getNextQuestion(isCorrect);
             if (nextQuestionId) {
@@ -175,12 +168,11 @@ export default function QuizPage({ params }: { params: { id: string | string[] }
             }
         }
         setCurrentQIndex(currentQIndex + 1);
-        setSelectedOption(newSelections[currentQIndex + 1]); // Set selected for next question if it exists
+        setSelectedOption(newSelections[currentQIndex + 1] || null);
         setAriaMessage(`Moving to question ${currentQIndex + 2}`);
     }
   };
   
-  // CHANGE 1: "Previous" button handler re-introduced
   const handlePrevious = () => {
     setCurrentQIndex(currentQIndex - 1);
     setSelectedOption(userSelections[currentQIndex - 1]);
@@ -188,8 +180,7 @@ export default function QuizPage({ params }: { params: { id: string | string[] }
   };
 
   const resetQuiz = () => {
-    // ... (resetQuiz logic would be updated similarly if needed, this is a good start)
-    window.location.reload(); // Simple way to fully reset the quiz state
+    initializeQuiz(quizData);
   };
 
   const startReview = () => setQuizState("review");
@@ -222,7 +213,6 @@ export default function QuizPage({ params }: { params: { id: string | string[] }
           <h2 className="text-xl sm:text-xl font-medium text-white px-4">{resourceTopic}</h2>
         </header>
       )}
-
       <main className="bg-zinc-900 rounded-xl p-6 shadow-xl w-full" id="main-content">
         {quizState === "quiz" && (
           <>
@@ -236,7 +226,6 @@ export default function QuizPage({ params }: { params: { id: string | string[] }
               totalQuestions={totalQuestionsToAsk}
             />
             <nav className="flex items-center justify-between mt-6" aria-label="Quiz navigation">
-              {/* CHANGE 1: "Previous" button is back */}
               <div>
                 {currentQIndex > 0 && (
                   <button onClick={handlePrevious} className="flex items-center gap-2 bg-zinc-700 text-white px-4 py-2 rounded hover:bg-zinc-600 transition-colors">
@@ -254,13 +243,12 @@ export default function QuizPage({ params }: { params: { id: string | string[] }
 
         {quizState === "results" && (
            <QuizFinalResult
-            userAnswers={askedQuestions.map((qaId, index) => { // Construct final answers for results page
+            userAnswers={askedQuestions.map((qaId, index) => {
               const question = quizData.find(q => q.id === qaId)!;
-              const selection = userSelections[index];
               return {
                 quizQAId: qaId,
-                selectedOption: selection!,
-                isCorrect: selection === question.correctAnswer,
+                selectedOption: userSelections[index]!,
+                isCorrect: userSelections[index] === question.correctAnswer,
               };
             })}
             quizData={quizData}
@@ -271,13 +259,12 @@ export default function QuizPage({ params }: { params: { id: string | string[] }
         
         {quizState === "review" && (
           <QuizReview
-            userAnswers={askedQuestions.map((qaId, index) => { // Construct final answers for review page
+            userAnswers={askedQuestions.map((qaId, index) => {
               const question = quizData.find(q => q.id === qaId)!;
-              const selection = userSelections[index];
               return {
                 quizQAId: qaId,
-                selectedOption: selection!,
-                isCorrect: selection === question.correctAnswer,
+                selectedOption: userSelections[index]!,
+                isCorrect: userSelections[index] === question.correctAnswer,
               };
             })}
             quizData={quizData}
