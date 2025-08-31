@@ -8,7 +8,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-// Navigation links array
+// ---------------- Navigation Links ----------------
 const navigationLinks = [
   { href: "/#", label: "Home" },
   { href: "/about", label: "About Us" },
@@ -17,15 +17,8 @@ const navigationLinks = [
   { href: "/contact", label: "Contact Us" },
 ];
 
-// Additional action buttons for mobile menu
-const mobileActionButtons: {
-  href: string;
-  label: string;
-  icon?: React.ElementType;
-  variant?: "ghost" | "outline" | "default";
-  authRequired?: boolean;
-  external?: boolean;
-}[] = [
+// ---------------- Mobile Action Buttons ----------------
+const mobileActionButtons = [
   {
     href: "/dashboard",
     label: "Dashboard",
@@ -42,7 +35,7 @@ const mobileActionButtons: {
   },
 ];
 
-// Reusable NavButton component
+// ---------------- Reusable Nav Button ----------------
 type NavButtonProps = {
   href: string;
   label: string;
@@ -50,19 +43,14 @@ type NavButtonProps = {
   external?: boolean;
 };
 
-const NavButton = ({
-  href,
-  label,
-  className = "",
-  external = false,
-}: NavButtonProps) => {
-  const baseClassName =
+const NavButton = ({ href, label, className = "", external = false }: NavButtonProps) => {
+  const baseClass =
     "rounded-full cursor-pointer hover:bg-[#adff2f]/10 hover:text-[#adff2f] transition-all duration-300 hover:scale-105";
 
   if (external) {
     return (
       <a href={href} target="_blank" rel="noopener noreferrer">
-        <Button variant="ghost" className={`${baseClassName} ${className}`}>
+        <Button variant="ghost" className={`${baseClass} ${className}`}>
           {label}
         </Button>
       </a>
@@ -70,15 +58,15 @@ const NavButton = ({
   }
 
   return (
-    <Link href={href} className="cursor-pointer">
-      <Button variant="ghost" className={`${baseClassName} ${className}`} size="adaptive">
+    <Link href={href}>
+      <Button variant="ghost" className={`${baseClass} ${className}`} size="adaptive">
         {label}
       </Button>
     </Link>
   );
 };
 
-// Reusable ActionButton component
+// ---------------- Reusable Action Button ----------------
 type ActionButtonProps = {
   href: string;
   label: string;
@@ -96,47 +84,36 @@ const ActionButton = ({
   className = "",
   external = false,
 }: ActionButtonProps) => {
-  const buttonContent = (
-    <Button variant={variant} className={className}>
+  const content = (
+    <Button variant={variant} className={`flex items-center gap-2 ${className}`}>
       {Icon && <Icon className="h-4 w-4" />}
       {label}
     </Button>
   );
 
-  if (external) {
-    return (
-      <a href={href} target="_blank" rel="noopener noreferrer">
-        {buttonContent}
-      </a>
-    );
-  }
-
-  return (
-    <Link href={href} className="cursor-pointer">
-      {buttonContent}
-    </Link>
+  return external ? (
+    <a href={href} target="_blank" rel="noopener noreferrer">
+      {content}
+    </a>
+  ) : (
+    <Link href={href}>{content}</Link>
   );
 };
 
+// ---------------- Navbar Component ----------------
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  // Close menu when route changes
-  useEffect(() => {
-    setIsMenuOpen(false);
-  }, [pathname]);
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  // Close mobile menu on route change
+  useEffect(() => setIsMenuOpen(false), [pathname]);
 
   return (
-    <nav className="fixed w-full top-0 z-50 backdrop-blur-md bg-background/50 border-b border-border">
+    <nav className="fixed top-0 w-full z-50 backdrop-blur-md bg-background/50 border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center flex-shrink-0 w-1/5">
+          <div className="flex items-center w-1/5 flex-shrink-0">
             <Link
               href="/#"
               className="flex items-center cursor-pointer hover:opacity-90 transition-all duration-300 group whitespace-nowrap"
@@ -148,16 +125,16 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Center Navigation Links - Hidden on Mobile */}
+          {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center justify-center gap-4 w-3/5">
             {navigationLinks.map((link) => (
               <NavButton key={link.href} href={link.href} label={link.label} />
             ))}
           </div>
 
-          {/* Right side buttons */}
-          <div className="flex items-center justify-end space-x-2 w-1/5">
-            {/* Desktop Dashboard Button */}
+          {/* Right-side buttons */}
+          <div className="flex items-center justify-end gap-2 w-1/5">
+            {/* Dashboard (Desktop) */}
             <SignedIn>
               <div className="hidden md:flex items-center">
                 <ActionButton
@@ -170,45 +147,39 @@ export default function Navbar() {
               </div>
             </SignedIn>
 
-            {/* Desktop Sign In/Up Buttons */}
+            {/* Sign In / Sign Up (Desktop) */}
             <SignedOut>
-              <div className="flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-2">
                 <ActionButton
                   href="/sign-in"
                   label="Sign In"
                   variant="outline"
-                  className="rounded-full flex items-center gap-2 border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black hover:border-[#adff2f] transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#adff2f]/25 px-4 py-2"
+                  className="rounded-full flex items-center gap-2 border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black hover:border-[#adff2f] transition-all duration-300 hover:scale-105 px-4 py-2"
                 />
                 <ActionButton
                   href="/sign-up"
                   label="Sign Up"
-                  className="rounded-full bg-gradient-to-r from-[#adff2f] to-[#9dff07] text-black hover:text-black transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#adff2f]/25 px-4 py-2"
+                  className="rounded-full bg-gradient-to-r from-[#adff2f] to-[#9dff07] text-black hover:text-black transition-all duration-300 hover:scale-105 px-4 py-2"
                 />
               </div>
             </SignedOut>
 
-            {/* Profile Button - Always visible when signed in */}
+            {/* Profile */}
             <SignedIn>
-              <div className="flex items-center">
-                <UserButton />
-              </div>
+              <UserButton />
             </SignedIn>
 
-            {/* Menu Button */}
+            {/* Mobile Menu Toggle */}
             <button
-              onClick={toggleMenu}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden flex items-center p-2 rounded-full hover:bg-[#adff2f]/10"
             >
-              {isMenuOpen ? (
-                <X className="h-6 w-6 text-[#adff2f]" />
-              ) : (
-                <Menu className="h-6 w-6 text-[#adff2f]" />
-              )}
+              {isMenuOpen ? <X className="h-6 w-6 text-[#adff2f]" /> : <Menu className="h-6 w-6 text-[#adff2f]" />}
             </button>
           </div>
         </div>
 
-        {/* Animated Mobile Menu */}
+        {/* Mobile Menu */}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
@@ -227,36 +198,18 @@ export default function Navbar() {
               >
                 {/* Mobile Navigation Links */}
                 {navigationLinks.map((link) => (
-                  <div key={link.href} className="block">
-                    <NavButton
-                      href={link.href}
-                      label={link.label}
-                      className="w-full text-left"
-                    />
-                  </div>
+                  <NavButton
+                    key={link.href}
+                    href={link.href}
+                    label={link.label}
+                    className="w-full text-left"
+                  />
                 ))}
 
                 {/* Mobile Action Buttons */}
-                {mobileActionButtons.map((button) => {
-                  if (button.authRequired) {
-                    return (
-                      <SignedIn key={button.href}>
-                        <div className="block">
-                          <ActionButton
-                            href={button.href}
-                            label={button.label}
-                            icon={button.icon}
-                            variant={button.variant}
-                            external={button.external}
-                            className="w-full rounded-full flex items-center justify-center gap-2 border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black"
-                          />
-                        </div>
-                      </SignedIn>
-                    );
-                  }
-
-                  return (
-                    <div key={button.href} className="block">
+                {mobileActionButtons.map((button) =>
+                  button.authRequired ? (
+                    <SignedIn key={button.href}>
                       <ActionButton
                         href={button.href}
                         label={button.label}
@@ -265,9 +218,19 @@ export default function Navbar() {
                         external={button.external}
                         className="w-full rounded-full flex items-center justify-center gap-2 border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black"
                       />
-                    </div>
-                  );
-                })}
+                    </SignedIn>
+                  ) : (
+                    <ActionButton
+                      key={button.href}
+                      href={button.href}
+                      label={button.label}
+                      icon={button.icon}
+                      variant={button.variant}
+                      external={button.external}
+                      className="w-full rounded-full flex items-center justify-center gap-2 border-[#adff2f]/30 text-[#adff2f] hover:bg-gradient-to-r hover:from-[#adff2f] hover:to-[#9dff07] hover:text-black"
+                    />
+                  )
+                )}
               </motion.div>
             </motion.div>
           )}
