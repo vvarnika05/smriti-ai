@@ -1,11 +1,12 @@
 import React from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 
 // The JSX for the left side of the sign-in card
 const LeftSidePanel = () => {
   return (
     <div className="hidden lg:block h-[600px] relative overflow-hidden ">
-      <img
+      <Image
         src="/brain.png"
         alt="AI Learning Brain"
         className="object-contain w-100 h-100 mx-auto mt-10 opacity-75 "

@@ -1,11 +1,10 @@
-// app/api/topic/[topicId]/quiz-progress/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { topicId: string } }
+  { params }: { params: Promise<{ topicId: string }> }
 ) {
   const { userId } = getAuth(req);
   if (!userId) {
