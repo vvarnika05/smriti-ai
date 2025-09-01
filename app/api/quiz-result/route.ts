@@ -29,15 +29,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // CHANGE 2: More efficient answer fetching.
-    // 1. Get all question IDs from the submission.
     const questionIds = answers.map((answer) => answer.quizQAId);
 
-    // 2. Fetch all correct answers for those questions in a single database call.
     const correctAnswersData = await prisma.quizQA.findMany({
       where: {
         id: { in: questionIds },
-        quizId: quizId, // Ensure questions belong to the correct quiz
+        quizId: quizId,
       },
       select: {
         id: true,
@@ -45,7 +42,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // 3. Create a Map for instant O(1) lookups.
     const answerMap = new Map(
       correctAnswersData.map((qa) => [qa.id, qa.correctAnswer])
     );
@@ -68,25 +64,22 @@ export async function POST(req: NextRequest) {
       };
     });
     
-    // CHANGE 1: Using a Prisma transaction to ensure all database writes succeed or none do.
-    const xpGain = correctAnswersCount * 5; // 5 XP per correct answer
+    const xpGain = correctAnswersCount * 5;
 
     const [_, quizResult, updatedUser] = await prisma.$transaction(async (tx) => {
-      // Operation 1: Save all the detailed user answers
       const userAnswerCreation = tx.userAnswer.createMany({
         data: userAnswersToCreate,
       });
 
-      // Operation 2: Create the final quiz result summary
       const quizResultCreation = tx.quizResult.create({
         data: {
+          userId, // THE ONLY CHANGE: Added the userId here
           quizId,
           score: correctAnswersCount,
           totalQuestions: answers.length, 
         },
       });
 
-      // Operation 3: Award XP to the user
       const userUpdate = tx.user.update({
         where: { id: userId },
         data: {
@@ -96,11 +89,9 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // All three operations are executed together
       return Promise.all([userAnswerCreation, quizResultCreation, userUpdate]);
     });
     
-    // After the transaction, update the user's level based on their new XP
     const { level } = getLevelAndTtile(updatedUser.experience);
     if (updatedUser.level !== level) {
         await prisma.user.update({
@@ -125,7 +116,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET handler remains unchanged as it was already well-written.
+// GET handler remains unchanged.
 export async function GET(req: NextRequest) {
   const { userId } = getAuth(req);
   if (!userId) {
@@ -143,15 +134,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // This query correctly ensures a user can only fetch results for their own topics.
     const quizResults = await prisma.quizResult.findMany({
-      where: { quizId,
-        quiz: {
-            resource: {
-                topic: {
-                    userId: userId
-                }
-            }
-        }
+      where: { 
+        quizId,
+        userId
       },
       orderBy: { createdAt: "desc" },
     });

@@ -84,6 +84,7 @@ model QuizQA {
 
 model QuizResult {
   id             String   @id @default(uuid())
+  userId         String?
   quizId         String
   score          Int
   totalQuestions Int      @default(0)

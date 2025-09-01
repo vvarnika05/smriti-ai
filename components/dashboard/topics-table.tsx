@@ -4,14 +4,7 @@ import * as React from "react";
 import axios from "axios";
 import Link from "next/link";
 import { toast } from "sonner";
-import {
-  ArrowUpDown,
-  CheckCircle2,
-  ChevronDown,
-  Clock,
-  GraduationCap,
-  PauseCircle,
-} from "lucide-react";
+import { ArrowUpDown, ChevronDown, GraduationCap } from "lucide-react";
 import {
   ColumnDef,
   useReactTable,
@@ -31,7 +24,6 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Progress } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -41,38 +33,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import ActionsCell from "./actionCell";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
+// CHANGE 1: Updated the Topic type to match the new API response
 export type Topic = {
   id: string;
   title: string;
-  status: "learning" | "completed" | "paused";
-  progress: number;
+  completionPercentage: number;
+  averageScore: number;
   isDeleting?: boolean;
 };
 
 export function TopicsTable(): React.JSX.Element {
   const [data, setData] = React.useState<Topic[]>([]);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState<
-    Record<string, boolean>
-  >({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
 
   const handleRemoveTopic = (topicId: string) => {
-    // First mark the row as deleting
-    setData((prev) =>
-      prev.map((topic) =>
-        topic.id === topicId ? { ...topic, isDeleting: true } : topic
-      )
-    );
-
-    // Then remove it after animation
+    setData((prev) => prev.map((topic) => (topic.id === topicId ? { ...topic, isDeleting: true } : topic)));
     setTimeout(() => {
       setData((prev) => prev.filter((topic) => topic.id !== topicId));
     }, 500);
@@ -82,75 +64,53 @@ export function TopicsTable(): React.JSX.Element {
     {
       accessorKey: "title",
       header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
           Topic <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
       cell: ({ row }) => (
-        <Link
-          href={`/dashboard/topic/${row.original.id}`}
-          className="hover:underline"
-        >
+        <Link href={`/dashboard/topic/${row.original.id}`} className="hover:underline font-medium">
           {row.getValue("title")}
         </Link>
       ),
     },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as Topic["status"];
-        const statusMap = {
-          learning: {
-            label: "Learning",
-            icon: <Clock className="w-4 h-4" />,
-            color: "bg-blue-100 text-blue-800",
-          },
-          completed: {
-            label: "Completed",
-            icon: <CheckCircle2 className="w-4 h-4" />,
-            color: "bg-green-100 text-green-800",
-          },
-          paused: {
-            label: "Paused",
-            icon: <PauseCircle className="w-4 h-4" />,
-            color: "bg-yellow-100 text-yellow-800",
-          },
-        };
-        const { label, icon, color } = statusMap[status];
-        return (
-          <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${color}`}
-          >
-            {icon} {label}
-          </span>
-        );
-      },
-    },
+    // CHANGE 2: Replaced the old "status" and "progress" columns with the new stacked bar
     {
       accessorKey: "progress",
       header: "Progress",
       cell: ({ row }) => {
-        const value = row.getValue("progress") as number;
+        const { completionPercentage, averageScore } = row.original;
+        
         return (
-          <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-muted-foreground">
-              {value}%
-            </span>
-            <Progress value={value} className="h-2" />
-          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="w-full bg-zinc-700 rounded-full h-2.5 relative overflow-hidden cursor-pointer">
+                  {/* Completion Bar (Light Green background) */}
+                  <div
+                    className="bg-lime-400/30 h-2.5 rounded-full"
+                    style={{ width: `${completionPercentage}%` }}
+                  />
+                  {/* Performance Bar (Dark Green foreground) */}
+                  <div
+                    className="bg-lime-400 h-2.5 rounded-full absolute top-0"
+                    style={{ width: `${(completionPercentage * averageScore) / 100}%` }}
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Completion: {completionPercentage.toFixed(0)}%</p>
+                <p>Average Score: {averageScore.toFixed(0)}%</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         );
       },
     },
     {
       accessorKey: "actions",
-      header: () => <div className="text-center w-full">Actions</div>,
-      cell: ({ row }) => (
-        <ActionsCell topicId={row.original.id} onDelete={handleRemoveTopic} />
-      ),
+      header: () => <div className="text-right">Actions</div>,
+      cell: ({ row }) => <div className="flex justify-end"><ActionsCell topicId={row.original.id} onDelete={handleRemoveTopic} /></div>,
     },
   ];
 
@@ -175,34 +135,18 @@ export function TopicsTable(): React.JSX.Element {
 
   React.useEffect(() => {
     async function fetchTopics() {
+      setIsLoading(true);
       try {
-        setIsLoading(true); // Start spinner
-        const topicAPI = "/api/topic";
-        const res = await axios.get(topicAPI);
-
-        const transformed = (res.data as any).topics.map(
-          ({ id, ...rest }: { id: string }) => {
-            const progress = Math.round(Math.random() * 100);
-            const status = progress === 100 ? "completed" : "learning";
-
-            return {
-              id,
-              progress,
-              status,
-              ...rest,
-            };
-          }
-        );
-
-        setData(transformed);
+        const res = await axios.get("/api/topic");
+        // CHANGE 3: Removed Math.random() and using data directly from the API
+        setData(res.data.topics);
       } catch (error) {
         console.error("Error occurred", error);
         toast.error("Failed to load topics");
       } finally {
-        setIsLoading(false); // Stop spinner
+        setIsLoading(false);
       }
     }
-
     fetchTopics();
   }, []);
 
@@ -220,17 +164,12 @@ export function TopicsTable(): React.JSX.Element {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((c) => c.getCanHide())
-              .map((column) => (
+            {table.getAllColumns().filter((c) => c.getCanHide()).map((column) => (
                 <DropdownMenuCheckboxItem
                   key={column.id}
                   className="capitalize"
                   checked={column.getIsVisible()}
-                  onCheckedChange={(value: boolean) =>
-                    column.toggleVisibility(!!value)
-                  }
+                  onCheckedChange={(value: boolean) => column.toggleVisibility(!!value)}
                 >
                   {column.id}
                 </DropdownMenuCheckboxItem>
@@ -238,11 +177,9 @@ export function TopicsTable(): React.JSX.Element {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center text-white text-lg gap-4">
+        <div className="flex h-64 items-center justify-center text-white">
           <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
-          <span>Loading Topics...</span>
         </div>
       ) : (
         <div className="rounded-md border">
@@ -252,12 +189,7 @@ export function TopicsTable(): React.JSX.Element {
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -266,32 +198,18 @@ export function TopicsTable(): React.JSX.Element {
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-id={row.original.id}
-                    className={
-                      row.original.isDeleting
-                        ? "opacity-0 transition-opacity duration-500"
-                        : ""
-                    }
-                  >
+                  <TableRow key={row.id} data-id={row.original.id} className={row.original.isDeleting ? "opacity-0 transition-opacity duration-500" : ""}>
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    No topics created yet.
                   </TableCell>
                 </TableRow>
               )}
