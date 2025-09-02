@@ -4,6 +4,19 @@ import { getAuth } from "@clerk/nextjs/server";
 import cloudinary from "@/lib/cloudinary";
 import { uploadPDFBuffer } from "@/lib/bufferToStream";
 import pdfParse from "pdf-parse/lib/pdf-parse.js";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { SUMMARY_PROMPT, SUMMARY_PROMPT_PDF } from "@/lib/prompts";
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+
+// Helper: ask Gemini
+async function askGemini(prompt: string): Promise<string> {
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  return response.text();
+}
+
 // GET: get single or multiple resources
 export async function GET(req: NextRequest) {
   const { userId } = getAuth(req);
@@ -95,15 +108,16 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const data = await pdfParse(buffer);
-    const url = data.text;
     // Now you can do anything with `buffer`
     // e.g., save to disk, upload to S3, or store in DB
   
-    const uploadResult = await uploadPDFBuffer(buffer, file.name.replace(/\.pdf$/, ""));
-    console.log(uploadResult)
-    console.log(url)
+    const uploadResult : any = await uploadPDFBuffer(buffer, file.name.replace(/\.pdf$/, ""));
+    console.log(uploadResult);
+    const pdfURL = uploadResult.secure_url;
+    const prompt = SUMMARY_PROMPT_PDF(data.text || "");
+    const summary = await askGemini(prompt);
     const resource = await prisma.resource.create({
-      data: { topicId, title, type, url, summary : "" }, //summary: summary || "" //create krte hue summary paas ni ho ri toh "" hi store krwa rha hu
+      data: { topicId, title, type, url : pdfURL , summary : summary! ? summary : "" }, //summary: summary || "" //create krte hue summary paas ni ho ri toh "" hi store krwa rha hu
     });
     return NextResponse.json(
       { message: "Resource created", resource },

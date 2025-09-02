@@ -6,6 +6,13 @@ import {
   ROADMAP_PROMPT,
   QUIZ_PROMPT,
   FLASHCARD_PROMPT,
+  FALLBACK_PROMPT_PDF,
+  SUMMARY_PROMPT_PDF,
+  QA_PROMPT_PDF,
+  MINDMAP_PROMPT_PDF,
+  ROADMAP_PROMPT_PDF,
+  QUIZ_PROMPT_PDF,
+  FLASHCARD_PROMPT_PDF
 } from "@/lib/prompts";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
@@ -75,17 +82,10 @@ export async function POST(req: NextRequest) {
       } else if (resource.type === "PDF") {
         try {
           // Download PDF bytes from Cloudinary (or any URL) and extract text
-          const pdfBytes = await axios.get<ArrayBuffer>(resource.url, {
-            responseType: "arraybuffer",
-          });
-          const { default: pdfParse } = await import("pdf-parse");
-          const parsed = await pdfParse(Buffer.from(pdfBytes.data));
-          console.log(parsed.text);
-          const prompt = SUMMARY_PROMPT(resource.url || "");
-          summary = await askGemini(prompt);
+          console.log(summary);
         } catch (err) {
           console.error("PDF parse failed. Falling back to title-based summary.", err);
-          const fallbackPrompt = FALLBACK_PROMPT(resource.title);
+          const fallbackPrompt = FALLBACK_PROMPT_PDF(resource.title);
           summary = await askGemini(fallbackPrompt);
         }
       } else if (resource.type === "ARTICLE") {
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (task === "roadmap") {
-      const prompt = ROADMAP_PROMPT(summary);
+      const prompt = resource.type=="VIDEO"? ROADMAP_PROMPT(summary) : ROADMAP_PROMPT_PDF(summary);
 
       const answer = await askGemini(prompt);
       return NextResponse.json({ message: "Roadmap generated", answer });
@@ -133,14 +133,14 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const prompt = QA_PROMPT(summary, question);
+      const prompt = resource.type=="VIDEO"? QA_PROMPT(summary,question) : QA_PROMPT_PDF(summary,question);
 
       const answer = await askGemini(prompt);
       return NextResponse.json({ message: "Answer generated", answer });
     }
 
     if (task === "mindmap") {
-      const prompt = MINDMAP_PROMPT(summary);
+      const prompt = resource.type=="VIDEO"? MINDMAP_PROMPT(summary) : MINDMAP_PROMPT_PDF(summary);
 
       const mindmap = await askGemini(prompt);
       return NextResponse.json({ message: "Mindmap code generated", mindmap });
@@ -163,7 +163,7 @@ export async function POST(req: NextRequest) {
         });
       } else {
         // Step 2: Generate new quiz questions
-        const prompt = QUIZ_PROMPT(summary);
+        const prompt = resource.type=="VIDEO"? QUIZ_PROMPT(summary) : QUIZ_PROMPT_PDF(summary);
 
         const mcqText = await askGemini(prompt);
         const mcqs = extractJSON(mcqText);
@@ -222,7 +222,7 @@ export async function POST(req: NextRequest) {
         });
       } else {
         // Step 2: Generate new flashcards
-        const prompt = FLASHCARD_PROMPT(summary);
+        const prompt = resource.type=="VIDEO"? FLASHCARD_PROMPT(summary) : FLASHCARD_PROMPT_PDF(summary);
 
         const flashcardText = await askGemini(prompt);
         const flashcards = extractJSON(flashcardText);
