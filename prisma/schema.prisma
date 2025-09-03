@@ -1,7 +1,3 @@
-// MERGE NOTE: This schema combines both your changes and the original repo's changes.
-// It includes the new Flashcard and updated Note models from upstream,
-// and your UserAnswer model and QuizQA difficulty field.
-
 generator client {
   provider = "prisma-client-js"
   output   = "../node_modules/.prisma/client"
@@ -21,11 +17,11 @@ model User {
   dob           String
   lastLogin     DateTime     @default(now())
   currentStreak Int          @default(0)
-  topics        Topic[]
-  notes         Note[]
-  userAnswers   UserAnswer[] // Your addition
-  level         Int          @default(1)
   experience    Int          @default(0)
+  level         Int          @default(1)
+  notes         Note[]
+  topics        Topic[]
+  userAnswers   UserAnswer[]
 }
 
 model Topic {
@@ -34,15 +30,9 @@ model Topic {
   title     String
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  resources Resource[]
   note      Note?
-}
-
-enum ResourceType {
-  ARTICLE
-  VIDEO
-  PDF
+  resources Resource[]
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Resource {
@@ -54,9 +44,9 @@ model Resource {
   summary       String
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  topic         Topic          @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  quizzes       Quiz[]
   flashcardDeck FlashcardDeck?
+  quizzes       Quiz[]
+  topic         Topic          @relation(fields: [topicId], references: [id], onDelete: Cascade)
 }
 
 model Quiz {
@@ -67,7 +57,7 @@ model Quiz {
   resource    Resource     @relation(fields: [resourceId], references: [id], onDelete: Cascade)
   quizQAs     QuizQA[]
   quizResults QuizResult[]
-  userAnswers UserAnswer[] // Your addition
+  userAnswers UserAnswer[]
 }
 
 model QuizQA {
@@ -77,22 +67,22 @@ model QuizQA {
   options       String[]
   correctAnswer String
   explanation   String?
-  difficulty    String       @default("Medium") // Your addition
-  userAnswers   UserAnswer[] // Your addition
+  difficulty    String       @default("Medium")
   quiz          Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  userAnswers   UserAnswer[]
 }
 
 model QuizResult {
   id             String   @id @default(uuid())
   quizId         String
   score          Int
-  totalQuestions Int      @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  totalQuestions Int      @default(0)
+  userId         String?
   quiz           Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
 }
 
-// Your UserAnswer model
 model UserAnswer {
   id             String   @id @default(uuid())
   userId         String
@@ -101,20 +91,19 @@ model UserAnswer {
   selectedOption String
   isCorrect      Boolean
   createdAt      DateTime @default(now())
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   quiz           Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
   quizQA         QuizQA   @relation(fields: [quizQAId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// Models from original repo
 model FlashcardDeck {
   id         String      @id @default(uuid())
   resourceId String      @unique
   title      String
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
-  resource   Resource    @relation(fields: [resourceId], references: [id], onDelete: Cascade)
   cards      Flashcard[]
+  resource   Resource    @relation(fields: [resourceId], references: [id], onDelete: Cascade)
 }
 
 model Flashcard {
@@ -131,7 +120,7 @@ model Flashcard {
 model FlashcardReview {
   id         String    @id @default(uuid())
   cardId     String
-  difficulty Int // 1-5 scale (1=easy, 5=hard)
+  difficulty Int
   nextReview DateTime
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
@@ -149,11 +138,17 @@ model ContactQuery {
 
 model Note {
   id        String   @id @default(uuid())
-  content   String?  @db.Text
+  content   String?
   topicId   String   @unique
   userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum ResourceType {
+  ARTICLE
+  VIDEO
+  PDF
 }
