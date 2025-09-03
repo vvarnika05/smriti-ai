@@ -33,7 +33,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import ActionsCell from "./actionCell";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // CHANGE 1: Updated the Topic type to match the new API response
 export type Topic = {
@@ -49,12 +54,19 @@ export function TopicsTable(): React.JSX.Element {
   const [isLoading, setIsLoading] = React.useState(true);
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
   const handleRemoveTopic = (topicId: string) => {
-    setData((prev) => prev.map((topic) => (topic.id === topicId ? { ...topic, isDeleting: true } : topic)));
+    setData((prev) =>
+      prev.map((topic) =>
+        topic.id === topicId ? { ...topic, isDeleting: true } : topic
+      )
+    );
     setTimeout(() => {
       setData((prev) => prev.filter((topic) => topic.id !== topicId));
     }, 500);
@@ -64,12 +76,18 @@ export function TopicsTable(): React.JSX.Element {
     {
       accessorKey: "title",
       header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
           Topic <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
       cell: ({ row }) => (
-        <Link href={`/dashboard/topic/${row.original.id}`} className="hover:underline font-medium">
+        <Link
+          href={`/dashboard/topic/${row.original.id}`}
+          className="hover:underline font-medium"
+        >
           {row.getValue("title")}
         </Link>
       ),
@@ -80,7 +98,7 @@ export function TopicsTable(): React.JSX.Element {
       header: "Progress",
       cell: ({ row }) => {
         const { completionPercentage, averageScore } = row.original;
-        
+
         return (
           <TooltipProvider>
             <Tooltip>
@@ -94,7 +112,9 @@ export function TopicsTable(): React.JSX.Element {
                   {/* Performance Bar (Dark Green foreground) */}
                   <div
                     className="bg-lime-400 h-2.5 rounded-full absolute top-0"
-                    style={{ width: `${(completionPercentage * averageScore) / 100}%` }}
+                    style={{
+                      width: `${(completionPercentage * averageScore) / 100}%`,
+                    }}
                   />
                 </div>
               </TooltipTrigger>
@@ -110,7 +130,11 @@ export function TopicsTable(): React.JSX.Element {
     {
       accessorKey: "actions",
       header: () => <div className="text-right">Actions</div>,
-      cell: ({ row }) => <div className="flex justify-end"><ActionsCell topicId={row.original.id} onDelete={handleRemoveTopic} /></div>,
+      cell: ({ row }) => (
+        <div className="flex justify-end">
+          <ActionsCell topicId={row.original.id} onDelete={handleRemoveTopic} />
+        </div>
+      ),
     },
   ];
 
@@ -138,8 +162,8 @@ export function TopicsTable(): React.JSX.Element {
       setIsLoading(true);
       try {
         const res = await axios.get("/api/topic");
-        // CHANGE 3: Removed Math.random() and using data directly from the API
-        setData(res.data.topics);
+        const topics = (res.data as { topics: Topic[] }).topics;
+        setData(topics);
       } catch (error) {
         console.error("Error occurred", error);
         toast.error("Failed to load topics");
@@ -164,12 +188,17 @@ export function TopicsTable(): React.JSX.Element {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {table.getAllColumns().filter((c) => c.getCanHide()).map((column) => (
+            {table
+              .getAllColumns()
+              .filter((c) => c.getCanHide())
+              .map((column) => (
                 <DropdownMenuCheckboxItem
                   key={column.id}
                   className="capitalize"
                   checked={column.getIsVisible()}
-                  onCheckedChange={(value: boolean) => column.toggleVisibility(!!value)}
+                  onCheckedChange={(value: boolean) =>
+                    column.toggleVisibility(!!value)
+                  }
                 >
                   {column.id}
                 </DropdownMenuCheckboxItem>
@@ -189,7 +218,12 @@ export function TopicsTable(): React.JSX.Element {
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <TableHead key={header.id}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -198,17 +232,31 @@ export function TopicsTable(): React.JSX.Element {
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-id={row.original.id} className={row.original.isDeleting ? "opacity-0 transition-opacity duration-500" : ""}>
+                  <TableRow
+                    key={row.id}
+                    data-id={row.original.id}
+                    className={
+                      row.original.isDeleting
+                        ? "opacity-0 transition-opacity duration-500"
+                        : ""
+                    }
+                  >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
                       </TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
                     No topics created yet.
                   </TableCell>
                 </TableRow>
