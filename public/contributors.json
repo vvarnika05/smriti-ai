@@ -19,7 +19,7 @@
     "type": "User",
     "user_view_type": "public",
     "site_admin": false,
-    "contributions": 146
+    "contributions": 147
   },
   {
     "login": "actions-user",
@@ -41,7 +41,7 @@
     "type": "User",
     "user_view_type": "public",
     "site_admin": false,
-    "contributions": 23
+    "contributions": 24
   },
   {
     "login": "Ashish001sing",
@@ -506,6 +506,28 @@
     "contributions": 2
   },
   {
+    "login": "arushimathur2604",
+    "id": 170409237,
+    "node_id": "U_kgDOCig9FQ",
+    "avatar_url": "https://avatars.githubusercontent.com/u/170409237?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/arushimathur2604",
+    "html_url": "https://github.com/arushimathur2604",
+    "followers_url": "https://api.github.com/users/arushimathur2604/followers",
+    "following_url": "https://api.github.com/users/arushimathur2604/following{/other_user}",
+    "gists_url": "https://api.github.com/users/arushimathur2604/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/arushimathur2604/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/arushimathur2604/subscriptions",
+    "organizations_url": "https://api.github.com/users/arushimathur2604/orgs",
+    "repos_url": "https://api.github.com/users/arushimathur2604/repos",
+    "events_url": "https://api.github.com/users/arushimathur2604/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/arushimathur2604/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false,
+    "contributions": 2
+  },
+  {
     "login": "revanthsaich",
     "id": 98806472,
     "node_id": "U_kgDOBeOqyA",
@@ -632,28 +654,6 @@
     "repos_url": "https://api.github.com/users/shubhranshu-sahu/repos",
     "events_url": "https://api.github.com/users/shubhranshu-sahu/events{/privacy}",
     "received_events_url": "https://api.github.com/users/shubhranshu-sahu/received_events",
-    "type": "User",
-    "user_view_type": "public",
-    "site_admin": false,
-    "contributions": 1
-  },
-  {
-    "login": "Rashidaga18",
-    "id": 138892734,
-    "node_id": "U_kgDOCEdVvg",
-    "avatar_url": "https://avatars.githubusercontent.com/u/138892734?v=4",
-    "gravatar_id": "",
-    "url": "https://api.github.com/users/Rashidaga18",
-    "html_url": "https://github.com/Rashidaga18",
-    "followers_url": "https://api.github.com/users/Rashidaga18/followers",
-    "following_url": "https://api.github.com/users/Rashidaga18/following{/other_user}",
-    "gists_url": "https://api.github.com/users/Rashidaga18/gists{/gist_id}",
-    "starred_url": "https://api.github.com/users/Rashidaga18/starred{/owner}{/repo}",
-    "subscriptions_url": "https://api.github.com/users/Rashidaga18/subscriptions",
-    "organizations_url": "https://api.github.com/users/Rashidaga18/orgs",
-    "repos_url": "https://api.github.com/users/Rashidaga18/repos",
-    "events_url": "https://api.github.com/users/Rashidaga18/events{/privacy}",
-    "received_events_url": "https://api.github.com/users/Rashidaga18/received_events",
     "type": "User",
     "user_view_type": "public",
     "site_admin": false,
