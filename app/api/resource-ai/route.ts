@@ -12,14 +12,13 @@ import {
   MINDMAP_PROMPT_PDF,
   ROADMAP_PROMPT_PDF,
   QUIZ_PROMPT_PDF,
-  FLASHCARD_PROMPT_PDF
+  FLASHCARD_PROMPT_PDF,
 } from "@/lib/prompts";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getYoutubeTranscript } from "@/utils/youtube";
-import axios from "axios";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
@@ -59,7 +58,10 @@ export async function POST(req: NextRequest) {
     });
 
     if (!resource) {
-      return NextResponse.json({ message: "Resource not found" }, { status: 404 });
+      return NextResponse.json(
+        { message: "Resource not found" },
+        { status: 404 }
+      );
     }
 
     let summary = resource.summary;
@@ -84,14 +86,20 @@ export async function POST(req: NextRequest) {
           // Download PDF bytes from Cloudinary (or any URL) and extract text
           console.log(summary);
         } catch (err) {
-          console.error("PDF parse failed. Falling back to title-based summary.", err);
+          console.error(
+            "PDF parse failed. Falling back to title-based summary.",
+            err
+          );
           const fallbackPrompt = FALLBACK_PROMPT_PDF(resource.title);
           summary = await askGemini(fallbackPrompt);
         }
       } else if (resource.type === "ARTICLE") {
         // For notes/text resources, we treat current resource.summary (if provided during creation)
         // as the raw content to summarize. If empty, fall back to the title.
-        const baseText = resource.summary && resource.summary.length > 0 ? resource.summary : resource.title;
+        const baseText =
+          resource.summary && resource.summary.length > 0
+            ? resource.summary
+            : resource.title;
         try {
           const prompt = SUMMARY_PROMPT(baseText);
           summary = await askGemini(prompt);
@@ -119,7 +127,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (task === "roadmap") {
-      const prompt = resource.type=="VIDEO"? ROADMAP_PROMPT(summary) : ROADMAP_PROMPT_PDF(summary);
+      const prompt =
+        resource.type == "VIDEO"
+          ? ROADMAP_PROMPT(summary)
+          : ROADMAP_PROMPT_PDF(summary);
 
       const answer = await askGemini(prompt);
       return NextResponse.json({ message: "Roadmap generated", answer });
@@ -133,14 +144,20 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const prompt = resource.type=="VIDEO"? QA_PROMPT(summary,question) : QA_PROMPT_PDF(summary,question);
+      const prompt =
+        resource.type == "VIDEO"
+          ? QA_PROMPT(summary, question)
+          : QA_PROMPT_PDF(summary, question);
 
       const answer = await askGemini(prompt);
       return NextResponse.json({ message: "Answer generated", answer });
     }
 
     if (task === "mindmap") {
-      const prompt = resource.type=="VIDEO"? MINDMAP_PROMPT(summary) : MINDMAP_PROMPT_PDF(summary);
+      const prompt =
+        resource.type == "VIDEO"
+          ? MINDMAP_PROMPT(summary)
+          : MINDMAP_PROMPT_PDF(summary);
 
       const mindmap = await askGemini(prompt);
       return NextResponse.json({ message: "Mindmap code generated", mindmap });
@@ -148,7 +165,7 @@ export async function POST(req: NextRequest) {
 
     if (task === "quiz") {
       // Step 1: Check if a quiz already exists for this resourceId
-      const existingQuiz = await prisma.quiz.findUnique({
+      const existingQuiz = await prisma.quiz.findFirst({
         where: { resourceId: resource.id },
         include: {
           quizQAs: true, // Include related questions and answers
@@ -163,7 +180,10 @@ export async function POST(req: NextRequest) {
         });
       } else {
         // Step 2: Generate new quiz questions
-        const prompt = resource.type=="VIDEO"? QUIZ_PROMPT(summary) : QUIZ_PROMPT_PDF(summary);
+        const prompt =
+          resource.type == "VIDEO"
+            ? QUIZ_PROMPT(summary)
+            : QUIZ_PROMPT_PDF(summary);
 
         const mcqText = await askGemini(prompt);
         const mcqs = extractJSON(mcqText);
@@ -222,7 +242,10 @@ export async function POST(req: NextRequest) {
         });
       } else {
         // Step 2: Generate new flashcards
-        const prompt = resource.type=="VIDEO"? FLASHCARD_PROMPT(summary) : FLASHCARD_PROMPT_PDF(summary);
+        const prompt =
+          resource.type == "VIDEO"
+            ? FLASHCARD_PROMPT(summary)
+            : FLASHCARD_PROMPT_PDF(summary);
 
         const flashcardText = await askGemini(prompt);
         const flashcards = extractJSON(flashcardText);
