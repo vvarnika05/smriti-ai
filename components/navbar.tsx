@@ -18,7 +18,14 @@ const navigationLinks = [
 ];
 
 // ---------------- Mobile Action Buttons ----------------
-const mobileActionButtons = [
+const mobileActionButtons: Array<{
+  href: string;
+  label: string;
+  icon?: React.ElementType;
+  variant?: "outline" | "ghost" | "default";
+  authRequired?: boolean;
+  external?: boolean;
+}> = [
   {
     href: "/dashboard",
     label: "Dashboard",
@@ -43,7 +50,12 @@ type NavButtonProps = {
   external?: boolean;
 };
 
-const NavButton = ({ href, label, className = "", external = false }: NavButtonProps) => {
+const NavButton = ({
+  href,
+  label,
+  className = "",
+  external = false,
+}: NavButtonProps) => {
   const baseClass =
     "rounded-full cursor-pointer hover:bg-[#adff2f]/10 hover:text-[#adff2f] transition-all duration-300 hover:scale-105";
 
@@ -59,7 +71,11 @@ const NavButton = ({ href, label, className = "", external = false }: NavButtonP
 
   return (
     <Link href={href}>
-      <Button variant="ghost" className={`${baseClass} ${className}`} size="adaptive">
+      <Button
+        variant="ghost"
+        className={`${baseClass} ${className}`}
+        size="adaptive"
+      >
         {label}
       </Button>
     </Link>
@@ -85,7 +101,10 @@ const ActionButton = ({
   external = false,
 }: ActionButtonProps) => {
   const content = (
-    <Button variant={variant} className={`flex items-center gap-2 ${className}`}>
+    <Button
+      variant={variant}
+      className={`flex items-center gap-2 ${className}`}
+    >
       {Icon && <Icon className="h-4 w-4" />}
       {label}
     </Button>
@@ -174,7 +193,11 @@ export default function Navbar() {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden flex items-center p-2 rounded-full hover:bg-[#adff2f]/10"
             >
-              {isMenuOpen ? <X className="h-6 w-6 text-[#adff2f]" /> : <Menu className="h-6 w-6 text-[#adff2f]" />}
+              {isMenuOpen ? (
+                <X className="h-6 w-6 text-[#adff2f]" />
+              ) : (
+                <Menu className="h-6 w-6 text-[#adff2f]" />
+              )}
             </button>
           </div>
         </div>
