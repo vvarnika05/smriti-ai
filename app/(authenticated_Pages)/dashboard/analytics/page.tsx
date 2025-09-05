@@ -16,6 +16,9 @@
       RadialLinearScale,
     } from 'chart.js';
 
+        import { getElementAtEvent } from 'react-chartjs-2';
+    import ErrorBoundary from './error-boundary';
+
     ChartJS.register(
       CategoryScale,
       LinearScale,
@@ -28,8 +31,9 @@
       RadialLinearScale
     );
 
-    const AnalyticsPage = () => {
+    const AnalyticsPageContent = () => {
       const [analyticsData, setAnalyticsData] = useState(null);
+      const chartRef = useRef<ChartJS>(null);
 
       useEffect(() => {
         const fetchAnalyticsData = async () => {
@@ -40,8 +44,72 @@
       }, []);
 
       if (!analyticsData) {
-        return <div>Loading...</div>;
+        return (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <style>
+              {
+                .loader {
+                  border: 16px solid #f3f3f3;
+                  border-radius: 50%;
+                  border-top: 16px solid #3498db;
+                  width: 120px;
+                  height: 120px;
+                  -webkit-animation: spin 2s linear infinite; /* Safari */
+                  animation: spin 2s linear infinite;
+                }
+
+                /* Safari */
+                @-webkit-keyframes spin {
+                  0% { -webkit-transform: rotate(0deg); }
+                  100% { -webkit-transform: rotate(360deg); }
+                }
+
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+              }
+            </style>
+            <div className="loader"></div>
+          </div>
+        );
       }
+
+      const options = {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top' as const,
+          },
+          title: {
+            display: true,
+            text: 'Chart.js Doughnut Chart',
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.parsed.y !== null) {
+                  label += context.parsed.y;
+                }
+                return label;
+              }
+            }
+          }
+        }
+      };
+
+      const onClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+        if (chartRef.current) {
+          const elements = getElementAtEvent(chartRef.current, event);
+          if (elements.length > 0) {
+            console.log(elements[0]);
+          }
+        }
+      };
 
       return (
         <div>
@@ -51,6 +119,9 @@
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-2">Average Score by Topic</h2>
             <Bar
+              ref={chartRef}
+              options={options}
+              onClick={onClick}
               data={{
                 labels: analyticsData.averageScorePerTopic.map((item) => item.quizId),
                 datasets: [
@@ -65,16 +136,27 @@
 
           {/* Performance Over Time */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-2">Performance Over Time</h2>
+            <h2 className="text-xl font-semibold mb-2">Performance Over Time (7 vs 30 days)</h2>
             <Line
+              ref={chartRef}
+              options={options}
+              onClick={onClick}
               data={{
-                labels: analyticsData.performanceTrends.map((item) =>
+                labels: analyticsData.performanceTrends30Days.map((item) =>
                   new Date(item.createdAt).toLocaleDateString()
                 ),
                 datasets: [
                   {
-                    label: "Score",
-                    data: analyticsData.performanceTrends.map((item) => item.score),
+                    label: 'Last 30 Days',
+                    data: analyticsData.performanceTrends30Days.map((item) => item.score),
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                  },
+                  {
+                    label: 'Last 7 Days',
+                    data: analyticsData.performanceTrends7Days.map((item) => item.score),
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
                   },
                 ],
               }}
@@ -85,6 +167,9 @@
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-2">Strengths and Weaknesses</h2>
             <Radar
+              ref={chartRef}
+              options={options}
+              onClick={onClick}
               data={{
                 labels: analyticsData.averageScorePerTopic.map((item) => item.quizId),
                 datasets: [
@@ -105,5 +190,11 @@
         </div>
       );
     };
+
+    const AnalyticsPage = () => (
+      <ErrorBoundary>
+        <AnalyticsPageContent />
+      </ErrorBoundary>
+    );
 
     export default AnalyticsPage;

@@ -2,8 +2,18 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getAuth } from "@clerk/nextjs/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const prisma = new PrismaClient();
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+
+// Helper: ask Gemini
+async function askGemini(prompt: string): Promise<string> {
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  return response.text();
+}
 
 export async function GET(req: Request) {
   try {
@@ -36,11 +46,24 @@ export async function GET(req: Request) {
     });
 
     // Performance trends (last 30 days)
-    const performanceTrends = await prisma.quizResult.findMany({
+    const performanceTrends30Days = await prisma.quizResult.findMany({
       where: {
         userId: userId,
         createdAt: {
           gte: new Date(new Date().setDate(new Date().getDate() - 30)),
+        },
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+
+    // Performance trends (last 7 days)
+    const performanceTrends7Days = await prisma.quizResult.findMany({
+      where: {
+        userId: userId,
+        createdAt: {
+          gte: new Date(new Date().setDate(new Date().getDate() - 7)),
         },
       },
       orderBy: {
@@ -54,20 +77,18 @@ export async function GET(req: Request) {
 
       - Average score per topic: ${JSON.stringify(averageScorePerTopic)}
       - Most frequently missed questions: ${JSON.stringify(missedQuestions)}
-      - Performance trends: ${JSON.stringify(performanceTrends)}
+      - Performance trends (last 30 days): ${JSON.stringify(performanceTrends30Days)}
+      - Performance trends (last 7 days): ${JSON.stringify(performanceTrends7Days)}
     `;
 
-    // --- Call your AI model here with the prompt ---
-    // Example: const aiInsights = await callAiModel(aiPrompt);
-
-    // For now, we'll use a placeholder for the AI insights
-    const aiInsights = "You're doing great! Keep up the good work.";
+    const aiInsights = await askGemini(aiPrompt);
 
     // Return the aggregated data and AI insights
     return NextResponse.json({
       averageScorePerTopic,
       missedQuestions,
-      performanceTrends,
+      performanceTrends30Days,
+      performanceTrends7Days,
       aiInsights,
     });
   } catch (error) {
