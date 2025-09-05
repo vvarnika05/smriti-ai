@@ -1,4 +1,3 @@
-
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -89,10 +88,11 @@ export async function GET(req: Request) {
           select: { id: true, question: true },
         })
       : [];
+    const qaMap = new Map(missedQA.map(q => [q.id, q.question]));
     const missedQuestions = misses.map(m => ({
       quizQAId: m.quizQAId,
       misses: m._count.quizQAId,
-      question: missedQA.find(q => q.id === m.quizQAId),
+      question: qaMap.get(m.quizQAId!) ?? null,
     }));
 
     // Performance trends (last 30 days)
