@@ -169,7 +169,11 @@ export default function QuizPage({ params }: QuizPageProps) {
         if (quizId && allQuestionsAnswered) {
             // CHANGE 2: Cleaner way to handle toast.promise
             const saveResults = async () => {
-                await axios.post("/api/quiz-result", { quizId, answers: finalAnswersPayload });
+                const response = await axios.post("/api/quiz-result", { quizId, answers: finalAnswersPayload });
+                if (response.data.unlockedAchievement) {
+                  const { name, icon } = response.data.unlockedAchievement;
+                  toast.success(`Achievement Unlocked: ${icon} ${name}`);
+                }
             };
 
             toast.promise(saveResults(), {

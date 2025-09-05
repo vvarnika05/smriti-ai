@@ -22,6 +22,8 @@ model User {
   notes         Note[]
   topics        Topic[]
   userAnswers   UserAnswer[]
+  points        Int               @default(0)
+  achievements  UserAchievement[]
 }
 
 model Topic {
@@ -151,4 +153,26 @@ enum ResourceType {
   ARTICLE
   VIDEO
   PDF
+}
+
+model Achievement {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  icon        String   // e.g., an emoji like "🏆" or a URL to an icon
+  criteria    String   @unique // A unique key like 'created_5_topics'
+  points      Int      @default(50)
+  users       UserAchievement[]
+}
+
+model UserAchievement {
+  id            String     @id @default(uuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime   @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
 }

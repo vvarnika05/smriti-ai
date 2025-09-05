@@ -12,6 +12,28 @@ type QuizSubmission = {
   }[];
 };
 
+async function checkAndUnlockAchievement(userId: string, criteria: string) {
+  const achievement = await prisma.achievement.findUnique({ where: { criteria } });
+  if (!achievement) return null;
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.userAchievement.create({
+        data: { userId, achievementId: achievement.id },
+      });
+      await tx.user.update({
+        where: { id: userId },
+        data: { points: { increment: achievement.points } },
+      });
+    });
+    return achievement; // Return the achievement to notify the user
+  } catch (e: any) {
+    // If already unlocked (unique constraint), no-op; otherwise rethrow
+    if (e?.code === "P2002") return null;
+    throw e;
+  }
+}
+
 // POST: Save quiz result
 export async function POST(req: NextRequest) {
   const { userId } = getAuth(req);
@@ -86,6 +108,9 @@ export async function POST(req: NextRequest) {
           experience: {
             increment: xpGain,
           },
+          points: { 
+            increment: correctAnswersCount 
+          },
         },
       });
 
@@ -100,10 +125,18 @@ export async function POST(req: NextRequest) {
         });
     }
 
+    const completedQuizzesCount = await prisma.quizResult.count({ where: { userId } });
+
+    let unlockedAchievement = null;
+    if (completedQuizzesCount >= 10) {
+        unlockedAchievement = await checkAndUnlockAchievement(userId, "completed_10_quizzes");
+    }
+
     return NextResponse.json(
       {
         message: "Quiz result and answers saved successfully",
         quizResult,
+        unlockedAchievement,
       },
       { status: 201 }
     );
