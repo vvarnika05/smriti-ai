@@ -1,4 +1,7 @@
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -34,6 +37,8 @@ async function askGemini(prompt: string): Promise<string | null> {
 export async function GET(req: Request) {
   try {
     const { userId } = getAuth(req);
+    const url = new URL(req.url);
+    const wantInsights = url.searchParams.get("insights") === "true";
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -116,14 +121,17 @@ export async function GET(req: Request) {
       },
     });
 
-    const aiPrompt = [
-      "You are a learning coach.",
-      "Using ONLY these aggregates, give 5 concise, actionable recommendations (<=120 words total).",
-      `averageScorePerTopic: ${JSON.stringify(averageScorePerTopic)}`,
-      `trend7Days: ${JSON.stringify(performanceTrends7Days)}`,
-      `topMissed: ${JSON.stringify(missedQuestions.map(m => ({ id: m.quizQAId, misses: m.misses })))}`,
-    ].join("\n");
-    const aiInsights = await askGemini(aiPrompt);
+    let aiInsights = null;
+    if (wantInsights) {
+      const aiPrompt = [
+        "You are a learning coach.",
+        "Using ONLY these aggregates, give 5 concise, actionable recommendations (<=120 words total).",
+        `averageScorePerTopic: ${JSON.stringify(averageScorePerTopic)}`,
+        `trend7Days: ${JSON.stringify(performanceTrends7Days)}`,
+        `topMissed: ${JSON.stringify(missedQuestions.map(m => ({ id: m.quizQAId, misses: m.misses })))}`,
+      ].join("\n");
+      aiInsights = await askGemini(aiPrompt);
+    }
 
     // Return the aggregated data and AI insights
     return NextResponse.json({
@@ -132,7 +140,7 @@ export async function GET(req: Request) {
       performanceTrends30Days,
       performanceTrends7Days,
       aiInsights,
-    });
+    }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     console.error("[ANALYTICS_GET]", error);
     return new NextResponse("Internal Server Error", { status: 500 });

@@ -8,6 +8,23 @@ interface LeaderboardUser {
   id: string; username: string; points: number;
 }
 
+const maskUsername = (username: string) => {
+  // A simple regex to check for something that looks like an email.
+  const emailRegex = /\S+@\S+\.\S+/;
+  if (emailRegex.test(username)) {
+    const parts = username.split('@');
+    if (parts.length === 2) {
+      const localPart = parts[0];
+      const domain = parts[1];
+      if (localPart.length > 0) {
+        const maskedLocalPart = localPart[0] + '***';
+        return `${maskedLocalPart}@${domain}`;
+      }
+    }
+  }
+  return username;
+};
+
 const LeaderboardPage = () => {
   const [users, setUsers] = useState<LeaderboardUser[]>([]);
   useEffect(() => {
@@ -30,7 +47,7 @@ const LeaderboardPage = () => {
             {users.map((user, index) => (
               <TableRow key={user.id}>
                 <TableCell className="font-bold text-lg">{index + 1}</TableCell>
-                <TableCell>{user.username}</TableCell>
+                <TableCell>{maskUsername(user.username)}</TableCell>
                 <TableCell className="text-right font-semibold">{user.points} XP</TableCell>
               </TableRow>
             ))}

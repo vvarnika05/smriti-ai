@@ -16,21 +16,22 @@ async function checkAndUnlockAchievement(userId: string, criteria: string) {
   const achievement = await prisma.achievement.findUnique({ where: { criteria } });
   if (!achievement) return null;
 
-  const isAlreadyUnlocked = await prisma.userAchievement.findFirst({
-    where: { userId, achievementId: achievement.id },
-  });
-
-  if (!isAlreadyUnlocked) {
-    await prisma.userAchievement.create({
-      data: { userId, achievementId: achievement.id },
-    });
-    await prisma.user.update({
-      where: { id: userId },
-      data: { points: { increment: achievement.points } },
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.userAchievement.create({
+        data: { userId, achievementId: achievement.id },
+      });
+      await tx.user.update({
+        where: { id: userId },
+        data: { points: { increment: achievement.points } },
+      });
     });
     return achievement; // Return the achievement to notify the user
+  } catch (e: any) {
+    // If already unlocked (unique constraint), no-op; otherwise rethrow
+    if (e?.code === "P2002") return null;
+    throw e;
   }
-  return null;
 }
 
 // POST: Save quiz result

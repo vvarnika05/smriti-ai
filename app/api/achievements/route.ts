@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import { getAuth } from "@clerk/nextjs/server";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
+import { auth } from "@clerk/nextjs/server";
 
 export async function GET(req: Request) {
   try {
-    const { userId } = getAuth(req);
+    const { userId } = auth();
     if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
     const allAchievements = await prisma.achievement.findMany();
@@ -21,7 +19,7 @@ export async function GET(req: Request) {
       unlocked: unlockedIds.has(ach.id),
     }));
 
-    return NextResponse.json(result);
+    return NextResponse.json(result, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("[ACHIEVEMENTS_GET]", error);
     return new NextResponse("Internal Server Error", { status: 500 });
