@@ -1,18 +1,34 @@
 
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { getAuth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import prisma from "@/lib/prisma";
 
-const prisma = new PrismaClient();
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
 
-// Helper: ask Gemini
-async function askGemini(prompt: string): Promise<string> {
+// Helper: ask Gemini (guarded + timeout)
+function withTimeout<T>(p: Promise<T>, ms = 8000): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const id = setTimeout(() => reject(new Error("AI timeout")), ms);
+    p.then(
+      (v) => { clearTimeout(id); resolve(v); },
+      (e) => { clearTimeout(id); reject(e); }
+    );
+  });
+}
+
+async function askGemini(prompt: string): Promise<string | null> {
+  if (!genAI) return null;
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  return response.text();
+  try {
+    const result = await withTimeout(model.generateContent(prompt), 8000);
+    const response = await result.response;
+    return response.text();
+  } catch (e) {
+    console.error("[ANALYTICS_AI]", e);
+    return null;
+  }
 }
 
 export async function GET(req: Request) {
@@ -23,27 +39,56 @@ export async function GET(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // Average score per topic
-    const averageScorePerTopic = await prisma.quizResult.groupBy({
-      by: ["quizId"],
-      where: {
-        userId: userId,
-      },
-      _avg: {
+    // Average score per topic (percentage)
+    const results = await prisma.quizResult.findMany({
+      where: { userId },
+      select: {
         score: true,
+        totalQuestions: true,
+        createdAt: true,
+        quiz: {
+          select: { 
+            resource: { select: { topicId: true, topic: { select: { title: true } } } },
+          },
+        },
       },
+      orderBy: { createdAt: "desc" },
     });
+    const topicAgg = new Map<string, { title?: string; sumPct: number; count: number }>();
+    for (const r of results) {
+      const topicId = r.quiz?.resource?.topicId;
+      if (!topicId) continue;
+      const pct = r.totalQuestions ? (r.score / r.totalQuestions) * 100 : 0;
+      const cur = topicAgg.get(topicId) ?? { title: r.quiz?.resource?.topic?.title, sumPct: 0, count: 0 };
+      cur.sumPct += pct; cur.count += 1; cur.title ||= r.quiz?.resource?.topic?.title;
+      topicAgg.set(topicId, cur);
+    }
+    const averageScorePerTopic = Array.from(topicAgg, ([topicId, v]) => ({
+      topicId,
+      title: v.title ?? "",
+      averageScore: Number((v.sumPct / v.count).toFixed(2)),
+    }));
 
-    // Most frequently missed questions
-    const missedQuestions = await prisma.userAnswer.findMany({
-      where: {
-        userId: userId,
-        isCorrect: false,
-      },
-      include: {
-        quizQA: true,
-      },
+    // Most frequently missed questions (top 10)
+    const misses = await prisma.userAnswer.groupBy({
+      by: ["quizQAId"],
+      where: { userId, isCorrect: false, quizQAId: { not: null } },
+      _count: { quizQAId: true },
+      orderBy: { _count: { quizQAId: "desc" } },
+      take: 10,
     });
+    const quizQAIds = misses.map(m => m.quizQAId!).filter(Boolean);
+    const missedQA = quizQAIds.length
+      ? await prisma.quizQA.findMany({
+          where: { id: { in: quizQAIds } },
+          select: { id: true, question: true },
+        })
+      : [];
+    const missedQuestions = misses.map(m => ({
+      quizQAId: m.quizQAId,
+      misses: m._count.quizQAId,
+      question: missedQA.find(q => q.id === m.quizQAId),
+    }));
 
     // Performance trends (last 30 days)
     const performanceTrends30Days = await prisma.quizResult.findMany({
@@ -71,16 +116,13 @@ export async function GET(req: Request) {
       },
     });
 
-    // Prepare data for the AI model
-    const aiPrompt = `
-      Based on the following user performance data, provide personalized recommendations for improvement:
-
-      - Average score per topic: ${JSON.stringify(averageScorePerTopic)}
-      - Most frequently missed questions: ${JSON.stringify(missedQuestions)}
-      - Performance trends (last 30 days): ${JSON.stringify(performanceTrends30Days)}
-      - Performance trends (last 7 days): ${JSON.stringify(performanceTrends7Days)}
-    `;
-
+    const aiPrompt = [
+      "You are a learning coach.",
+      "Using ONLY these aggregates, give 5 concise, actionable recommendations (<=120 words total).",
+      `averageScorePerTopic: ${JSON.stringify(averageScorePerTopic)}`,
+      `trend7Days: ${JSON.stringify(performanceTrends7Days)}`,
+      `topMissed: ${JSON.stringify(missedQuestions.map(m => ({ id: m.quizQAId, misses: m.misses })))}`,
+    ].join("\n");
     const aiInsights = await askGemini(aiPrompt);
 
     // Return the aggregated data and AI insights

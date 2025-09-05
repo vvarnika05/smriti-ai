@@ -1,6 +1,6 @@
     "use client";
 
-    import { useEffect, useState } from "react";
+    import { useEffect, useRef, useState } from "react";
     import axios from "axios";
     import { Bar, Line, Radar } from "react-chartjs-2";
     import {
@@ -16,7 +16,7 @@
       RadialLinearScale,
     } from 'chart.js';
 
-        import { getElementAtEvent } from 'react-chartjs-2';
+    import { getElementAtEvent } from 'react-chartjs-2';
     import ErrorBoundary from './error-boundary';
 
     ChartJS.register(
@@ -33,7 +33,9 @@
 
     const AnalyticsPageContent = () => {
       const [analyticsData, setAnalyticsData] = useState(null);
-      const chartRef = useRef<ChartJS>(null);
+      const barRef = useRef<ChartJS>(null);
+      const lineRef = useRef<ChartJS>(null);
+      const radarRef = useRef<ChartJS>(null);
 
       useEffect(() => {
         const fetchAnalyticsData = async () => {
@@ -46,30 +48,26 @@
       if (!analyticsData) {
         return (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <style>
-              {
-                .loader {
-                  border: 16px solid #f3f3f3;
-                  border-radius: 50%;
-                  border-top: 16px solid #3498db;
-                  width: 120px;
-                  height: 120px;
-                  -webkit-animation: spin 2s linear infinite; /* Safari */
-                  animation: spin 2s linear infinite;
-                }
-
-                /* Safari */
-                @-webkit-keyframes spin {
-                  0% { -webkit-transform: rotate(0deg); }
-                  100% { -webkit-transform: rotate(360deg); }
-                }
-
-                @keyframes spin {
-                  0% { transform: rotate(0deg); }
-                  100% { transform: rotate(360deg); }
-                }
+            <style jsx>{`
+              .loader {
+                border: 16px solid #f3f3f3;
+                border-radius: 50%;
+                border-top: 16px solid #3498db;
+                width: 120px;
+                height: 120px;
+                -webkit-animation: spin 2s linear infinite; /* Safari */
+                animation: spin 2s linear infinite;
               }
-            </style>
+              /* Safari */
+              @-webkit-keyframes spin {
+                0% { -webkit-transform: rotate(0deg); }
+                100% { -webkit-transform: rotate(360deg); }
+              }
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+            `}</style>
             <div className="loader"></div>
           </div>
         );
@@ -102,9 +100,25 @@
         }
       };
 
-      const onClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-        if (chartRef.current) {
-          const elements = getElementAtEvent(chartRef.current, event);
+      const handleBarClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+        if (barRef.current) {
+          const elements = getElementAtEvent(barRef.current, event);
+          if (elements.length > 0) {
+            console.log(elements[0]);
+          }
+        }
+      };
+      const handleLineClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+        if (lineRef.current) {
+          const elements = getElementAtEvent(lineRef.current, event);
+          if (elements.length > 0) {
+            console.log(elements[0]);
+          }
+        }
+      };
+      const handleRadarClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+        if (radarRef.current) {
+          const elements = getElementAtEvent(radarRef.current, event);
           if (elements.length > 0) {
             console.log(elements[0]);
           }
@@ -119,9 +133,9 @@
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-2">Average Score by Topic</h2>
             <Bar
-              ref={chartRef}
+              ref={barRef}
               options={options}
-              onClick={onClick}
+              onClick={handleBarClick}
               data={{
                 labels: analyticsData.averageScorePerTopic.map((item) => item.quizId),
                 datasets: [
@@ -138,9 +152,9 @@
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-2">Performance Over Time (7 vs 30 days)</h2>
             <Line
-              ref={chartRef}
+              ref={lineRef}
               options={options}
-              onClick={onClick}
+              onClick={handleLineClick}
               data={{
                 labels: analyticsData.performanceTrends30Days.map((item) =>
                   new Date(item.createdAt).toLocaleDateString()
@@ -167,9 +181,9 @@
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-2">Strengths and Weaknesses</h2>
             <Radar
-              ref={chartRef}
+              ref={radarRef}
               options={options}
-              onClick={onClick}
+              onClick={handleRadarClick}
               data={{
                 labels: analyticsData.averageScorePerTopic.map((item) => item.quizId),
                 datasets: [
