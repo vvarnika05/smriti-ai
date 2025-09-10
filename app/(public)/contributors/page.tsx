@@ -470,7 +470,14 @@ export default function Contributors() {
         throw new Error("Failed to load contributors data");
       }
       const contributorsData = await contributorsResponse.json();
-      setContributors(contributorsData);
+
+      // Filter out GitHub Actions bot
+      const filteredContributors = contributorsData.filter(
+        (c: { login?: string; username?: string }) =>
+          c.login !== "actions-user" && c.username !== "actions-user"
+      );
+
+      setContributors(filteredContributors);
 
       // Load last updated data (optional)
       try {
