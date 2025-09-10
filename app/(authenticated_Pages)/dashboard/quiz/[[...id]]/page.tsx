@@ -35,7 +35,7 @@ type ResourceResponse = {
 
 type QuizResponse = {
   message: string;
-  quiz: { id:string; resourceId: string };
+  quiz: { id: string; resourceId: string };
   quizQAs: QuizQA[];
 };
 
@@ -47,35 +47,43 @@ type FinalAnswer = {
 
 export default function QuizPage({ params }: QuizPageProps) {
   const resolvedParams = use(params);
-  const id = Array.isArray(resolvedParams.id) ? resolvedParams.id[0] : resolvedParams.id;
+  const id = Array.isArray(resolvedParams.id)
+    ? resolvedParams.id[0]
+    : resolvedParams.id;
   const hasFetched = useRef(false);
 
   const [isLoading, setIsLoading] = useState(true);
   const [resourceTopic, setResourceTopic] = useState("");
   const [quizData, setQuizData] = useState<QuizQA[]>([]);
   const [quizId, setQuizId] = useState<string | null>(null);
-  
+
   const [askedQuestions, setAskedQuestions] = useState<string[]>([]);
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [userSelections, setUserSelections] = useState<(string | null)[]>([]);
 
-  const [quizState, setQuizState] = useState<"quiz" | "results" | "review">("quiz");
+  const [quizState, setQuizState] = useState<"quiz" | "results" | "review">(
+    "quiz"
+  );
   const [ariaMessage, setAriaMessage] = useState("");
   const totalQuestionsToAsk = 5;
 
   const currentQuestion = useMemo(() => {
-    if (askedQuestions.length === 0 || currentQIndex >= askedQuestions.length) return null;
-    return quizData.find(q => q.id === askedQuestions[currentQIndex]);
+    if (askedQuestions.length === 0 || currentQIndex >= askedQuestions.length)
+      return null;
+    return quizData.find((q) => q.id === askedQuestions[currentQIndex]);
   }, [currentQIndex, askedQuestions, quizData]);
 
   const initializeQuiz = (questions: QuizQA[]) => {
     if (questions.length > 0) {
-      const mediumQuestions = questions.filter(q => q.difficulty === "Medium");
-      const firstQuestion = mediumQuestions.length > 0 
-        ? mediumQuestions[Math.floor(Math.random() * mediumQuestions.length)]
-        : questions[Math.floor(Math.random() * questions.length)];
-      
+      const mediumQuestions = questions.filter(
+        (q) => q.difficulty === "Medium"
+      );
+      const firstQuestion =
+        mediumQuestions.length > 0
+          ? mediumQuestions[Math.floor(Math.random() * mediumQuestions.length)]
+          : questions[Math.floor(Math.random() * questions.length)];
+
       setAskedQuestions([firstQuestion.id]);
       setUserSelections(Array(totalQuestionsToAsk).fill(null));
       setCurrentQIndex(0);
@@ -91,11 +99,16 @@ export default function QuizPage({ params }: QuizPageProps) {
     async function Datafetcher() {
       setIsLoading(true);
       try {
-        const res = await axios.get<ResourceResponse>(`/api/resource`, { params: { id } });
+        const res = await axios.get<ResourceResponse>(`/api/resource`, {
+          params: { id },
+        });
         if (res.data.resource) setResourceTopic(res.data.resource.title);
 
         const payload = { resourceId: id, task: "quiz" };
-        const resQuiz = await axios.post<QuizResponse>(`/api/resource-ai`, payload);
+        const resQuiz = await axios.post<QuizResponse>(
+          `/api/resource-ai`,
+          payload
+        );
 
         setQuizData(resQuiz.data.quizQAs);
         setQuizId(resQuiz.data.quiz.id);
@@ -109,12 +122,14 @@ export default function QuizPage({ params }: QuizPageProps) {
     }
     Datafetcher();
   }, [id]);
-  
+
   const getNextQuestion = (isCorrect: boolean) => {
     if (!currentQuestion) return undefined;
 
     const difficultyHierarchy = ["Easy", "Medium", "Hard"];
-    const currentDifficultyIndex = difficultyHierarchy.indexOf(currentQuestion.difficulty);
+    const currentDifficultyIndex = difficultyHierarchy.indexOf(
+      currentQuestion.difficulty
+    );
 
     let nextDifficultyIndex = currentDifficultyIndex;
     if (isCorrect && currentDifficultyIndex < difficultyHierarchy.length - 1) {
@@ -123,23 +138,31 @@ export default function QuizPage({ params }: QuizPageProps) {
       nextDifficultyIndex--;
     }
 
-    const availableQuestions = quizData.filter(q => !askedQuestions.includes(q.id));
+    const availableQuestions = quizData.filter(
+      (q) => !askedQuestions.includes(q.id)
+    );
 
     for (let i = 0; i < difficultyHierarchy.length; i++) {
-        const searchIndex = isCorrect ? nextDifficultyIndex - i : nextDifficultyIndex + i;
-        if (searchIndex >= 0 && searchIndex < difficultyHierarchy.length) {
-            const targetDifficulty = difficultyHierarchy[searchIndex];
-            const pool = availableQuestions.filter(q => q.difficulty === targetDifficulty);
-            if (pool.length > 0) {
-                return pool[Math.floor(Math.random() * pool.length)].id;
-            }
+      const searchIndex = isCorrect
+        ? nextDifficultyIndex - i
+        : nextDifficultyIndex + i;
+      if (searchIndex >= 0 && searchIndex < difficultyHierarchy.length) {
+        const targetDifficulty = difficultyHierarchy[searchIndex];
+        const pool = availableQuestions.filter(
+          (q) => q.difficulty === targetDifficulty
+        );
+        if (pool.length > 0) {
+          return pool[Math.floor(Math.random() * pool.length)].id;
         }
+      }
     }
 
     if (availableQuestions.length > 0) {
-      return availableQuestions[Math.floor(Math.random() * availableQuestions.length)].id;
+      return availableQuestions[
+        Math.floor(Math.random() * availableQuestions.length)
+      ].id;
     }
-    
+
     console.warn("No more questions available for adaptive selection.");
     return undefined;
   };
@@ -155,49 +178,60 @@ export default function QuizPage({ params }: QuizPageProps) {
     setAriaMessage(isCorrect ? "Correct answer!" : "Incorrect answer.");
 
     if (currentQIndex === totalQuestionsToAsk - 1) {
-        setQuizState("results");
-        setAriaMessage(`Quiz completed!`);
-        
-        const finalAnswersPayload = askedQuestions.map((qaId, index) => ({
-            quizQAId: qaId,
-            selectedOption: newSelections[index],
-        }));
+      setQuizState("results");
+      setAriaMessage(`Quiz completed!`);
 
-        // CHANGE 1: More robust check to prevent saving incomplete results
-        const allQuestionsAnswered = finalAnswersPayload.every(a => a.selectedOption);
+      const finalAnswersPayload = askedQuestions.map((qaId, index) => ({
+        quizQAId: qaId,
+        selectedOption: newSelections[index],
+      }));
 
-        if (quizId && allQuestionsAnswered) {
-            // CHANGE 2: Cleaner way to handle toast.promise
-            const saveResults = async () => {
-                const response = await axios.post("/api/quiz-result", { quizId, answers: finalAnswersPayload });
-                if (response.data.unlockedAchievement) {
-                  const { name, icon } = response.data.unlockedAchievement;
-                  toast.success(`Achievement Unlocked: ${icon} ${name}`);
-                }
-            };
+      // CHANGE 1: More robust check to prevent saving incomplete results
+      const allQuestionsAnswered = finalAnswersPayload.every(
+        (a) => a.selectedOption
+      );
 
-            toast.promise(saveResults(), {
-                loading: "Saving your results...",
-                success: "Results saved successfully!",
-                error: (err) => `Error: ${err.message || "Could not save results."}`,
-            });
-        } else if (!allQuestionsAnswered) {
-            toast.error("Could not save results: Not all questions were answered.");
-            console.error("Attempted to save quiz with incomplete answers.", finalAnswersPayload);
-        }
+      if (quizId && allQuestionsAnswered) {
+        // CHANGE 2: Cleaner way to handle toast.promise
+        const saveResults = async () => {
+          const response = await axios.post("/api/quiz-result", {
+            quizId,
+            answers: finalAnswersPayload,
+          });
+          const data = response.data as {
+            unlockedAchievement?: { name: string; icon: string };
+          };
+          if (data.unlockedAchievement) {
+            const { name, icon } = data.unlockedAchievement;
+            toast.success(`Achievement Unlocked: ${icon} ${name}`);
+          }
+        };
+
+        toast.promise(saveResults(), {
+          loading: "Saving your results...",
+          success: "Results saved successfully!",
+          error: (err) => `Error: ${err.message || "Could not save results."}`,
+        });
+      } else if (!allQuestionsAnswered) {
+        toast.error("Could not save results: Not all questions were answered.");
+        console.error(
+          "Attempted to save quiz with incomplete answers.",
+          finalAnswersPayload
+        );
+      }
     } else {
-        if (currentQIndex === askedQuestions.length - 1) {
-            const nextQuestionId = getNextQuestion(isCorrect);
-            if (nextQuestionId) {
-                setAskedQuestions([...askedQuestions, nextQuestionId]);
-            }
+      if (currentQIndex === askedQuestions.length - 1) {
+        const nextQuestionId = getNextQuestion(isCorrect);
+        if (nextQuestionId) {
+          setAskedQuestions([...askedQuestions, nextQuestionId]);
         }
-        setCurrentQIndex(currentQIndex + 1);
-        setSelectedOption(newSelections[currentQIndex + 1] || null);
-        setAriaMessage(`Moving to question ${currentQIndex + 2}`);
+      }
+      setCurrentQIndex(currentQIndex + 1);
+      setSelectedOption(newSelections[currentQIndex + 1] || null);
+      setAriaMessage(`Moving to question ${currentQIndex + 2}`);
     }
   };
-  
+
   const handlePrevious = () => {
     setCurrentQIndex(currentQIndex - 1);
     setSelectedOption(userSelections[currentQIndex - 1]);
@@ -210,7 +244,7 @@ export default function QuizPage({ params }: QuizPageProps) {
 
   const startReview = () => setQuizState("review");
   const returnToResults = () => setQuizState("results");
-  
+
   if (isLoading || askedQuestions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
@@ -221,27 +255,45 @@ export default function QuizPage({ params }: QuizPageProps) {
   }
 
   if (!currentQuestion) {
-     return (
+    return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center">
         <AlertCircle className="h-10 w-10 text-red-500" />
-        <p className="text-xl font-semibold mt-4">Could not load the current question.</p>
+        <p className="text-xl font-semibold mt-4">
+          Could not load the current question.
+        </p>
       </div>
     );
   }
 
   return (
     <div className="mt-10 min-h-[90vh] h-full px-6 max-w-3xl mx-auto flex flex-col items-center justify-center">
-      <AriaLiveRegion message={ariaMessage} priority="polite" clearAfter={3000} />
+      <AriaLiveRegion
+        message={ariaMessage}
+        priority="polite"
+        clearAfter={3000}
+      />
       {quizState !== "results" && (
         <header className="py-8 space-y-4 text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold text-lime-400">Quiz On</h1>
-          <h2 className="text-xl sm:text-xl font-medium text-white px-4">{resourceTopic}</h2>
+          <h1 className="text-3xl sm:text-4xl font-bold text-lime-400">
+            Quiz On
+          </h1>
+          <h2 className="text-xl sm:text-xl font-medium text-white px-4">
+            {resourceTopic}
+          </h2>
         </header>
       )}
-      <main className="bg-zinc-900 rounded-xl p-6 shadow-xl w-full" id="main-content">
+      <main
+        className="bg-zinc-900 rounded-xl p-6 shadow-xl w-full"
+        id="main-content"
+      >
         {quizState === "quiz" && (
           <>
-            <AccessibleProgressBar current={currentQIndex + 1} total={totalQuestionsToAsk} label="Quiz Progress" className="mb-6" />
+            <AccessibleProgressBar
+              current={currentQIndex + 1}
+              total={totalQuestionsToAsk}
+              label="Quiz Progress"
+              className="mb-6"
+            />
             <QuizQuestion
               question={currentQuestion.question}
               options={currentQuestion.options}
@@ -250,16 +302,28 @@ export default function QuizPage({ params }: QuizPageProps) {
               questionNumber={currentQIndex + 1}
               totalQuestions={totalQuestionsToAsk}
             />
-            <nav className="flex items-center justify-between mt-6" aria-label="Quiz navigation">
+            <nav
+              className="flex items-center justify-between mt-6"
+              aria-label="Quiz navigation"
+            >
               <div>
                 {currentQIndex > 0 && (
-                  <button onClick={handlePrevious} className="flex items-center gap-2 bg-zinc-700 text-white px-4 py-2 rounded hover:bg-zinc-600 transition-colors">
+                  <button
+                    onClick={handlePrevious}
+                    className="flex items-center gap-2 bg-zinc-700 text-white px-4 py-2 rounded hover:bg-zinc-600 transition-colors"
+                  >
                     <ArrowLeft size={16} aria-hidden="true" /> Previous
                   </button>
                 )}
               </div>
-              <button onClick={handleNext} disabled={!selectedOption} className="bg-primary text-black px-6 py-2 rounded hover:bg-lime-300 flex items-center gap-2 transition-colors disabled:opacity-50">
-                {currentQIndex === totalQuestionsToAsk - 1 ? "Finish Quiz" : "Next"}
+              <button
+                onClick={handleNext}
+                disabled={!selectedOption}
+                className="bg-primary text-black px-6 py-2 rounded hover:bg-lime-300 flex items-center gap-2 transition-colors disabled:opacity-50"
+              >
+                {currentQIndex === totalQuestionsToAsk - 1
+                  ? "Finish Quiz"
+                  : "Next"}
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </button>
             </nav>
@@ -267,9 +331,9 @@ export default function QuizPage({ params }: QuizPageProps) {
         )}
 
         {quizState === "results" && (
-           <QuizFinalResult
+          <QuizFinalResult
             userAnswers={askedQuestions.map((qaId, index) => {
-              const question = quizData.find(q => q.id === qaId)!;
+              const question = quizData.find((q) => q.id === qaId)!;
               return {
                 quizQAId: qaId,
                 selectedOption: userSelections[index]!,
@@ -281,11 +345,11 @@ export default function QuizPage({ params }: QuizPageProps) {
             startReview={startReview}
           />
         )}
-        
+
         {quizState === "review" && (
           <QuizReview
             userAnswers={askedQuestions.map((qaId, index) => {
-              const question = quizData.find(q => q.id === qaId)!;
+              const question = quizData.find((q) => q.id === qaId)!;
               return {
                 quizQAId: qaId,
                 selectedOption: userSelections[index]!,
