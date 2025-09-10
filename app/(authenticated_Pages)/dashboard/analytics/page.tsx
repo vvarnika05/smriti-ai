@@ -195,104 +195,108 @@ const AnalyticsPageContent = () => {
   };
 
   return (
-    <div>
+    <div className="max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Performance Analytics</h1>
 
-      {/* Average Score by Topic */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">Average Score by Topic</h2>
-        <Bar
-          ref={barRef}
-          options={barOptions}
-          onClick={handleBarClick}
-          data={{
-            labels: analyticsData.averageScorePerTopic.map(
-              (item) => item.quizId
-            ),
-            datasets: [
-              {
-                label: "Average Score",
-                data: analyticsData.averageScorePerTopic.map(
-                  (item) => item._avg.score
-                ),
-                backgroundColor: "rgba(54, 162, 235, 0.5)",
-                borderColor: "rgba(54, 162, 235, 1)",
-                borderWidth: 1,
-              },
-            ],
-          }}
-        />
-      </div>
+      <div className="grid md:gird-cols-3 grid-cols-1 gap-10">
+        {/* Average Score by Topic */}
+        <div>
+          <h2 className="text-xl font-semibold mb-2">Average Score by Topic</h2>
+          <Bar
+            ref={barRef}
+            options={barOptions}
+            onClick={handleBarClick}
+            data={{
+              labels: analyticsData.averageScorePerTopic.map(
+                (item) => item.quizId
+              ),
+              datasets: [
+                {
+                  label: "Average Score",
+                  data: analyticsData.averageScorePerTopic.map(
+                    (item) => item._avg.score
+                  ),
+                  backgroundColor: "rgba(54, 162, 235, 0.5)",
+                  borderColor: "rgba(54, 162, 235, 1)",
+                  borderWidth: 1,
+                },
+              ],
+            }}
+          />
+        </div>
 
-      {/* Performance Over Time */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">
-          Performance Over Time (7 vs 30 days)
-        </h2>
-        <Line
-          ref={lineRef}
-          options={lineOptions}
-          onClick={handleLineClick}
-          data={{
-            labels: analyticsData.performanceTrends30Days.map((item) =>
-              new Date(item.createdAt).toLocaleDateString()
-            ),
-            datasets: [
-              {
-                label: "Last 30 Days",
-                data: analyticsData.performanceTrends30Days.map(
-                  (item) => item.score
-                ),
-                borderColor: "rgb(75, 192, 192)",
-                backgroundColor: "rgba(75, 192, 192, 0.5)",
-                tension: 0.1,
-              },
-              {
-                label: "Last 7 Days",
-                data: analyticsData.performanceTrends7Days.map(
-                  (item) => item.score
-                ),
-                borderColor: "rgb(255, 99, 132)",
-                backgroundColor: "rgba(255, 99, 132, 0.5)",
-                tension: 0.1,
-              },
-            ],
-          }}
-        />
-      </div>
+        {/* Performance Over Time */}
+        <div>
+          <h2 className="text-xl font-semibold mb-2">
+            Performance Over Time (7 vs 30 days)
+          </h2>
+          <Line
+            ref={lineRef}
+            options={lineOptions}
+            onClick={handleLineClick}
+            data={{
+              labels: analyticsData.performanceTrends30Days.map((item) =>
+                new Date(item.createdAt).toLocaleDateString()
+              ),
+              datasets: [
+                {
+                  label: "Last 30 Days",
+                  data: analyticsData.performanceTrends30Days.map(
+                    (item) => item.score
+                  ),
+                  borderColor: "rgb(75, 192, 192)",
+                  backgroundColor: "rgba(75, 192, 192, 0.5)",
+                  tension: 0.1,
+                },
+                {
+                  label: "Last 7 Days",
+                  data: analyticsData.performanceTrends7Days.map(
+                    (item) => item.score
+                  ),
+                  borderColor: "rgb(255, 99, 132)",
+                  backgroundColor: "rgba(255, 99, 132, 0.5)",
+                  tension: 0.1,
+                },
+              ],
+            }}
+          />
+        </div>
 
-      {/* Strengths and Weaknesses */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">Strengths and Weaknesses</h2>
-        <Radar
-          ref={radarRef}
-          options={radarOptions}
-          onClick={handleRadarClick}
-          data={{
-            labels: analyticsData.averageScorePerTopic.map(
-              (item) => item.quizId
-            ),
-            datasets: [
-              {
-                label: "Your Performance",
-                data: analyticsData.averageScorePerTopic.map(
-                  (item) => item._avg.score
-                ),
-                backgroundColor: "rgba(255, 99, 132, 0.2)",
-                borderColor: "rgba(255, 99, 132, 1)",
-                borderWidth: 1,
-              },
-            ],
-          }}
-        />
-      </div>
+        {/* Strengths and Weaknesses */}
+        <div>
+          <h2 className="text-xl font-semibold mb-2">
+            Strengths and Weaknesses
+          </h2>
+          <Radar
+            ref={radarRef}
+            options={radarOptions}
+            onClick={handleRadarClick}
+            data={{
+              labels: analyticsData.averageScorePerTopic.map(
+                (item) => item.quizId
+              ),
+              datasets: [
+                {
+                  label: "Your Performance",
+                  data: analyticsData.averageScorePerTopic.map(
+                    (item) => item._avg.score
+                  ),
+                  backgroundColor: "rgba(255, 99, 132, 0.2)",
+                  borderColor: "rgba(255, 99, 132, 1)",
+                  borderWidth: 1,
+                },
+              ],
+            }}
+          />
+        </div>
 
-      {/* AI Insights */}
-      <div>
-        <h2 className="text-xl font-semibold mb-2">
-          Personalized Recommendations
-        </h2>
-        <p className="text-gray-700">{analyticsData.aiInsights}</p>
+        {/* AI Insights */}
+        <div>
+          <h2 className="text-xl font-semibold mb-2">
+            Personalized Recommendations
+          </h2>
+          <p className="text-gray-700">{analyticsData.aiInsights}</p>
+        </div>
       </div>
     </div>
   );

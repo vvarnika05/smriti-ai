@@ -5,7 +5,7 @@ import LevelCard from "@/components/dashboard/levelCard";
 import LoginStreakCard from "@/components/dashboard/loginStreakCard";
 import PerformanceCard from "@/components/dashboard/performanceCard";
 import { StudyReminder } from "@/components/dashboard/studyreminder";
-import { Plus } from "lucide-react";
+import { Plus, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -20,12 +20,21 @@ export default function Page() {
               Welcome back! 👋
             </h1>
           </div>
-          <Link href="/dashboard/topic/">
-            <Button variant="default">
-              <Plus className="h-4 w-4" />
-              <span className="md:block hidden">New Topic</span>
-            </Button>
-          </Link>
+
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard/analytics/">
+              <Button variant="outline">
+                <TrendingUp className="h-4 w-4" />
+                <span className="md:block hidden">Analytics</span>
+              </Button>
+            </Link>
+            <Link href="/dashboard/topic/">
+              <Button variant="default">
+                <Plus className="h-4 w-4" />
+                <span className="md:block hidden">New Topic</span>
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Performance stats */}
