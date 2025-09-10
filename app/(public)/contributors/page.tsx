@@ -471,10 +471,12 @@ export default function Contributors() {
       }
       const contributorsData = await contributorsResponse.json();
 
-      // Filter out GitHub Actions bot
+      // Filter out bots
       const filteredContributors = contributorsData.filter(
         (c: { login?: string; username?: string }) =>
-          c.login !== "actions-user" && c.username !== "actions-user"
+          !["actions-user", "dependabot[bot]"].includes(
+            c.login ?? c.username ?? ""
+          )
       );
 
       setContributors(filteredContributors);
