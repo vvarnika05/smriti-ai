@@ -2,6 +2,25 @@ import BlogCard from "@/components/blog/BlogCard";
 import Link from "next/link";
 import { getAllBlogPosts } from "@/lib/blog";
 import Footer from "@/components/Footer";
+import { generateMetadataUtil } from "@/utils/generateMetadata";
+
+export const metadata = generateMetadataUtil({
+  title: "Blog",
+  description: "Discover the latest insights, tips, and strategies for smarter learning with AI. Read our blog for study techniques, productivity hacks, and educational technology updates.",
+  keywords: [
+    "Smriti AI Blog",
+    "learning blog",
+    "study tips",
+    "AI education",
+    "productivity blog",
+    "learning strategies",
+    "educational technology",
+    "study techniques",
+    "memory retention tips",
+    "AI learning insights"
+  ],
+  url: "https://www.smriti.live/blogs",
+});
 
 export default async function BlogsPage() {
   //the below line is commented out to use dummy data for layout testing

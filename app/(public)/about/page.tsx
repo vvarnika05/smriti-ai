@@ -12,22 +12,25 @@ import {
 import { TextAnimate } from "@/components/magicui/text-animate";
 import { NumberTicker } from "@/components/magicui/number-ticker";
 import CTA from "@/components/landing/CTA";
+import { generateMetadataUtil } from "@/utils/generateMetadata";
 
-export const metadata = {
-  title: "About Us | Smriti AI",
-  description:
-    "Learn about Smriti AI, your AI-powered study companion that helps you summarize content, generate flashcards, create mindmaps, attempt quizzes, and follow personalized learning roadmaps for faster, smarter learning.",
+export const metadata = generateMetadataUtil({
+  title: "Smriti AI",
+  description: "Your AI-powered study companion that helps you learn faster and remember better. Generate summaries, flashcards, mind maps, and personalized learning roadmaps.",
   keywords: [
-    "Smriti AI About Us",
+    "Smriti AI",
     "AI study companion",
     "personalized learning",
-    "mindmaps AI",
-    "flashcards generator",
-    "AI quizzes",
+    "AI flashcards",
+    "study assistant",
+    "mind maps AI",
     "learning roadmap",
-    "study assistant AI",
+    "AI memory retention",
+    "smart studying",
+    "educational AI"
   ],
-};
+  url: "https://www.smriti.live/about",
+});
 
 export default function AboutPage() {
   const features = [
