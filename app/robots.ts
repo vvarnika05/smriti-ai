@@ -1,14 +1,17 @@
-// app/robots.ts
 import { MetadataRoute } from "next";
+import { headers } from "next/headers";
 
-const BASE =
-    process.env.SITE_URL ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "http://localhost:3000";
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const h = await headers();
+  const host = h.get("host") || "localhost:3000";
+  const protocol = host.startsWith("localhost") ? "http" : "https";
+  const BASE = `${protocol}://${host}`;
 
-export default function robots(): MetadataRoute.Robots {
-    return {
-        rules: { userAgent: "*", allow: "/" },
-        sitemap: `${BASE}/sitemap.xml`,
-    };
+  return {
+    rules: {
+      userAgent: "*",
+      allow: "/",
+    },
+    sitemap: `${BASE}/sitemap.xml`,
+  };
 }
