@@ -1,39 +1,39 @@
-// app/sitemap.ts
 import { MetadataRoute } from "next";
+import { headers } from "next/headers";
 import { getAllBlogPosts } from "@/lib/blog";
 
-const BASE =
-    process.env.SITE_URL ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "http://localhost:3000";
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    // Static public routes
-    const staticPaths = [
-        "/",                // Home
-        "/about",
-        "/contributors",
-        "/blogs",
-        "/contact",
-        "/privacy-policy",
-        "/terms-of-use",
-    ];
+  const h = await headers();
+  const host = h.get("host") || "localhost:3000";
+  const protocol = host.startsWith("localhost") ? "http" : "https";
+  const BASE = `${protocol}://${host}`;
 
-    const staticEntries: MetadataRoute.Sitemap = staticPaths.map((p) => ({
-        url: new URL(p, BASE).toString(),
-        lastModified: new Date(),
-        changeFrequency: "weekly",
-        priority: p === "/" ? 1 : 0.8,
-    }));
+  // Static public routes
+  const staticPaths = [
+    "/", // Home
+    "/about",
+    "/contributors",
+    "/blogs",
+    "/contact",
+    "/privacy-policy",
+    "/terms-of-use",
+  ];
 
-    // Dynamic blog post routes
-    const posts = await getAllBlogPosts(); // returns BlogPost[] (slug, publishDate, etc.)
-    const blogEntries: MetadataRoute.Sitemap = posts.map((post) => ({
-        url: new URL(`/blogs/${post.slug}`, BASE).toString(),
-        lastModified: post.publishDate ? new Date(post.publishDate) : new Date(),
-        changeFrequency: "weekly",
-        priority: 0.9,
-    }));
+  const staticEntries: MetadataRoute.Sitemap = staticPaths.map((p) => ({
+    url: new URL(p, BASE).toString(),
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: p === "/" ? 1 : 0.8,
+  }));
 
-    return [...staticEntries, ...blogEntries];
+  // Dynamic blog post routes
+  const posts = await getAllBlogPosts(); // returns BlogPost[] (slug, publishDate, etc.)
+  const blogEntries: MetadataRoute.Sitemap = posts.map((post) => ({
+    url: new URL(`/blogs/${post.slug}`, BASE).toString(),
+    lastModified: post.publishDate ? new Date(post.publishDate) : new Date(),
+    changeFrequency: "weekly",
+    priority: 0.9,
+  }));
+
+  return [...staticEntries, ...blogEntries];
 }
