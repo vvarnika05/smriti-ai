@@ -16,7 +16,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
       // Call API to log daily login
       const logDailyLogin = async () => {
         try {
-          await axios.post("/api/user-login");
+          await axios.post("/api/user/login");
           console.log("Daily login tracked successfully");
         } catch (error) {
           console.error("Error tracking daily login:", error);

@@ -54,7 +54,7 @@ export default function LoginStreakCard({ days = 90 }: LoginStreakProps) {
     const fetchStreak = async () => {
       try {
         const response = await axios.get<ApiResponse>(
-          `/api/user-login?days=${days}`
+          `/api/user/login?days=${days}`
         );
         setCurrentStreak(response.data.currentStreak);
       } catch (error) {
