@@ -72,8 +72,6 @@ const Hero = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.8 }}               // fade duration
                 className="h-[3em] flex items-center justify-center text-center overflow-hidden px-4 leading-[1]"
-              // ^ h-[3em] = exactly 3 lines (3 * font-size)
-              // leading-[1] makes 1em == one line height so 3em == 3 lines
               >
                 <span className="break-words">
                   {sentences[index]}
