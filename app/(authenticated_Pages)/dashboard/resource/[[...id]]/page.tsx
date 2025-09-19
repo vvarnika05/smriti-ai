@@ -2,6 +2,9 @@
 import { use, useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+
 import {
   Send,
   Wand2,
@@ -146,6 +149,33 @@ export default function ResourceChatPage({ params }: { params: any }) {
     Datafetcher();
   }, []);
 
+  const handleDownloadImage = async (elementId: string) => {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    const canvas = await html2canvas(element);
+    const imgData = canvas.toDataURL("image/png");
+
+    const link = document.createElement("a");
+    link.href = imgData;
+    link.download = "mindmap.png";
+    link.click();
+  };
+  const handleDownloadPDF = async (elementId: string) => {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    const canvas = await html2canvas(element);
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF({
+      orientation: "landscape",
+      unit: "px",
+      format: [canvas.width, canvas.height],
+    });
+    pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+    pdf.save("mindmap.pdf");
+  };
   return (
     <div className="h-screen bg-muted/50 text-foreground pt-24">
       <div className="flex flex-col h-full w-full">
@@ -177,37 +207,49 @@ export default function ResourceChatPage({ params }: { params: any }) {
             {messages.map((msg, idx) => (
               <div
                 key={idx}
-                className={`flex w-full ${
-                  msg.sender === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex w-full ${msg.sender === "user" ? "justify-end" : "justify-start"
+                  }`}
               >
                 <div
                   className={`
-                        ${
-                          msg.sender === "user"
-                            ? "bg-muted text-foreground max-w-xs"
-                            : "text-foreground w-full"
-                        }
+                        ${msg.sender === "user"
+                      ? "bg-muted text-foreground max-w-xs"
+                      : "text-foreground w-full"
+                    }
                         p-4 rounded-xl shadow prose prose-invert
-                        ${
-                          msg.sender === "user"
-                            ? "rounded-br-none"
-                            : "rounded-bl-none"
-                        }
+                        ${msg.sender === "user"
+                      ? "rounded-br-none"
+                      : "rounded-bl-none"
+                    }
                         leading-loose
                       `}
                 >
                   {msg.sender === "bot" && msg.type === "mindmap" ? (
-                    <Mermaid
-                      id={msg.id || `mermaid-${idx}`}
-                      chart={prepareMermaidCode({ code: msg.text })}
-                      key={msg.id || `mermaid-${idx}`}
-                    />
+                    <div id={`mindmap-${msg.id || idx}`} className="relative">
+                      <Mermaid
+                        id={msg.id || `mermaid-${idx}`}
+                        chart={prepareMermaidCode({ code: msg.text })}
+                        key={msg.id || `mermaid-${idx}`}
+                      />
+                      <div className="flex gap-2 mt-2">
+                        <Button
+                          onClick={() => handleDownloadImage(`mindmap-${msg.id || idx}`)}
+                          className="rounded-full bg-blue-600 text-white"
+                        >
+                          Download as Image
+                        </Button>
+                        <Button
+                          onClick={() => handleDownloadPDF(`mindmap-${msg.id || idx}`)}
+                          className="rounded-full bg-green-600 text-white"
+                        >
+                          Download as PDF
+                        </Button>
+                      </div>
+                    </div>
                   ) : (
                     <div
-                      className={`max-w-none ${
-                        msg.sender === "bot" ? "markdown-body" : ""
-                      } `}
+                      className={`max-w-none ${msg.sender === "bot" ? "markdown-body" : ""
+                        } `}
                     >
                       <ReactMarkdown>{msg.text}</ReactMarkdown>
                     </div>

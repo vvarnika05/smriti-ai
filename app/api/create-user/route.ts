@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  
+
   const { username, email, mobile, dob } = body;
 
   if (!username || !email || !mobile || !dob) {
@@ -39,13 +39,13 @@ export async function POST(req: NextRequest) {
 
   // ✅ Mobile number validation using regex
   if (!isValidPhoneNumber(mobile)) {
-  return NextResponse.json(
-    {
-      message: "Invalid mobile number. Please enter a valid mobile number.",
-    },
-    { status: 400 }
-  );
-}
+    return NextResponse.json(
+      {
+        message: "Invalid mobile number. Please enter a valid mobile number.",
+      },
+      { status: 400 }
+    );
+  }
 
   try {
     const user = await prisma.user.create({
@@ -85,3 +85,8 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+//how to test the download mindmap function locally
+
+// 1. Use Postman or curl to send a POST request to http://localhost:3000/api/create-user
+

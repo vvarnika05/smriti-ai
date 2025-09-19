@@ -9,6 +9,8 @@ const LeftSidePanel = () => {
       <Image
         src="/brain.png"
         alt="AI Learning Brain"
+        width={400}
+        height={400}
         className="object-contain w-100 h-100 mx-auto mt-10 opacity-75 "
       />
       <motion.h1
