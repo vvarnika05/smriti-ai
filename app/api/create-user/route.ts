@@ -86,7 +86,5 @@ export async function POST(req: NextRequest) {
   }
 }
 
-//how to test the download mindmap function locally
 
-// 1. Use Postman or curl to send a POST request to http://localhost:3000/api/create-user
 
