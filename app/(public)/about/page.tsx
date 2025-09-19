@@ -83,15 +83,7 @@ export default function AboutPage() {
       highlight: "Global Impact",
     },
   ];
-  const formatDisplayNumber = (value: number, suffix: string) => {
-  // For numbers 1000 and above, convert to k format
-  if (value >= 1000 && suffix === "+") {
-    const kValue = Math.floor(value / 1000);
-    return `${kValue}k+`;
-  }
-  // For other numbers, return as normal
-  return `${value}${suffix}`;
-};
+  
 
   const stats = [
     { number: 1000, label: "Active Learners", suffix: "+" },
